@@ -1,3 +1,15 @@
+#
+# Docker specific
+#
+docker/tmp
+
+#
+# Node specific
+#
+
+#
+# Rails specific
+#
 *.rbc
 capybara-*.html
 .rspec
