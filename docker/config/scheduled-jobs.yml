@@ -1,0 +1,8 @@
+result_loader_job:
+  name: 'Result Loader Job'
+  cron: '0 */6 * * *'
+  class: LoaderJob
+  queue: default
+  description: Runs loader job
+  args:
+    source_id: 1

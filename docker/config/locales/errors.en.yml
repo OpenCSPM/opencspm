@@ -1,0 +1,9 @@
+en:
+  error:
+    authentication_failure:
+      http_code: 401
+      code: 401
+      message: 'The user is not authenticated.'
+    database_connect_timeout:
+      code: 5001
+      message: 'The database connection timed out.'

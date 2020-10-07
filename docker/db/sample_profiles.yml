@@ -1,0 +1,58 @@
+---
+- name: Darkbit Best Practices
+  platform: Google Cloud
+  author: Darkbit
+  tags:
+    - db-bp-1
+    - gcp
+- name: Google Cloud CIS 1.1
+  platform: Google Cloud
+  author: Darkbit
+  tags:
+    - cis-1.1
+    - pci-3.4
+    - k8s-critical
+- name: GKE CIS 1.1
+  platform: Kubernetes
+  author: Darkbit
+  tags:
+    - cis-1.1
+    - gke
+    - hipaa-6.2
+    - hipaa-7.5
+- name: PCI DSS
+  platform: Google Cloud
+  author: Darkbit
+  tags:
+    - pci
+    - gcp
+    - gke
+- name: AWS Well Architected
+  platform: AWS
+  author: Darkbit
+  tags:
+    - well-architected
+    - aws-bp
+- name: Public Resources - AWS
+  platform: AWS
+  author: Darkbit
+  tags:
+    - public-resources
+    - db-bp-2
+- name: Public Resources - GCP
+  platform: Google Cloud
+  author: Darkbit
+  tags:
+    - public-resources
+    - db-bg-3
+    - k8s-service-mesh
+- name: GKE Critical
+  platform: Google Cloud
+  author: Darkbit
+  tags:
+    - gke-critical
+- name: K8s Visibility
+  platform: Kubernetes
+  author: Darkbit
+  tags:
+    - k8s-logging

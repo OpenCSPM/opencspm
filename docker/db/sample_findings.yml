@@ -1,0 +1,286 @@
+---
+gcp-cis-gcp-1.1_gce-1:
+  id: gce-1
+  profile: gcp-cis-gcp-1.1
+  title: GCE Virtual Machines Should Not Use the Default Compute Service Account
+  description: GCE VMs with the default service account attached
+  impact: 7
+  platform: gcp
+  domain: Identity and Access Management
+  resource: GCE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: compute.googleapis.com/projects/demo1-bad/zones/us-central1-a/instances/dev-secrets-manager
+      status: passed
+    - resource: compute.googleapis.com/projects/demo1-good/zones/us-central1-a/instances/dev-secrets-manager
+      status: passed
+  result:
+    status: passed
+    passed: 2
+    total: 2
+gcp-cis-gcp-1.1_gce-2:
+  id: gce-2
+  profile: gcp-cis-gcp-1.1
+  title: GCE Virtual Machines Should Have Limited OAuth Scopes
+  description: GCE VMs without the 'cloud-platform' scope
+  impact: 9
+  platform: gcp
+  domain: Identity and Access Management
+  resource: GCE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: compute.googleapis.com/projects/demo1-bad/zones/us-central1-a/instances/dev-secrets-manager
+      status: failed
+    - resource: compute.googleapis.com/projects/demo1-good/zones/us-central1-a/instances/dev-secrets-manager
+      status: failed
+  result:
+    status: failed
+    passed: 0
+    total: 2
+gcp-cis-gcp-1.1_gce-3:
+  id: gce-3
+  profile: gcp-cis-gcp-1.1
+  title: GCE Virtual Machines Should Have Secure Boot Enabled
+  description: GCE VMs with secure boot flag enabled
+  impact: 4
+  platform: gcp
+  domain: Host and Cluster Security
+  resource: GCE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: compute.googleapis.com/projects/demo1-bad/zones/us-central1-a/instances/dev-secrets-manager
+      status: failed
+    - resource: compute.googleapis.com/projects/demo1-good/zones/us-central1-a/instances/dev-secrets-manager
+      status: failed
+  result:
+    status: failed
+    passed: 0
+    total: 2
+gcp-cis-gcp-1.1_iam-1:
+  id: iam-1
+  profile: gcp-cis-gcp-1.1
+  title: External Domain Identities Should Not Be Bound To IAM Roles
+  description:
+    Identities from domains not in the current organization should not
+    be used as the organization cannot manage their settings
+  impact: 5
+  platform: gcp
+  domain: Identity and Access Management
+  resource: IAM
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: The Organization
+      status: passed
+  result:
+    status: passed
+    passed: 1
+    total: 1
+gcp-cis-gcp-1.1_iam-2:
+  id: iam-2
+  profile: gcp-cis-gcp-1.1
+  title: IAM Users Should Not Be Bound To The ServiceAccountUser Role At The Org/Folder/Project
+  description:
+    The iam.serviceAccountUser Role should be bound directly on the resource
+    and not at the Org/Folder/Project level
+  impact: 8
+  platform: gcp
+  domain: Identity and Access Management
+  resource: IAM
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: The Organization
+      status: passed
+  result:
+    status: passed
+    passed: 1
+    total: 1
+gcp-cis-gke-1.1_gke-1:
+  id: gke-1
+  profile: gcp-cis-gke-1.1
+  title: GKE Clusters Should Have Workload Identity Enabled
+  description:
+    GKE Clusters with the Workload Identity configuration enabled to provide
+    credentials directly to pods
+  impact: 7
+  platform: gcp
+  domain: Host and Cluster Security
+  resource: GKE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: container.googleapis.com/projects/demo1-bad/locations/us-central1/clusters/prod-cluster1
+      status: failed
+    - resource: container.googleapis.com/projects/demo1-good/locations/us-central1/clusters/prod-cluster1
+      status: passed
+  result:
+    status: failed
+    passed: 1
+    total: 2
+gcp-cis-gke-1.1_gke-2:
+  id: gke-2
+  profile: gcp-cis-gke-1.1
+  title: GKE Clusters Should Not Attach the Default Compute Service Account
+  description: GKE Nodes without the default service account attached
+  impact: 7
+  platform: gcp
+  domain: Identity and Access Management
+  resource: GKE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: container.googleapis.com/projects/demo1-bad/locations/us-central1/clusters/prod-cluster1
+      status: failed
+    - resource: container.googleapis.com/projects/demo1-good/locations/us-central1/clusters/prod-cluster1
+      status: passed
+  result:
+    status: failed
+    passed: 1
+    total: 2
+gcp-cis-gke-1.1_gke-3:
+  id: gke-3
+  profile: gcp-cis-gke-1.1
+  title: GKE Clusters Should Have Limited OAuth Scopes
+  description: GKE Nodes without the 'cloud-platform' scope
+  impact: 7
+  platform: gcp
+  domain: Identity and Access Management
+  resource: GKE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: container.googleapis.com/projects/demo1-bad/locations/us-central1/clusters/prod-cluster1
+      status: failed
+    - resource: container.googleapis.com/projects/demo1-good/locations/us-central1/clusters/prod-cluster1
+      status: failed
+  result:
+    status: failed
+    passed: 0
+    total: 2
+gcp-cis-gke-1.1_gke-4:
+  id: gke-4
+  profile: gcp-cis-gke-1.1
+  title: GKE NodePools Should Run Container-Optimized OS
+  description: GKE Nodes should be running the hardened COS image for optimal security
+  impact: 7
+  platform: gcp
+  domain: Host and Cluster Security
+  resource: GKE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: container.googleapis.com/projects/demo1-bad/locations/us-central1/clusters/prod-cluster1/nodePools/default-pool
+      status: failed
+    - resource: container.googleapis.com/projects/demo1-good/locations/us-central1/clusters/prod-cluster1/nodePools/default-pool
+      status: passed
+  result:
+    status: failed
+    passed: 1
+    total: 2
+gcp-cis-gke-1.1_gke-5:
+  id: gke-5
+  profile: gcp-cis-gke-1.1
+  title: GKE NodePools Should Have AutoRepair Enabled
+  description: GKE Nodes should attempt to self-address issues and failures automatically
+  impact: 8
+  platform: gcp
+  domain: Host and Cluster Security
+  resource: GKE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: container.googleapis.com/projects/demo1-bad/locations/us-central1/clusters/prod-cluster1/nodePools/default-pool
+      status: passed
+    - resource: container.googleapis.com/projects/demo1-good/locations/us-central1/clusters/prod-cluster1/nodePools/default-pool
+      status: passed
+  result:
+    status: passed
+    passed: 2
+    total: 2
+gcp-cis-gke-1.1_gke-6:
+  id: gke-6
+  profile: gcp-cis-gke-1.1
+  title: GKE NodePools Should Have AutoUpgrade Enabled
+  description:
+    GKE Nodes should be automatically upgraded to a matching version of
+    the control plane during maintenance windows
+  impact: 5
+  platform: gcp
+  domain: Host and Cluster Security
+  resource: GKE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource: container.googleapis.com/projects/demo1-bad/locations/us-central1/clusters/prod-cluster1/nodePools/default-pool
+      status: passed
+    - resource: container.googleapis.com/projects/demo1-good/locations/us-central1/clusters/prod-cluster1/nodePools/default-pool
+      status: passed
+  result:
+    status: passed
+    passed: 2
+    total: 2
+gcp-darkbit-best-practices-1.0_darkbit-1:
+  id: darkbit-1
+  profile: gcp-darkbit-best-practices-1.0
+  title:
+    Pods in GKE Clusters Should Not Be Able To Privilege Escalate To Project
+    Owner
+  description:
+    GKE Clusters without workload identity or network policy, cloud-platform/any
+    oauth scope, with a service account bound to a role that grants usage of all service
+    accounts in the project where another service account is Owner
+  impact: 9
+  platform: gcp
+  domain: Identity and Access Management
+  resource: GKE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource:
+        container.googleapis.com/projects/demo1-bad/locations/us-central1/clusters/prod-cluster1
+        to owner via serviceAccount:terraform@demo1-bad.iam.gserviceaccount.com
+      status: failed
+  result:
+    status: failed
+    passed: 0
+    total: 1
+gcp-darkbit-best-practices-1.0_darkbit-2:
+  id: darkbit-2
+  profile: gcp-darkbit-best-practices-1.0
+  title: GCE Instances Should Not Be Able To Privilege Escalate To GKE Cluster Admin
+  description:
+    GCE Instances in the same project as publicly accessible GKE clusters
+    with permissions to access the compute instance metadata of the GKE nodes to perform
+    a kube-env-stealer impersonation attack from outside the cluster
+  impact: 9
+  platform: gcp
+  domain: Host and Cluster Security
+  resource: GKE
+  refs:
+    - text: My link
+      url: https://cloud.google.com
+  resources:
+    - resource:
+        compute.googleapis.com/projects/demo1-bad/zones/us-central1-a/instances/dev-secrets-manager
+        to cluster-admin via serviceAccount:gce-sa@demo1-bad.iam.gserviceaccount.com
+      status: failed
+  result:
+    status: failed
+    passed: 0
+    total: 1

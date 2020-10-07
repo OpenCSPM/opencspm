@@ -1,0 +1,3552 @@
+---
+- name: dbc-2
+  guid: 77fe366c-b65a-5051-b211-a4ca2ec23662
+  platform: global
+  title: Centralized Secrets Management not in use
+  description: As infrastructure-as-code automation becomes widely used in an environment,
+    it becomes possible to consistently separate out secret material from applications
+    and code in a standard way. Once this happens, patterns in the code will emerge
+    where the same secrets are stored and used in multiple places in the infrastructure.  Using
+    a centralized, secure system for storing and accessing them that is able to operate
+    in a cloud-native environment provides a means for centralized provisioning, auditing,
+    rotation, and revocation of all secrets in the organization.  The damage due to
+    credential theft and time available to an attacker with automatically rotated
+    credentials is significantly decreased, and the likelihood for sensitive secret
+    material to be exposed to additional persons or systems than are required is also
+    diminished.
+  validation: |2-
+
+    Review all source control repositories, artifact creation processes, and deployment pipelines for the presence of static secrets in configuration files and ensure those values are not "hardcoded".  Ensure all new developers are trained on secure handling of secrets, and add secrets handling checks to all pull request/code reviews.
+  remediation: |2-
+
+    Consider deploying a centralized system such as Hashicorp Vault or GCP Secrets Manager and working through all aspects of the infrastructure to remove statically defined secrets in favor of fetching them dynamically from a centrals secret store.
+  impact: 5
+  refs:
+  - text: Hashicorp Vault
+    url: https://www.hashicorp.com/products/vault/
+    ref: link
+  - text: GCP Secrets Manager
+    url: https://cloud.google.com/secret-manager/docs
+    ref: link
+  - ids:
+    - PR.AC-6
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-3
+  guid: f0258634-29df-5872-9cec-4a329d66f4ca
+  platform: global
+  title: Centralized Logging and Monitoring should be off-node and off-cluster
+  description: Without all systems, OS applications, Kubernetes components, and container
+    applications logging and sending metrics to a centralized point outside of the
+    primary cluster, the operations team will not be in a position to observe, triage,
+    and accurately troubleshoot issues as they occur.  As a Security Analysis SaaS
+    offering, system availability and reliable ingestion pipelines are vital to the
+    value of the service.  Without a deep understanding of all critical aspects and
+    logging tendencies of all applications and system components, a strong understanding
+    of what falls inside the "norm" versus what is broken is difficult to diagnose
+    when one component is not operating correctly.
+  validation: |2-
+
+    Ensure that all virtual machine instances and Kubernetes clusters are configured to ship logs and metrics to an appropriate, separate destination.  When new resources are being created, validate their logs and metrics are being correctly received.
+  remediation: |2-
+
+    All platform logs should be centrally collected, analyzed, and leveraged to understand system errors when they occur and how they affect operations.  All metrics should be centrally collected, charted, and leveraged to understand load, usage, and resource consumption as it relates to ingestion rates.  For example, all CPU/RAM/Network/Disk metrics should be collected for VMs and containers in addition to application-specific metrics such as logs per second, average log size, log processing time per "hop", etc.  Both performance metrics and log event metrics should be gathered outside the cluster they are originating from into a central point to be able to understand what "healthy" means for each and every system, Kubernetes component, and containerized deployment.  In GCP, the main point of log and metrics aggregation for all GKE clusters, GKE pods, GKE nodes, GCE instances, Firewall logs, VPC flow logs, and more is Stackdriver.  However, the log filtering and metrics visualization capabilities may not be as full-featured as commercial offerings, and this is a common point of third-party integration for GCP organizations.
+  impact: 9
+  refs:
+  - text: GCP Stackdriver
+    url: https://cloud.google.com/stackdriver#documentation
+    ref: link
+  - text: Grafana Stackdriver Integration
+    url: https://grafana.com/docs/grafana/latest/features/datasources/stackdriver/
+    ref: link
+  - text: Datadog
+    url: https://www.datadoghq.com/
+    ref: link
+  - ids:
+    - DE.AE-1
+    - DE.AE-2
+    - DE.AE-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-9
+  guid: a8e1c332-1fa8-5ea4-92df-56622a3b973c
+  platform: gcp
+  title: Project Lifecycle should be automated
+  description: When creating GCP projects, there are several steps that should be
+    followed to ensure consistency and standardization of the base configuration of
+    all projects.  Using automation with infrastructure-as-code tools like Terraform
+    to manage the creation and management of all GCP projects greatly improves the
+    ease of administration and enforces security best practices.
+  validation: |2-
+
+    Run `gcloud projects list` and review projects for consistent application of initial project settings and following of conventions using `gcloud compute networks list`, `gcloud compute firewall-rules list`, and `gcloud iam service-accounts list/get-iam-policy`.
+  remediation: |2-
+
+    Using Terraform code stored in source control repositories, define and create all GCP projects using code.  Ensure that projects do not include the default networks and firewall rules, the default compute service account is not bound to "Project Editor", and incorporate any other standard settings for all projects to have.  The Cloud Foundation Toolkit from Google offers a pre-made Terraform module to make this easier.
+  impact: 5
+  refs:
+  - text: Terraform
+    url: https://www.terraform.io/
+    ref: link
+  - text: Google Project Factory
+    url: https://github.com/terraform-google-modules/terraform-google-project-factory
+    ref: link
+  - ids:
+    - PR.IP-1
+    - PR.IP-2
+    - PR.IP-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-10
+  guid: 2607af8b-07eb-5f45-8105-c8f0a68247c8
+  platform: gcp
+  title: Security Policies should be enforced using Organization Policies
+  description: GCP IAM grants users the ability to create or modify resources, but
+    GCP Organization Policies help control how those resources are defined.  For example,
+    a user might be able to create a GCE instance, but a "constraint" has been placed
+    by an Organization Policy that prevents the instance from having an external IP
+    address attached.  Organization Policies can be applied at the Org node, a GCP
+    Folder, or at a GCP Project level, and they offer a way for GCP Administrators
+    to delegate control over resources so long as they follow the desired constraints.
+  validation: |2-
+
+    Run `gcloud beta resource-manager org-policies list --organization=ORGID` or `--folder=FOLDERID` or `--project=PROJECTID` to validate the organization policies are in the correct place in the hierarchy.
+  remediation: |2-
+
+    The following policies are recommended:
+
+    * Prevent Instances from having external IPs
+    * Skip Default Network creation during project creation
+    * Trusted GCE Images enforcement
+    * Serial Port Access
+    * Service Account Key creation of user-managed keys
+
+    Using GCP Folders directly under the Organization node, apply the above constraints to a Folder.  For approved exemptions, places those resources inside Projects under a sibling Folder under the Organization node and apply the modified Organization Policy to that Folder.  It's recommended that proper testing be performed in a dedicated folder containing only test projects and resources to understand the behavior.
+  impact: 2
+  refs:
+  - text: GCP Organization Policies
+    url: https://cloud.google.com/resource-manager/docs/organization-policy/overview
+    ref: link
+  - text: Understanding Organization Policies
+    url: https://cloud.google.com/resource-manager/docs/organization-policy/understanding-constraints
+    ref: link
+  - ids:
+    - ID.GV-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-11
+  guid: f4a5c64d-5db9-57e3-aa23-569e995cdb54
+  platform: gcp
+  title: Project names should follow a consistent naming convention
+  description: GCP Project names are visible in many places in the UI, the CLI, and
+    in logs.  Consistently naming projects can help ease administration as the purpose
+    of the project can be encoded in the name with some upfront planning.
+  validation: |2-
+
+    Run `gcloud projects list` and look for projects that do not follow the defined naming convention as potential points of project creation that do not follow automated processes.
+  remediation: |2-
+
+    Create all GCP project IDs using a scheme such as: <org abbrev>-<environment>-<application or stack name> and also use the same string for the project name.  e.g. acme-dev-frontend or acme-prod-backendcluster.  Do not include sensitive information in project IDs.  Project IDs can have 4-30 lowercase letters, digits, or hyphens, must start with a lowercase letter, and must end with a letter or number.
+  impact: 2
+  refs:
+  - text: GCP Projects
+    url: https://cloud.google.com/resource-manager/docs/creating-managing-projects
+    ref: link
+  - ids:
+    - ID.AM-2
+    - PR.IP-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-12
+  guid: 5be7cee6-ee00-56ec-b271-4b2b6a6a3b34
+  platform: gcp
+  title: Resource Structure does not follow the proper hierarchy aligned with environment
+    separation goals
+  description: |-
+    Folders and Projects should be implemented in a hierarchical pattern aligned with the ownership of teams and applications.  Projects should contain a single set of directly related resources and separated into different projects for each environment type (dev/stage/prod).
+
+    Any change to the network, virtual machines, operating system, Kubernetes components, and applications running inside Kubernetes requires proper testing to ensure that change operates as desired.  Managing the risk of each change is best handled by creating dedicated environments using identical infrastructure-as-code techniques.  Without a "dev" or "test" environment, every change in the sole production cluster is inherently untested and a potential point for causing an outage.
+  validation: |2-
+
+    Use the GCP UI to view the folder and project structure.  Ensure the hierarchy and naming align with environment types and resources inside each project correspond to that environment only.
+  remediation: |2-
+
+    Using infrastructure-as-code tools such as Terraform, create identical environments for development, test/staging to complement the production environment.  Test all changes, upgrades, and fixes in the development environment, and perform those changes cleanly on the test/staging environment.  With a solid understanding of the changes and effects, planning and deploying to production becomes much less risky.  As a side effect of building environments with code, it provides confidence of full-environment reproducibility.
+
+    Under the organization node, create one or more folders that represents each service offering or "stack". e.g. "SaaS".  Under the "SaaS" folder, create folders for "Dev", "Stage", and "Prod".  Under each of those folders, create one or more projects to hold those resources that align with the environment.  By using folders, IAM permissions can be granted on the parent folder and they are inherited by the projects under them.  In addition, Stackdriver audit log sinks (exports) can be configured on a folder and apply to all logs from all projects underneath.
+
+    Moving from one environment to 3 requires some changes to the centralized administrative access and monitoring/logging systems, so consider the Shared VPC approach VPC peering to help isolate identical copies of environments yet still manage and monitor them consistently.
+  impact: 9
+  refs:
+  - text: GCP Shared VPCs
+    url: https://cloud.google.com/vpc/docs/shared-vpc
+    ref: link
+  - text: Terraform
+    url: https://www.terraform.io/
+    ref: link
+  - ids:
+    - ID.AM-2
+    - ID.AM-3
+    - PR.IP-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-14
+  guid: e895db93-5bf2-55a0-9adc-17731c080bd8
+  platform: gcp
+  title: IAM ServiceAccountUser granted at the project level
+  description: When creating a GCP resources that attaches a GCP service account,
+    the calling user or service account must have the permission to "use" that service
+    account. Otherwise, the ability to create a GCE instance with any service account
+    attached would be a direct path to privilege escalation if at least one other
+    service account in the project had higher permissions. This permission can be
+    granted on a specific service account or at the project level.  Granting the permission
+    directly on the service account resource permits "use" of just that service account.  Granting
+    the permission at the project level permits the "use" of any service account in
+    the project.  Even if the project does not currently have a highly privileged
+    service account today, it might in the future, and that would inadvertently increase
+    the power of this binding.
+  validation: |2-
+
+    Run `gcloud beta projects get-iam-policy PROJECTID --flatten='bindings[]' --filter=bindings.role:iam.serviceAccountUser --format="csv[no-heading](bindings.members[])"` for each project and ensure no results are displayed.
+  remediation: |2-
+
+    Remove the permission at the project level and instead assign "iam.serviceAccountUser" on the small number of service accounts in the project that are necessary.
+  impact: 5
+  refs:
+  - text: Granting IAM Roles to Service Accounts
+    url: https://cloud.google.com/iam/docs/granting-roles-to-service-accounts
+    ref: link
+  - ids:
+    - PR.AC-1
+    - PR.AC-4
+    - PR.AC-6
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-15
+  guid: 5a21d6de-3854-514c-a2ec-23f35fcd161f
+  platform: gcp
+  title: Overuse of Primitive IAM Roles
+  description: GCP "Primitive" Roles of "Project Owner", "Project Editor", and "Project
+    Viewer" are broad groupings of permissions that cross nearly every API in a project.  Assigning
+    "Project Owner" is granting full control over that project.  Assigning "Project
+    Editor" is granting read/write to nearly every resource in a project with exceptions
+    for IAM management.  Assigning "Project Viewer" allows for reading nearly every
+    resource in the project.  By their nature, they do not conform to the principle
+    of least privilege.  Instead, binding predefined IAM Roles or creating custom
+    IAM Roles is preferred.
+  validation: |2-
+
+    Run `gcloud organizations get-iam-policy ORGIDNUMBER --format=json | jq -r 'select(.bindings) | .bindings[] | .role as $role | select(.role=="roles/owner" or .role=="roles/editor" or .role=="roles/viewer") | "($role): (.members[])"'` for the organization level.  For each folder, run `gcloud resource-manager folders get-iam-policy FOLDERIDNUMBER --format=json | jq -r 'select(.bindings) | .bindings[] | .role as $role | select(.role=="roles/owner" or .role=="roles/editor" or .role=="roles/viewer") | "($role): (.members[])"'`.  For each project, run `gcloud projects get-iam-policy PROJECTID --format=json | jq -r 'select(.bindings) | .bindings[] | .role as $role | select(.role=="roles/owner" or .role=="roles/editor" or .role=="roles/viewer") | "($role): (.members[])"'` and validate that the minimum assignments necessary are present.
+  remediation: |2-
+
+    Use the IAM Role recommendation information to gauge how many permissions are granted versus how many are in actual use over the past 90 days.  Consider implementing the predefined roles or custom roles it suggests and revoking the primitive role.  Considerations: At least one member of the project must have the Owner role (roles/owner). If the Owner role is revoked from all members, it might remove the ability to manage the project.  When using access controls that are separate from Cloud IAM, such as Cloud Storage access control lists (ACLs) or Kubernetes role-based access control (RBAC), make sure those access controls will work correctly after the primitive role is revoked.
+  impact: 5
+  refs:
+  - text: IAM Recommender Overview
+    url: https://cloud.google.com/iam/docs/recommender-overview
+    ref: link
+  - text: Managing IAM Recommender
+    url: https://cloud.google.com/iam/docs/recommender-managing
+    ref: link
+  - text: Using IAM Securely
+    url: https://cloud.google.com/iam/docs/using-iam-securely
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.IP-1
+    ref: csf
+  tags:
+  - dbc
+  - k8s-logging
+- name: dbc-18
+  guid: 7d7ec1dc-fdfb-5edd-91dd-cf09a6a8d987
+  platform: gcp
+  title: Overlapping IAM Role Permissions
+  description: A project was found to have IAM Role assignments that fully overlap.  That
+    is, one or more IAM Roles are assigned that have permissions fully covered by
+    another IAM Role assigned.  This is a minor misconfiguration that should be resolved
+    to clarify the explicit intent and aid in auditing permissions in the future.
+  validation: |2-
+
+    Review the permissions at the organization, folder, and project level, and look for combinations of primitive IAM Roles such as "Project Owner" or "Project Editor" assigned in combination with other custom or predefined IAM roles.
+  remediation: |2-
+
+    Review the configuration of IAM permissions and consider consolidating the permissions down to the single IAM Role that encapsulates the permissions necessary to do the job role.  The most expeditious solution is to simply remove the smaller IAM Role.  A common example is a predefined role such as "Compute Admin" being fully encapsulated in a primitive role such as "Project Owner".
+  impact: 1
+  refs:
+  - text: Using IAM Securely
+    url: https://cloud.google.com/iam/docs/using-iam-securely
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.IP-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-19
+  guid: e6504c23-cf7f-52aa-92a3-49e54ca7f332
+  platform: gcp
+  title: Organization Admin assigned at the Folder or Project level
+  description: The predefined Organization Administrator IAM Role is meant to be assigned
+    at the Organization level, not the Folder or Project level.  This is likely a
+    misconfiguration.  However, it offers the `resourcemanager.projects.setIamPolicy`
+    permission which allows modification of permissions on that Project including
+    adding oneself or others as "Project Owner" and gaining full access to the Project
+    and all resources contained inside it.
+  validation: |2-
+
+    For each folder, run `gcloud resource-manager folders get-iam-policy FOLDERIDNUMBER --format=json `| jq -r 'select(.bindings) | .bindings[] | select(.role=="roles/resourcemanager.organizationAdmin") | .members[]'.  For each project, run `gcloud projects get-iam-policy PROJECTID --format=json | jq -r 'select(.bindings) | .bindings[] | select(.role=="roles/resourcemanager.organizationAdmin") | .members[]'` and validate that no entries are present.
+  remediation: |2-
+
+    Review the need for Organization Administrator to be assigned at the Folder or Project level and instead grant the desired IAM Roles for those users.
+  impact: 3
+  refs:
+  - text: Organization Access Control
+    url: https://cloud.google.com/resource-manager/docs/access-control-org
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.IP-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-20
+  guid: 288c5376-739a-5da8-927d-b72a185f8439
+  platform: gcp
+  title: Default Firewall Rules are present
+  description: The default firewalls in the default VPC permit inbound access to SSH,
+    RDP, and ICMP from 0.0.0.0/0 and between all instances on the local subnet.  By
+    default, GCE instances and GKE workers are created in the default subnet of the
+    default VPC in a project and inherit this access for ease of use, but this means
+    they are exposed via SSH or RDP to the entire Internet.
+  validation: |2-
+
+    In each project, run `gcloud compute firewall-rules list --format=json | jq -r '.[] | select(.name | test("^default-allow-")) | .name' | grep -v 'default-allow-internal'` and ensure entries named `default-allow-icmp`, `default-allow-rdp`, and `default-allow-ssh` are not listed.
+  remediation: |2-
+
+    Delete the default firewall rules in all projects and create new firewall rules explicitly with the principle of least privilege/access in mind.
+  impact: 8
+  refs:
+  - text: Default Firewall Rules
+    url: https://cloud.google.com/vpc/docs/firewalls#more_rules_default_vpc
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-4
+    - PR.AC-5
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-21
+  guid: 3d56976e-3673-5c48-a501-33e0a2975038
+  platform: gcp
+  title: Firewall logging should be enabled on all rules
+  description: Firewall rules do not enable logging of connections by default.  In
+    regulated environments, firewall logging is a requirement in almost every situation
+    to be able to understand when systems are accessed on certain ports or for evidence
+    of which systems were accessed in the event of a security incident.
+  validation: |2-
+
+    In each project, run `gcloud compute firewall-rules list --format=json | jq -r '.[] | select(.logConfig.enable==false) | "(.name)"'` and ensure no entries are present.
+  remediation: |2-
+
+    For all TCP and UDP firewall rules, enable firewall logging on each rule.  Logs are sent automatically to Stackdriver for review for the default retention period of 30 days.
+  impact: 9
+  refs:
+  - text: Firewall Rules Logging
+    url: https://cloud.google.com/vpc/docs/firewall-rules-logging
+    ref: link
+  - ids:
+    - DE.AE-1
+    - DE.CM-7
+    - DE.CM-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-22
+  guid: 8d492ba7-166e-5e64-8645-210040600af1
+  platform: gcp
+  title: VPC Flow logging should be enabled on all VPC Subnets
+  description: VPC flow logs record metadata about all traffic flowing in and out
+    of a VPC. These logs are vital for auditing and review after security incidents
+    to be able to create an accurate timeline of network events to go with application
+    and Cloud API Audit logs.
+  validation: |2-
+
+    In each project, run `gcloud compute networks subnets list --format=json | jq -r '.[] | select(.logConfig.enable | not) | "(.name) (.region)"'` and ensure no entries are present.
+  remediation: |2-
+
+    Enable VPC Flow logging on all VPCs with a 100% sample rate for production environments or those that hold sensitive data.  When directing to a GCS bucket, enable bucket versioning and optionally configure an object lifecycle policy to retain the data for the desired period only.
+  impact: 7
+  refs:
+  - text: Using VPC Flow Logs
+    url: https://cloud.google.com/vpc/docs/using-flow-logs
+    ref: link
+  - ids:
+    - DE.AE-1
+    - DE.CM-7
+    - DE.CM-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-23
+  guid: '09ca0a00-f921-54bf-ab6e-80690f9dd06d'
+  platform: gcp
+  title: Firewall rules allows access to SSH TCP/22 from all hosts
+  description: Firewall rules that permit inbound/ingress access from any IP address
+    (0.0.0.0/0) to administrative ports via SSH (TCP/22) should be reviewed for necessity
+    to prevent unintended exposure of services and systems protected by that security
+    group.  The primary exclusion to this is a dedicated, hardened bastion host.
+  validation: |2-
+
+    In each project, run `gcloud compute firewall-rules list --format=json | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[] | contains("0.0.0.0/0")) | "(.name) (.allowed[])"'` and ensure no entries that permit `IPProtocol` of `tcp` and `ports` of `22`.
+  remediation: |2-
+
+    For each firewall rule, assess whether the attached systems requires SSH access from any IP address.  If it doesn't, consider reducing the source IP ranges to a specific set of subnets or to the bastion host(s) in the environment.
+  impact: 8
+  refs:
+  - text: Configuring Firewall Rules
+    url: https://cloud.google.com/vpn/docs/how-to/configuring-firewall-rules
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-4
+    - PR.AC-5
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-24
+  guid: 39bd81b4-4925-5701-a5be-a2ee38b67166
+  platform: gcp
+  title: Default deny egress rules should be configured
+  description: There are no egress firewall rules in place, so the implicit egress
+    "allow all" firewall policy is in effect.  This allows any GCP resource to connect
+    to any external destination on any port or protocol.  While this default configuration
+    provides ease of use, it offers no protection for exfiltration of data, lateral
+    movement, or network pivoting in the event of a compromise.
+  validation: |2-
+
+    In each project, run `gcloud compute firewall-rules list --format=json | jq -r '.[] | select(.destinationRanges) | select(.denied) | select(.direction=="EGRESS") | select(.destinationRanges[] | contains("0.0.0.0/0")) | select(.denied[].IPProtocol=="all") | "(.name)"'` and ensure that an entry is present.
+  remediation: |2-
+
+    Configure an explicit deny egress firewall rule in each VPC of priority 65535, and configure explicit egress firewall rules that allow external access on the specific ports to specific destinations as needed.  When combined with firewall logging, this has the added benefit of detecting when applications are misconfigured or when potentially malicious activity is attempting to use non-approved ports.
+  impact: 5
+  refs:
+  - text: Default GCP Firewall Rules
+    url: https://cloud.google.com/vpc/docs/firewalls#default_firewall_rules
+    ref: link
+  - ids:
+    - PR.AC-5
+    - PR.DS-5
+    - DE.AE-1
+    ref: csf
+  tags:
+  - dbc
+  - k8s-logging
+- name: dbc-25
+  guid: 27d34b2a-4b21-5a95-9707-30c32ade1045
+  platform: gcp
+  title: GCE Instances have public IPs
+  description: GCE Instances should not have public IP addresses assigned directly
+    to them, and should be administered using their private IP and services running
+    on them exposed only via load balancers.  This reduces the scope of attacks against
+    vulnerable services and affords additional protection against denial-of-service.
+  validation: |2-
+
+    In each project, run `gcloud compute instances list --format=json | jq -r '.[] | . as $instance | .networkInterfaces[] | select(.accessConfigs) | .accessConfigs[] | select(.type=="ONE_TO_ONE_NAT") | "($instance.name): (.natIP)"'` and ensure that no entries with public IPs exist.
+  remediation: |2-
+
+    Configure all GCE Instances to not have public IP addresses assigned.  In GKE, enable private nodes.  For services running on these systems that should be exposed externally, configure a load balancer.  For remote administration, consider using the Identity-Aware Proxy service to create an SSH or RDP-over-TLS tunnel directly to the private IP of the instance.
+  impact: 5
+  refs:
+  - text: IAP Proxy for GCE
+    url: https://cloud.google.com/iap/docs/enabling-compute-howto
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-4
+    - PR.AC-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-26
+  guid: 9352728c-93c6-55ee-a072-8c3132241cf9
+  platform: gcp
+  title: Default networks are present
+  description: Each project contains a default VPC/Network with default subnets in
+    every region for ease of use, but the IP ranges used are likely not desired and
+    may overlap between different projects.  This may cause issues in the future if
+    VPC Peering is desired as the subnets will conflict and prevent routing.
+  validation: |2-
+
+    In each project, run `gcloud compute networks list --format=json | jq -r 'select(.[]) | .[] | select(.name=="default") | .name'` and ensure no entries are listed.
+  remediation: |2-
+
+    Delete the default VPC/Network and subnets in each project and instead create a new VPC and subnets according to the networking and IP address management needs of the organization to avoid overlap.  To ensure all projects created do not have the default VPC/Network and subnets created automatically, configure the constraints/compute.skipDefaultNetworkCreation organization policy at the organization node.
+  impact: 2
+  refs:
+  - text: Default VPC Network
+    url: https://cloud.google.com/vpc/docs/vpc#default-network
+    ref: link
+  - text: Organization Policies
+    url: https://cloud.google.com/resource-manager/docs/organization-policy/org-policy-constraints
+    ref: link
+  - ids:
+    - ID.AM-3
+    - PR.AC-5
+    - PR.DS-7
+    - PR.PT-4
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-27
+  guid: 1cc2e0e7-6dc9-5c4f-959e-3e60addad801
+  platform: gcp
+  title: User-managed GCP Service Account Keys older than 90 days
+  description: GCP Service Account Keys that are created by an administrator are known
+    as "user-managed" keys.  Unless rotated by the user, they are static for their
+    lifetime.  They should be rotated on a frequent basis to limit their active lifetime
+    in the event the key material is compromised.
+  validation: |2-
+
+    Run `for project in $(gcloud projects list --filter=parent.id=ORGIDNUMBER --format="value(projectId)"); do for sa in $(gcloud iam service-accounts list --format="value(email)" --project=$project); do gcloud iam service-accounts keys list --iam-account $sa --project=$project --format=json | jq -r '.[] | select(.keyType=="USER_MANAGED") | "(.name): (.validAfterTime) (.validBeforeTime)"'; done; done` and review the validAfterTime and validBeforeTime values for each key to ensure they are not valid for longer than 90 days.
+  remediation: |2-
+
+    GCP Service Accounts have native, dynamic key integrations to services like GCE, GKE, AppEngine, Cloud Functions, and more such that exporting a static key is only necessary for integrations from non-GCP services like Splunk, Sumologic, Datadog, etc that need access to GCP resources from outside the organization.  This removes the need for exporting keys for all but a small number of clearly defined use cases for those types of integrations.  Refactor GCP applications using static, exported service account keys to use the native integration.  For keys used by external services, rotate them every 90 days.
+  impact: 2
+  refs:
+  - text: Managing Service Account Keys
+    url: https://cloud.google.com/iam/docs/creating-managing-service-account-keys
+    ref: link
+  - text: Security Health Analytics
+    url: https://cloud.google.com/security-command-center/docs/how-to-manage-security-health-analytics
+    ref: link
+  - ids:
+    - PR.AC-1
+    - PR.AC-3
+    - PR.AC-6
+    - PR.AC-7
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-28
+  guid: f657ccb7-f778-5c52-9d83-a691e190e289
+  platform: gcp
+  title: GCP Projects should enable data access logging
+  description: GCP Audit logs automatically capture administrative activity logs for
+    any creation or modification of resources via the GCP API.  e.g. "create GCE instance"
+    or "delete GCS bucket".  By default, read requests to get/list resources and read/write
+    requests that access user-provided data are not logged.  e.g. "get or delete an
+    object in a GCS bucket".  These logs can and should be enabled on non-development
+    projects to enable full capture of API activity necessary to support incident
+    analysis and for meeting certain regulatory compliance requirements.
+  validation: |2-
+
+    Run `for project in $(gcloud projects list --filter=parent.id=ORGIDNUMBER --format="value(projectId)"); do gcloud projects get-iam-policy $project --format=json | jq -r 'select(.auditConfigs)'; done` and ensure that it returns the following: `[
+          {
+            "service": "allServices",
+            "auditLogConfigs": [
+              { "logType": "ADMIN_READ" },
+              { "logType": "DATA_READ"  },
+              { "logType": "DATA_WRITE" },
+            ]
+          },
+        ]`.
+  remediation: |2-
+
+    Enable "Admin READ" and "Data READ and WRITE" access logging for "allServices" at the organization level so that it applies to all downstream folders and projects.  Configure Stackdriver to export audit logs to a storage medium such as a GCS bucket and configure a lifecycle and retention policy to automatically move data to cheaper storage and to prune old data.  Caveat: Audit logs are often verbose and generate large volumes of log entries, and storing these in GCS buckets incurs an additional cost.  Use the exemption configuration to remove GCP internal service audit logs if necessary.
+  impact: 8
+  refs:
+  - text: Project Audit Logs
+    url: https://cloud.google.com/logging/docs/audit/understanding-audit-logs
+    ref: link
+  - text: Configuring Data Access Logs
+    url: https://cloud.google.com/logging/docs/audit/configure-data-access
+    ref: link
+  - ids:
+    - PR.PT-1
+    ref: csf
+  tags:
+  - dbc
+  - k8s-logging
+- name: dbc-29
+  guid: d2a48599-29d1-5e8a-a9e4-fb1fb35cfa75
+  platform: gcp
+  title: Cloud Security Command Center should be enabled
+  description: 'Security Command Center helps security teams gather data, identify
+    threats, and act on them before they result in business damage or loss. It offers
+    deep insight into application and data risk so that organizations can quickly
+    mitigate threats to your their resources across and evaluate overall health. Security
+    Command Center provides a single, centralized dashboard to:  - View and monitor
+    an inventory of your cloud assets. - Scan storage systems for sensitive data.
+    - Detect common web vulnerabilities and anomalous behavior. - Review access rights
+    to your critical resources in your organization. - Apply recommended remediations
+    to resolve vulnerabilities.'
+  validation: |2-
+
+    Run `for project in $(gcloud projects list --filter=parent.id=ORGIDNUMBER --format="value(projectId)"); do gcloud services list --project=$project | grep securitycenter; done` and ensure at least one entry is returned.
+  remediation: |2-
+
+    Logged into GCP with roles/resourcemanager.organizationAdmin and roles/securitycenter.admin permissions, navigate to Security > Security Command Center in the UI and follow the prompts for enabling the service for all current and future projects.  Also, click on "Security Health Analytics" in the Dashboard and enable it.  Finally, navigate to Security > Threat Detection and enable Event Threat Detection to be able to receive events in Cloud Security Command Center.
+  impact: 9
+  refs:
+  - text: Cloud Security Command Center Quickstart
+    url: https://cloud.google.com/security-command-center/docs/quickstart-scc-setup
+    ref: link
+  - ids:
+    - ID.AM-2
+    - ID.AM-5
+    - ID.GV-1
+    - ID.RA-1
+    - ID.RA-2
+    - ID.RA-3
+    - ID.RA-4
+    - ID.RA-6
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-30
+  guid: 5344a9bb-7f90-5b64-a466-111c6c59f09d
+  platform: gcp
+  title: CloudSQL Instances should have a private IP address
+  description: By default, CloudSQL instances are assigned a public IPv4 address,
+    and the access list allows any source IP address to attempt to connect and authenticate
+    to the database.  This facilitates development and ease of connectivity for troubleshooting,
+    but it means an attacker can access the potentially sensitive data in the database
+    without restriction if they obtain valid credentials.
+  validation: |2-
+
+    In each project, run `gcloud sql instances list --format=json | jq -r '.[] | select(.settings.ipConfiguration.ipv4Enabled==true) | "(.name) Public IP: (.settings.ipConfiguration.ipv4Enabled)"'` and ensure no entries are listed.
+  remediation: |2-
+
+    To reduce the likelihood of an attacker to access the database service directly or to use stolen credentials from any source IP, the instance should be configured with a private IP address only. This should be configured during creation of the instance and a VPC peering relationship should be configured between the CloudSQL VPC and the VPCs where applications accessing the database reside.
+  impact: 5
+  refs:
+  - text: CloudSQL MySQL Private IP
+    url: https://cloud.google.com/sql/docs/mysql/configure-private-services-access
+    ref: link
+  - text: CloudSQL PostgreSQL Private IP
+    url: https://cloud.google.com/sql/docs/postgres/configure-private-services-access
+    ref: link
+  - text: CloudSQL Sqlserver Private IP
+    url: https://cloud.google.com/sql/docs/sqlserver/configure-private-services-access
+    ref: link
+  - ids:
+    - ID.AM-3
+    - PR.AC-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-31
+  guid: f033a7cd-69ce-53d9-8ca7-74579eb07a70
+  platform: gcp
+  title: CloudSQL Instances should require SSL/TLS
+  description: By default, CloudSQL instances will accept both SSL/TLS and plaintext
+    database connections.  As CloudSQL instances are provisioned inside a separate
+    VPC within GCP that the user does not control, this means that database traffic
+    will traverse a VPC peering connection without in-transit encryption.  Requiring
+    SSL/TLS connections ensures that all connections are encrypted over the wire.
+  validation: |2-
+
+    In each project, run `gcloud sql instances list --format=json | jq -r '.[] | select(.settings.ipConfiguration.requireSsl==null) | "(.name) SSL: (.settings.ipConfiguration.requireSsl)"'` and ensure no entries are listed.
+  remediation: |2-
+
+    Configure the instance during creation or while running to `require-ssl`.  For example, `gcloud sql instances patch [INSTANCE_NAME] --require-ssl`.  To allow applications to connect securely without changing application code, the cloudsql-proxy can be used.  It can handle setting up a localhost SSL proxy/tunnel and applications can be configured to connect to the database via that tunnel.
+  impact: 5
+  refs:
+  - text: CloudSQL MySQL Require SSL/TLS
+    url: https://cloud.google.com/sql/docs/mysql/configure-ssl-instance
+    ref: link
+  - text: CloudSQL PostgreSQL Require SSL/TLS
+    url: https://cloud.google.com/sql/docs/postgres/configure-ssl-instance
+    ref: link
+  - text: CloudSQL Sqlserver Require SSL/TLS
+    url: https://cloud.google.com/sql/docs/sqlserver/configure-ssl-instance
+    ref: link
+  - ids:
+    - PR.AC-7
+    - PR.DS-2
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-32
+  guid: 6581aa85-27d2-5f66-95f5-b4f1f6b8a68f
+  platform: gcp
+  title: Firewalls ingress to TCP/3306 from 0.0.0.0/0
+  description: Firewall rules that permit inbound/ingress access from any IP address
+    (0.0.0.0/0) to database ports via TCP/3306 should be reviewed for necessity to
+    prevent unintended exposure of services and systems protected by that security
+    group.  The primary exclusion to this is a dedicated, hardened bastion host.
+  validation: |2-
+
+    In each project, run `gcloud compute firewall-rules list --format=json | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[] | contains("0.0.0.0/0")) | "(.name) (.allowed[])"` and ensure no entries that permit `IPProtocol` of `tcp` and `ports` of `3306`.
+  remediation: |2-
+
+    For each firewall rule, assess whether the attached systems requires Database access from any IP address.  If it doesn't, consider reducing the source IP ranges to a specific set of subnets where the applications and administrative systems reside.
+  impact: 7
+  refs:
+  - text: Configuring Firewall Rules
+    url: https://cloud.google.com/vpn/docs/how-to/configuring-firewall-rules
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-4
+    - PR.AC-5
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-33
+  guid: 647dfcff-8bf4-5215-94e1-765d9da48454
+  platform: gcp
+  title: Firewalls ingress to TCP/5432 from 0.0.0.0/0
+  description: Firewall rules that permit inbound/ingress access from any IP address
+    (0.0.0.0/0) to database ports via TCP/5432 should be reviewed for necessity to
+    prevent unintended exposure of services and systems protected by that security
+    group.  The primary exclusion to this is a dedicated, hardened bastion host.
+  validation: |2-
+
+    In each project, run `gcloud compute firewall-rules list --format=json | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[] | contains("0.0.0.0/0")) | "(.name) (.allowed[])"` and ensure no entries that permit `IPProtocol` of `tcp` and `ports` of `5432`.
+  remediation: |2-
+
+    For each firewall rule, assess whether the attached systems requires Database access from any IP address.  If it doesn't, consider reducing the source IP ranges to a specific set of subnets where the applications and administrative systems reside.
+  impact: 7
+  refs:
+  - text: Configuring Firewall Rules
+    url: https://cloud.google.com/vpn/docs/how-to/configuring-firewall-rules
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-4
+    - PR.AC-5
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-34
+  guid: 1dd1167e-7787-53b9-b32b-aa3cbfc49a11
+  platform: gcp
+  title: Firewalls ingress to TCP/3389 from 0.0.0.0/0
+  description: Firewall rules that permit inbound/ingress access from any IP address
+    (0.0.0.0/0) to database ports via RDP (TCP/3389) should be reviewed for necessity
+    to prevent unintended exposure of services and systems protected by that security
+    group.  The primary exclusion to this is a dedicated, hardened bastion host.
+  validation: |2-
+
+    In each project, run `gcloud compute firewall-rules list --format=json | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[] | contains("0.0.0.0/0")) | "(.name) (.allowed[])"` and ensure no entries that permit `IPProtocol` of `tcp` and `ports` of `3389`.
+  remediation: |2-
+
+    For each firewall rule, assess whether the attached systems requires Remote Desktop access from any IP address.  If it doesn't, consider reducing the source IP ranges to a specific set of subnets or to the bastion host(s) in the environment.
+  impact: 7
+  refs:
+  - text: Configuring Firewall Rules
+    url: https://cloud.google.com/vpn/docs/how-to/configuring-firewall-rules
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-4
+    - PR.AC-5
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-36
+  guid: e738902b-746f-579b-981c-d36a054bf19f
+  platform: gcp
+  title: GCP usage within 30% of project quota limit
+  description: The GCP service enforces several quotas on all GCP projects to protect
+    both service availability and the customer.  Without quotas, a compromised account
+    would offer "unlimited" resources to mine bitcoin, or a single customer could
+    attempt to exhaust all available resources of a given service type.  Quotas on
+    Instance counts, Virtual CPUs, and Persistent Disks are commonly known, but there
+    are several quotas that can easily catch users by surprise when attempting even
+    modest scale-up activities.  As the process for increasing quota limits can take
+    1-3 days, it's best to request these increases well ahead of the need to prevent
+    self-inflicted capacity based outages.
+  validation: |2-
+
+    Run `for project in $(gcloud projects list --filter=parent.id=1071234196403 --format="value(projectId)"); do gcloud compute project-info describe --project $project --format=json | jq -r '.quotas[] | "(.metric): (.usage) (.limit)"'; done` and `gcloud compute regions list --format=json | jq -r '.[] | .name as $name | .quotas[] | "($name) (.metric): (.usage) (.limit)"'`.  Ensure that usage does not exceed 70% of the limit value for all quotas.
+  remediation: |2-
+
+    Review the project-level and per-region quotas for all critical GCP projects on a routine basis.  For quotas that are within 30-50% of total capacity, evaluate the need for increasing those limits and use the GCP console to request them as needed.
+  impact: 5
+  refs:
+  - text: Managing GCP Quotas
+    url: https://cloud.google.com/compute/quotas
+    ref: link
+  - ids:
+    - PR.DS-4
+    - ID.AM-5
+    - ID.RA-4
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-39
+  guid: 7befc99c-0695-574a-b10a-af5c538a2171
+  platform: gcp
+  title: Exported GCP Service Account Keys in use inside GCP/GKE resources
+  description: When application code needs to interact with the GCP APIs, it needs
+    an identity and credentials.  The creation of a GCP Service Account represents
+    the identity, and a GCP-managed keypair associated with that Service Account serves
+    as the credentials used to generate session tokens needed during API interaction.  For
+    applications that reside outside GCP, users can generate and export up to ten
+    new Service Account Keys for a single Service Account.  These exported keys are
+    then "user-managed" in that they don't expire or require any additional information
+    to be used to authenticate as that Service Account using GCP APIs.  Until recently,
+    it was common practice to manually export a Service Account Key in a JSON-file
+    format and store that inside a GKE/Kubernetes Secret to support Pods having GCP
+    API access.  However, these keys require manual rotation and replacement, and
+    this makes automatic key rotation for compliance reasons or following a security
+    incident extremely difficult.
+  validation: |2-
+
+    Review the presence of, age, and expiration of all user-managed/exported Service Account Keys in the account.  Ensure the description of the Service Account and/or Key provides an indication of where it is being used.  If GCP Organization Policies are enforcing, ensure the `iam.disableServiceAccountKeyCreation` control is applied to all but a small approved list of Folders and Projects.
+  remediation: |2-
+
+    Periodically review all Service Account Keys associated with Service Accounts, and ensure their usage is only in limited situations where there is no other option.  For GCE, attaching the Service Account to the instance is the preferred method as the credentials are short-lived and automatically rotated every hour.  For Pods in GKE, use the Workload Identity feature to map GKE/Kubernetes Service Accounts to GCP Service Accounts via IAM mapping and get similar behavior to the GCE instance metadata approach.  To prevent keys from being generated, consider enforcing the `iam.disableServiceAccountKeyCreation` GCP Organization Policy on all Folders/Projects that do not hold IAM responsibilities for external application authentication.
+  impact: 5
+  refs:
+  - text: GCP Service Accounts
+    url: https://cloud.google.com/iam/docs/understanding-service-accounts
+    ref: link
+  - text: GCP Service Account Keys
+    url: https://cloud.google.com/iam/docs/creating-managing-service-account-keys
+    ref: link
+  - text: GCP Organization Policy
+    url: https://cloud.google.com/resource-manager/docs/organization-policy/restricting-service-accounts#disable_service_account_key_creation
+    ref: link
+  - ids:
+    - PR.AC-1
+    - PR.AC-6
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-40
+  guid: 9a58ed98-e24a-5f2a-a420-0b445ddb376d
+  platform: gcp
+  title: Shared VPC projects contain non VPC related resources
+  description: GCP Projects that contain VPCs to be "shared" with other GCP Projects
+    are also known as "Host" Projects, and the GCP Projects that are associated with
+    the Host Projects are known as "Resource" Projects.  This approach maintains the
+    networking configuration centrally with dedicated IAM permissions, and the ability
+    to "use" the network is granted to each Service Project which is typically owned
+    by other teams in the organization who own the instances and clusters.  Where
+    possible, the Shared VPC project should retain its single purpose configuration
+    and not hold resources unrelated to the VPC networking, routing, and firewall
+    settings.  Resources outside of those purposes should be held in one or more Service
+    Projects instead to maintain cleaner ownership and permissions isolation.
+  validation: |2-
+
+    Review all Host Projects and validate that no GCE instances, GKE clusters, GCS buckets, etc exist and that IAM permissions for the Project are only network-focused.
+  remediation: |2-
+
+    If resources exist in the Shared VPC project that are not networking related, they should be migrated to a dedicated Service Project.  Permissions to manage the VPC resources in the Shared VPC Project should be carefully reviewed to ensure they only grant access to perform network configuration tasks.
+  impact: 3
+  refs:
+  - text: GCP Shared VPCs
+    url: https://cloud.google.com/vpc/docs/shared-vpc
+    ref: link
+  - ids:
+    - PR.AC-5
+    - PR.PT-4
+    - PR.IP-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-41
+  guid: cb1f71c5-e10d-5e0e-9057-4b794d1cd588
+  platform: gcp
+  title: Load Balancers should use a MODERN or RESTRICTED SSL policy
+  description: By default, Load Balancers use an SSL/TLS policy equivalent to the
+    COMPATIBLE profile which supports a wide range of ciphers and TLS versions of
+    varying security.  In nearly all use cases, the more stringent profiles should
+    be used to ensure client connections only negotiate with strong ciphers and recent
+    TLS versions.  For compliance-focused environments, the RESTRICTED policy should
+    be used.
+  validation: |2-
+
+    Run `gcloud compute target-https-proxies list --format=json | jq -r '.[] | select(.sslPolicy | not) | "(.name) (.selfLink)"'` and `gcloud compute target-ssl-proxies list --format=json | jq -r '.[] | select(.sslPolicy | not) | "(.name) (.selfLink)"'` and ensure they do not return any entries.
+  remediation: |2-
+
+    Configure all Load Balancers to leverage the MODERN or RESTRICTED SSL policy or a CUSTOM SSL policy with equivalent enforcement of secure ciphers and TLS versions.
+  impact: 3
+  refs:
+  - text: GCP SSL Policies
+    url: https://cloud.google.com/load-balancing/docs/ssl-policies-concepts
+    ref: link
+  - ids:
+    - PR.DS-2
+    - PR.PT-4
+    - PR.AC-7
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-42
+  guid: '0089ced9-0d18-552a-88de-b5d77c179e2d'
+  platform: gcp
+  title: Firewall rules allows all ports from all hosts
+  description: Firewall rules that allow all ports from any CIDR range are effectively
+    disabling firewall protection to the attached service or system.
+  validation: |2-
+
+    In each project, run `gcloud compute firewall-rules list --format=json | jq -r '.[] | select(.sourceRanges) | select(.allowed) | select(.sourceRanges[] | contains("0.0.0.0/0")) | "(.name) (.allowed[])"'` and ensure no entries that permit `IPProtocol` of `all`.
+  remediation: |2-
+
+    For each firewall rule, review the application needs for protocols and ports, and reconfigure the firewall rule(s) to only grant access to those.
+  impact: 5
+  refs:
+  - text: Configuring Firewall Rules
+    url: https://cloud.google.com/vpn/docs/how-to/configuring-firewall-rules
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-4
+    - PR.AC-5
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-43
+  guid: 2f3f76ca-7048-5b40-97a1-350869c51f0c
+  platform: gcp
+  title: GCS Bucket Logging should be enabled
+  description: GCS bucket logging helps maintain an audit trail of access that can
+    be used in the event of a security incident.  Bucket logging is disabled by default,
+    so any unauthorized access will go untraced unless this is explicitly enabled.
+  validation: |2-
+
+    In each project, run `for bucket in $(gsutil ls); do gsutil logging get $bucket; done | grep "has no logging"` and validate that no entries are present.
+  remediation: |2-
+
+    Enable data access audit logs on all storage buckets that store data that requires auditable logging.
+  impact: 5
+  refs:
+  - text: GCS Audit Logs
+    url: https://cloud.google.com/storage/docs/audit-logs
+    ref: link
+  - ids:
+    - PR.PT-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-44
+  guid: 9082de43-725d-5562-90a9-8204a5aba5c4
+  platform: gcp
+  title: GCS Buckets without object versioning enabled
+  description: GCS Buckets that store sensitive data should have object versioning
+    enabled to help protect against the overwriting of objects or data loss in the
+    event of a compromise.  A concrete example is a bucket that receives audit/access
+    logs from other services.  Without object versioning, an attacker might be able
+    to delete evidence of their activities.  With object versioning enabled, they
+    won't be able to remove the original version of the log data.
+  validation: |2-
+
+    In each project, run `for bucket in $(gsutil ls); do gsutil versioning get $bucket; done | grep "Suspended"` and validate that no entries are present.
+  remediation: |2-
+
+    Enable object versioning on all storage buckets that store data that requires integrity protection.
+  impact: 5
+  refs:
+  - text: GCS Object Versioning
+    url: https://cloud.google.com/storage/docs/object-versioning
+    ref: link
+  - ids:
+    - PR.PT-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-45
+  guid: 8f62fb14-a782-5888-b0cb-3d5ee30b4bdd
+  platform: gcp
+  title: Predefined GKE IAM Roles should be avoided
+  description: Access to the GKE Cluster API Server resources is controlled by a combination
+    of IAM and in-cluster RBAC permissions.  If either grants access to the resource,
+    access is allowed.  When using IAM permissions, access is granted to the permitted
+    resources in all namespaces.  Using RBAC policies allows for granting more granular
+    access to resources on a cluster-wide or per-namespace level and follows the principle
+    of least privilege.  In this case, only IAM permissions are being used for allowing
+    access via the "Project Owner" IAM Role, and this effectively grants full access
+    to all resources in the cluster and "root" access to all GKE worker nodes.
+  validation: |2-
+
+    Run `gcloud organizations get-iam-policy ORGIDNUMBER --format=json | jq -r 'select(.bindings) | .bindings[] | .role as $role | select(.role=="roles/container.admin" or .role=="roles/container.developer" or .role=="roles/container.viewer") | "($role): (.members[])"'` for the organization level.  For each folder, run `gcloud resource-manager folders get-iam-policy FOLDERIDNUMBER --format=json | jq -r 'select(.bindings) | .bindings[] | .role as $role | select(.role=="roles/container.admin" or .role=="roles/container.developer" or .role=="roles/container.viewer") | "($role): (.members[])"'`.  For each project, run `gcloud projects get-iam-policy PROJECTID --format=json | jq -r 'select(.bindings) | .bindings[] | .role as $role | select(.role=="roles/container.admin" or .role=="roles/container.developer" or .role=="roles/container.viewer") | "($role): (.members[])"'` and validate that the minimum assignments necessary are present.
+  remediation: |2-
+
+    The recommended approach is to avoid using IAM permissions to grant access to GKE clusters with one exception: a custom IAM Role that only permits cluster users with the ability to download a kubeconfig file via the "gcloud container clusters get-credentials" API call.  All Kubernetes access should be granted inside the cluster using RBAC ClusterRoleBindings or per-namespace RoleBindings.  Create a custom IAM Role call "Kubernetes API Access" with the following permissions: - container.apiServices.get - container.apiServices.list - container.clusters.get - container.clusters.getCredentials  Create a security group with all members that need cluster access, and bind the "Kubernetes API Access" IAM Role to that group at the project where the cluster lives.  For each administrator, create a ClusterRoleBinding that grants that user the "Cluster Admin" ClusterRole.  For each developer/CI system, create a RoleBinding that grants that user the Role they need in the namespace(s) they need access to that are not kube-system.  This is commonly the "admin" ClusterRole bound to the namespace to delegate them full control over that namespace.
+  impact: 5
+  refs:
+  - text: Kubernetes RBAC
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/role-based-access-control
+    ref: Kubernetes RBAC
+  - text: GKE Multi-tenancy
+    url: https://speakerdeck.com/alp/multi-tenancy-best-practices-for-google-kubernetes-engine?slide=3
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.IP-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-46
+  guid: 50399e71-32dc-569b-bcd1-d63fa0a39a85
+  platform: gcp
+  title: GKE Network Policy support should be installed
+  description: By default in Kubernetes, all Pods can communicate with each other
+    by IP and egress to any subnet (including the Internet) unless routing or firewalls
+    are added to prevent that traffic.  This presents ample opportunity for lateral
+    movement from the perspective of a compromised workload. One of the best ways
+    to reduce the scope of that movement is to deploy NetworkPolicy resources that
+    define firewall rules for pod-to-pod traffic.  In GKE, the Network Policy add-on
+    must be enabled to allow for the cluster to enforce firewall policies on Pods.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.networkPolicy.enabled==true and .networkPolicy.provider=="CALICO") | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure the cluster to enabled Network Policy support to allow for in-cluster support for NetworkPolicy (firewall rules) resources.
+  impact: 9
+  refs:
+  - text: Kubernetes Network Policy
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#restrict_with_network_policy
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.AC-5
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+  - k8s-logging
+- name: dbc-47
+  guid: 9eb1bf9e-1214-510e-9675-397a7ffd52fb
+  platform: gcp
+  title: GKE Control Plane IPs should be restricted to a known set of IP ranges
+  description: The Kubernetes API Server systems (Control Plane) expose the Kubernetes
+    API Server TLS port publicly without an IP restrictions or limitations.  This
+    provides convenient remote administrative access, but it affords only a single
+    layer of defense in front of the Kubernetes cluster and all applications and data
+    inside.  A pre-authentication or denial-of-service vulnerability could compromise
+    or disrupt the cluster completely.  Several pre-authentication denial-of-service
+    vulnerabilities have been discovered and fixed in recent Kubernetes releases.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.masterAuthorizedNetworksConfig.enabled==true) | select(.masterAuthorizedNetworksConfig.cidrBlocks[].cidrBlock!="0.0.0.0/0") | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure the master authorized networks on the GKE cluster to be restricted to a known set of IP ranges for API Server access.  In environments with bastion hosts or VPNs, their internal subnet range or security groups are commonly used.
+  impact: 9
+  refs:
+  - text: Billion Laughs Attack
+    url: https://www.stackrox.com/post/2019/09/protecting-kubernetes-api-against-cve-2019-11253-billion-laughs-attack/
+    ref: link
+  - text: Billion Laughs PoC
+    url: https://gist.github.com/bgeesaman/0e0349e94cd22c48bf14d8a9b7d6b8f2
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-5
+    - PR.PT-3
+    - PR.PT-4
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-48
+  guid: 6506294c-7084-5b9a-a0c5-a94b5fca6082
+  platform: gcp
+  title: GKE Workload Identity should be enabled and enforcing metadata protection
+    on all NodePools
+  description: Currently, all pods have the ability to reach the Instance Metadata
+    API corresponding to the underlying node.  By extension, those pods can access
+    the APIs and data used to bootstrap the Kubernetes worker node.  The credentials
+    used to bootstrap a Kubernetes worker node are very commonly sufficient to be
+    used to privilege escalate to "cluster-admin".  Also by extension, this means
+    that every container image ever run in this cluster in the non-"prod" namespace
+    has had the ability to reach and export these credentials.  Therefore, it's very
+    important for a cluster's security posture to prevent pods from being able to
+    reach the Instance Metadata API to fetch those bootstrapping credentials.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.workloadIdentityConfig.workloadPool | test("svc.id.goog")) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure Workload Identity on the cluster and every node pool in the cluster with the GKE_METADATA setting enabled.  Alternatively, deploy an egress NetworkPolicy blocking egress to 169.254.169.254 for all non-kube-system namespaces.
+  impact: 9
+  refs:
+  - text: GKE Workload Identity
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/workload-identity
+    ref: link
+  - text: Hardening GKE
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#workload_identity
+    ref: link
+  - ids:
+    - PR.AC-1
+    - PR.AC-4
+    - PR.AC-5
+    - PR.AC-6
+    - PR.AC-7
+    - PR.DS-2
+    - PR.PT-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-49
+  guid: 896263b0-7ac0-54db-a3c3-620c97edfd50
+  platform: gcp
+  title: GKE Node pools should use dedicated GCP ServiceAccounts
+  description: By default, GKE associates the "default" compute service account to
+    GKE worker nodes, and it is automatically granted the "Project Editor" IAM Role.  To
+    avoid using an inherently shared service account with over-provisioned permissions,
+    create a dedicated service account for each GKE cluster in each project and grant
+    it only the minimal IAM permissions needed.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.nodePools[].config.serviceAccount | test("-compute@developer.gserviceaccount.com") | not) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Create a dedicated GCP service account for each cluster in each project. Create a custom IAM Role with the "monitoring.viewer", "monitoring.metricWriter", and "logging.logWriter" permissions, and associate that with the dedicated GCP service account.  Ensure the OAuth Scopes attached to the nodes are:
+
+    * https://www.googleapis.com/auth/devstorage.read_only
+    * https://www.googleapis.com/auth/logging.write
+    * https://www.googleapis.com/auth/monitoring
+    * https://www.googleapis.com/auth/servicecontrol
+    * https://www.googleapis.com/auth/service.management.readonly
+    * https://www.googleapis.com/auth/trace.append
+
+    Consideration: Changing the service account or the OAuth Scopes will result in a rolling redeployment of the Node Pool.
+  impact: 9
+  refs:
+  - text: GKE NodePool OAuth Scopes
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#use_least_privilege_sa
+    ref: link
+  - ids:
+    - PR.AC-1
+    - PR.AC-6
+    - PR.IP-1
+    - PR.PT-3
+    ref: csf
+  tags:
+  - dbc
+  - k8s-logging
+- name: dbc-50
+  guid: c0247bd6-3f66-5a6a-b867-817bff7dc370
+  platform: gcp
+  title: GKE Node pools should use Shielded GKE Nodes
+  description: Starting in GKE 1.13.6 and later, GKE Worker nodes can be provisioned
+    with a Virtual Trusted Platform Module (vTPM) that can be used to cryptographically
+    verify the integrity of the boot process and to securely distribute the bootstrapping
+    credentials used by the Kubelet to attach the node to the cluster on first boot.  Without
+    this feature, the Kubelet's bootstrapping credentials are available via the GCE
+    Metadata API, and that can be accessed by any Pod unless additional protections
+    are put in place.  These credentials can be leveraged to escalate to cluster-admin
+    in most situations.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.nodePools[].config.shieldedInstanceConfig.enableIntegrityMonitoring==true and .nodePools[].config.shieldedInstanceConfig.enableSecureBoot==true) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Modify the cluster node pool configuration to enable shielded nodes (--enable-shielded-nodes) and secure boot (--shielded-secure-boot).  This will remove the sensitive bootstrapping credentials from the GCE Metadata API and enable additional verification checks to ensure the worker nodes have not been compromised at a fundamental level.  Considerations: The nodes must be running the COS or COS_CONTAINERD operating system, and enabling this change will require a node pool rolling redeployment performed at the next maintenance window.
+  impact: 9
+  refs:
+  - text: GKE Hardening
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#shielded_nodes
+    ref: link
+  - text: GKE Shielded Nodes
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/shielded-gke-node
+    ref: link
+  - ids:
+    - PR.DS-6
+    - PR.DS-8
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-51
+  guid: 1b62d4fd-a5c1-5624-9067-e45c3261c24c
+  platform: gcp
+  title: Production GKE Clusters should have a highly-available control plane
+  description: By default, GKE creates a "zonal" cluster.  That is, a cluster where
+    the single control plane GCE instance is deployed in one GCP availability zone.  GKE
+    clusters can also be configured as "regional" clusters in which three control
+    plane GCE instances can be deployed evenly across three availability zones at
+    no direct, additional cost.  Having three control plane instances insulates from
+    a single control plane instance failure and allows for zero-downtime API server
+    upgrades.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.location | test("^[a-z]+-[a-z0-9]+$")) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    For all production GKE clusters, configure the "location" as the region name instead of the zone name.  This requires rebuilding the cluster if it is already deployed as a zonal cluster.
+  impact: 9
+  refs:
+  - text: GKE Regional Clusters
+    url: https://cloud.google.com/kubernetes-engine/docs/concepts/regional-clusters
+    ref: link
+  - ids:
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+  - k8s-logging
+- name: dbc-52
+  guid: 03cf095b-e748-59e1-b596-777da1ba23c3
+  platform: gcp
+  title: GKE Clusters should use a Private Cluster Endpoint/IP
+  description: By default, GKE creates clusters with a public IP address on the control
+    plane without any network restriction on source IP ranges that can access it.  Even
+    though the access controls protecting the API server require authentication and
+    authorization, the API server is open to denial-of-service attacks, being probed
+    by bots/scanners inflating Stackdriver logs, and direct exploitation should a
+    Kubernetes API Server vulnerability be discovered.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.privateClusterConfig.enablePrivateEndpoint==true) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Consider rebuilding GKE clusters with the "private master endpoint" configuration to ensure the API server is not assigned a routable public IP address.  Additional considerations:
+
+    * Converting a public to a private GKE cluster requires rebuilding it.
+    * Use a dedicated /28 subnet for the control plane IP space that does not overlap anywhere and is not part of 172.17.0.0/16.
+    * Private control planes leverage VPC peering and count toward VPC peering quota.
+    * Modifications to the VPC peering or firewall rules from the control plane to the worker nodes can break the cluster.
+  impact: 9
+  refs:
+  - text: GKE Private Clusters
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-5
+    - PR.PT-3
+    - PR.PT-4
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-53
+  guid: 0e680f8d-95d8-5fcb-937e-9891dd11fe2e
+  platform: gcp
+  title: Production GKE Cluster NodePools should be spread across multiple availability
+    zones
+  description: By default, GKE creates a "zonal" cluster.  That is, a cluster where
+    the single control plane GCE instance is deployed in one GCP availability zone
+    and the worker GCE instances are deployed as a node pool in that same availability
+    zone.  This optimizes for cost and simplicity at the expense of redundancy and
+    protection against a zone outage.  If the control plane is set to "regional",
+    then the worker GCE instances are deployed evenly across the three availability
+    zones with instance groups per zone.  Setting the node pool instance count to
+    "1" on a regional cluster will create one GCE instance in each of the three zones
+    for a total of three worker nodes.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.locations | length >= 3) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    For all production GKE clusters, configure the "location" as the region name instead of the zone name.  This requires rebuilding the cluster if it is already deployed as a zonal cluster.  The worker nodes will automatically be spread evenly across all three availability zones.
+
+    Consideration: as traffic goes from node to node over zone boundaries, additional network costs will be incurred.
+  impact: 5
+  refs:
+  - text: GKE Regional Clusters
+    url: https://cloud.google.com/kubernetes-engine/docs/concepts/regional-clusters
+    ref: link
+  - text: GKE Network Pricing
+    url: https://cloud.google.com/compute/network-pricing
+    ref: link
+  - ids:
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-54
+  guid: ed4eb845-f04a-5774-986b-112d4a468704
+  platform: k8s
+  title: GKE Maintenance Window should be explicitly set
+  description: The GKE service performs maintenance functions on the cluster control
+    plane and workers automatically, and the default configuration is for the time
+    to be chosen by the service.  However, an organization will often want to configure
+    that time window to fall during hours when traffic levels are lowest, batch processing
+    is not occurring, or when operations teams are available to troubleshoot application
+    issues.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.maintenancePolicy.window | null | not) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure either a "simple" maintenance window of 4 hours (UTC) per day or a more complex maintenance window with rules to define a more granular schedule.  Consideration: The policy must allow at least 24 hours of maintenance availability in a 14-day rolling window. Only contiguous availability windows of at least four hours are considered.
+  impact: 2
+  refs:
+  - text: GKE Maintenance Windows
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/maintenance-windows-and-exclusions
+    ref: link
+  - ids:
+    - PR.MA-1
+    - ID.RA-4
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-55
+  guid: 54c8a422-1076-5507-afbc-1baf12e5bafc
+  platform: gcp
+  title: GKE Intranode Visibility should be enabled
+  description: When enabling VPC Flow Logs on a VPC where GKE clusters are running,
+    traffic that does not exit the node is not captured.  That is, traffic between
+    two pods on the same node do not exit the host's network and therefore are omitted
+    from VPC Flow Logging.  Enabling Intranode Visibility allows this traffic to be
+    recorded in the VPC Flow Logs for analysis and diagnosis.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.networkConfig.enableIntraNodeVisibility==true) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure Intranode Visibility on GKE Clusters running in VPCs with Flow logging enabled.  Considerations: VPC Flow logs may increase in size and contribute to additional cost.
+  impact: 2
+  refs:
+  - text: GKE Intranode Visibility
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/intranode-visibility
+    ref: link
+  - ids:
+    - DE.AE-1
+    - DE.AE-3
+    - DE.CM-1
+    - DE.CM-7
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-56
+  guid: be0d8437-d539-53fc-b017-0c5e92b00050
+  platform: gcp
+  title: GKE Logs should be sent to Stackdriver
+  description: By default, GKE enables a Stackdriver log export managed add-on capability
+    that ships all Host OS, Kubernetes components, and container logs to the Stackdriver
+    endpoint in the current project.  This provides a detailed record of nearly all
+    activities in the cluster and nodes to support troubleshooting and auditing functions.  Even
+    if a third party logging solution is implemented to capture and ship logs, it's
+    recommended that this add-on is enabled to ensure all Host OS and Kubernetes component
+    logs are captured off-cluster.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.loggingService=="logging.googleapis.com/kubernetes") | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure the Kubernetes Engine Monitoring for "System and workload logging and monitoring" via the console or by way of the `--enable-stackdriver-kubernetes` option to gcloud on all GKE clusters. Existing clusters can have this feature enabled in-place with no downtime.
+  impact: 9
+  refs:
+  - text: Kubernetes Engine Monitoring
+    url: https://cloud.google.com/monitoring/kubernetes-engine/installing
+    ref: link
+  - ids:
+    - DE.AE-1
+    - DE.AE-2
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-57
+  guid: 39990107-d55c-5487-b87f-bbfe4d19bfd2
+  platform: gcp
+  title: GKE Metrics should be sent to Stackdriver
+  description: By default, GKE enables a Stackdriver metrics export managed add-on
+    capability that ships all Host OS, Kubernetes components, and container metrics
+    to the Stackdriver metrics endpoint in the current project.  This provides a detailed
+    record of nearly all performance metrics in the cluster and nodes to support troubleshooting
+    and auditing functions.  Even if a third party metrics solution is implemented,
+    it's recommended that this add-on is enabled to ensure all Host OS and Kubernetes
+    component metrics are captured off-cluster.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.monitoringService=="monitoring.googleapis.com/kubernetes") | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure the Kubernetes Engine Monitoring for "System and workload logging and monitoring" via the console or by way of the `--enable-stackdriver-kubernetes` option to gcloud on all GKE clusters. Existing clusters can have this feature enabled in-place with no downtime.
+  impact: 6
+  refs:
+  - text: Kubernetes Engine Monitoring
+    url: https://cloud.google.com/monitoring/kubernetes-engine/installing
+    ref: link
+  - ids:
+    - DE.AE-1
+    - DE.AE-2
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-58
+  guid: 15d42207-9457-5b63-acf8-186414fa05bb
+  platform: gcp
+  title: GKE Node Pools should use the COS or COS_CONTAINERD Operating System
+  description: GKE Nodes can leverage either Container-Optimized OS or Ubuntu-based
+    operating system images.  Unless there is a very specific use-case that a Container-Optimized
+    OS image cannot support such as installed certain drivers and/or kernel modules,
+    Ubuntu nodes are not recommended.  Container-Optimized OS is a fully hardened
+    operating system designed specifically to run containerized workloads with a high
+    degree of security, and it receives automatic updates from Google.  The track
+    record for security issues that affect Ubuntu nodes in GKE that did not affect
+    COS nodes is also important to consider.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.nodePools[].config.imageType | test("^COS")) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure your GKE Node Pools to leverage either the COS or COS_CONTAINERD image type.  The COS image leverages Docker, and the COS_CONTAINERD image implements only containerd and does not use the commonly known Docker socket at `/var/run/docker.sock` which allows applications that can access that socket to effectively be "root" on the host.  If your workloads do not require the ability to mount the docker socket for activities such as image building in-cluster or certain security features, COS_CONTAINERD offers an even smaller attack surface than COS.  Considerations: changing the image type recreates the nodes in the node pool.
+  impact: 5
+  refs:
+  - text: GKE Node Images
+    url: https://cloud.google.com/kubernetes-engine/docs/concepts/node-images
+    ref: link
+  - ids:
+    - PR.IP-1
+    - PR.PT-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-59
+  guid: '0208f5cf-e54b-5a4b-a90a-18f3db82d37e'
+  platform: gcp
+  title: GCP Projects should have only one GKE Cluster
+  description: GCP Projects are typically the most granular point for IAM permissions
+    to be declared, and the way GKE clusters expect to leverage the project's resources
+    makes isolating multiple clusters in the same project very difficult.  Assignment
+    of IAM Roles related to instance and cluster administration is typically only
+    available at the Project level, so permissions apply to all clusters.  In addition,
+    logs and metrics sent from GKE clusters go to the Project's shared Stackdriver
+    location, and IAM Roles for logging and monitoring grant access for all logs and
+    metrics for all clusters and applications--making it extremely difficult to prevent
+    users of one cluster from seeing all logs from all applications and all namespaces.  Finally,
+    in some cases of misconfiguration, a compromise of a GKE cluster can lead to compromise
+    of all clusters in the same Project.
+  validation: |2-
+
+    For each GCP Project, run `gcloud container clusters list` and ensure only one cluster is listed per project.
+  remediation: |2-
+
+    Organize GCP Projects such that each GKE Cluster has a designated Project with no other resources co-located unless they directly support the cluster.  Understand that certain IAM Roles such as "Compute Admin" equate to "Kubernetes Engine Administrator" because access to the GCE Instances that make up the GKE worker nodes as "root" means those users can also access all data, secrets, and applications inside Kubernetes.  Therefore, also review the IAM permissions in the Project to ensure unintended permission "cross-over" is minimized.
+  impact: 2
+  refs:
+  - text: IAM Concepts
+    url: https://cloud.google.com/iam/docs/concepts
+    ref: link
+  - text: GCP Enterprise Best Practices
+    url: https://cloud.google.com/docs/enterprise/best-practices-for-enterprise-organizations
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.AC-5
+    - PR.DS-7
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-60
+  guid: 3f80d3c0-7172-5d22-9dc2-a46b12dc6919
+  platform: gcp
+  title: GKE Node pools should AutoRepair
+  description: GKE Nodes have several health checks that continuously run to validate
+    that the worker node is running and capable of handling workloads.  If an issue
+    occurs that the system cannot auto-resolve, the automatic repair feature will
+    handle evicting workloads from the node and reprovisioning the underlying GCE
+    instance for you.  This is highly recommended for reducing administrator load
+    and maintaining healthy clusters.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.nodePools[].management.autoRepair==true) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure the node pools to enable AutoRepair during node pool creation or to existing clusters with the `--enable-autorepair` feature set.
+  impact: 5
+  refs:
+  - text: GKE Node Auto Repair
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-repair
+    ref: link
+  - ids:
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-61
+  guid: 2a0af119-6735-501b-964a-30efbcd4a153
+  platform: gcp
+  title: GKE Node pools should AutoUpgrade
+  description: The GKE service will automatically maintain the version and patch release
+    of the control plane nodes, but the Node Pools are left to the user to keep upgraded
+    by default.  This can result in situations where security issues are patched on
+    the control plane but not on the nodes, and performing node upgrades is an activity
+    that can consume a large amount of administrative time if performed manually across
+    many clusters and node pools.  If your workloads are properly configured to withstand
+    a single node failure, these maintenance activities can be performed during upgrade
+    windows without manual intervention or downtime.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.nodePools[].management.autoUpgrade==true) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure the node pools to enable AutoUpgrade during node pool creation or to existing clusters with the `--enable-autoupgrade` feature set.  It's strongly recommended to validate that all workloads can handle the upgrade process smoothly in a development cluster before enabling this setting in production.
+  impact: 2
+  refs:
+  - text: GKE Node Auto Upgrade
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/node-auto-upgrades
+    ref: link
+  - ids:
+    - PR.MA-1
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-62
+  guid: 4cef5a03-d6db-5fd8-92fe-453b24cdb3db
+  platform: gcp
+  title: GKE Node pools should use the minimum OAuth Scopes
+  description: |-
+    GKE Nodes are fundamentally GCE instances, and GCE instances with a Service Account attached have the permissions of the IAM Roles attached.  However, those permissions can be restricted even further by defining OAuth Scopes that explicitly list the APIs the OAuth Token generated for that Service Account are valid for.  For example, a GCE instance with an attached Service Account that is assigned the IAM Role of "Project Owner" but has only the "https://www.googleapis.com/auth/devstorage" OAuth Scope will only be able to interact with GCS Buckets.  However, if that OAuth Scope was set to "https://www.googleapis.com/auth/cloud-platform" (equivalent to "any/all APIs"), that instance would have the full privileges provided by "Project Owner".  By default, GKE Node Pools should only specify the following OAuth Scopes that provide the minimum access needed:
+
+    * https://www.googleapis.com/auth/devstorage.read_only
+    * https://www.googleapis.com/auth/logging.write
+    * https://www.googleapis.com/auth/monitoring
+    * https://www.googleapis.com/auth/service.management.readonly
+    * https://www.googleapis.com/auth/servicecontrol
+    * https://www.googleapis.com/auth/trace.append
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.nodePools[].config.oauthScopes[] | test("cloud-platform") | not) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure GKE Node Pools to explicitly set only the minimum OAuth Scopes.  For pods/applications that were running on these nodes and leveraging the node's Service Account for access to GCP APIs, understand that access is shared by all pods unless Workload Identity is deployed.  To map GCP Service Accounts to individual Pods/Workloads, create GCP Service Accounts in the Project with the necessary permissions and leverage Workload Identity to attach those credentials directly.
+  impact: 5
+  refs:
+  - text: GKE NodePool OAuth Scopes
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster#use_least_privilege_sa
+    ref: link
+  - ids:
+    - PR.IP-1
+    - PR.AC-1
+    - PR.AC-6
+    ref: csf
+  tags:
+  - dbc
+  - k8s-logging
+- name: dbc-63
+  guid: 1dc51c31-05b3-5fe8-9b79-9d09c7a9db93
+  platform: gcp
+  title: GKE Subnet Alias ranges should be configured
+  description: In order to support private GKE Clusters, Alias IP ranges on the VPC
+    Subnets is required.  In addition to private clusters, Alias IP ranges simplify
+    the route tables in the VPC, reduce the number of "hops" traffic takes from load
+    balancers to Pods, and allows the GCE network interfaces to perform anti-spoofing
+    checks as IP forwarding is not required on the instance.  Finally, the separation
+    of VM IPs from Container IPs allows for native firewall rules to be configured
+    for pod traffic separately from VM traffic.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.ipAllocationPolicy.useIpAliases==true) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    During cluster creation, specify a VPC Subnet that supports Alias IP ranges and secondary ranges for Pods and Services.  This can only be done at cluster creation time.
+  impact: 5
+  refs:
+  - text: VPC Alias IPs
+    url: https://cloud.google.com/vpc/docs/alias-ip
+    ref: link
+  - text: VPC-Native GKE Clusters
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/alias-ips
+    ref: link
+  - ids:
+    - PR.AC-5
+    - PR.PT-4
+    - PR.PT-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-64
+  guid: 8aced34e-ed35-50d8-aaab-3bd7271bb6f7
+  platform: gcp
+  title: Legacy ABAC authorization in GKE
+  description: Role-Based Access Control has been the default authorization mechanism
+    in Kubernetes since version 1.6.  GKE still provides a legacy capability that
+    supports ABAC, but it should not be used.  It essentially provides "cluster admin"
+    access for any authenticated credential to the cluster and has no method for changing
+    this policy.  This is an extremely permissive setting that allows for full cluster
+    compromise should an attacker gain access to a single pod with a mounted Kubernetes
+    service account or a valid cluster credential.
+  validation: |2-
+
+    Run `gcloud container clusters describe <clustername> --format=json | jq -r 'select(.legacyAbac.enabled | not) | "(.name)"'` and ensure that the cluster's name is listed.
+  remediation: |2-
+
+    Configure the cluster without the `--enable-legacy-authorization` flag set.  If migrating an existing cluster from ABAC to RBAC by modifying this setting in-place, ensure that all the required RBAC RoleBindings and ClusterRoleBindings are present first.  This should be performed in a development environment before applying this process to production clusters.
+  impact: 9
+  refs:
+  - text: GKE Cluster Hardening
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/hardening-your-cluster
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.IP-1
+    ref: csf
+  tags:
+  - dbc
+  - k8s-logging
+- name: dbc-65
+  guid: 055adcff-8a12-503a-8056-fe418d714bbf
+  platform: gcp
+  title: CloudSQL Instances High-Availability
+  description: By default, CloudSQL instances are deployed as a single instance, and
+    this means an instance failure or availability-zone outage would take the database
+    offline.  Production applications should be relying on access to data stores that
+    can withstand these failure conditions where possible, and the CloudSQL service
+    offering provides a high-availability instance type that runs in multiple availability-zones
+    in the same region for this purpose.
+  validation: |2-
+
+    In each project, run `gcloud sql instances list --format=json | jq -r '.[] | select(.settings.availabilityType=="ZONAL") | "(.name) Type: (.settings.availabilityType)"'` and ensure no entries are listed as "ZONAL".
+  remediation: |2-
+
+    Create or update the CloudSQL instances used in production with the "REGIONAL" availability type instead of the default of "ZONAL". Existing instances can be modified to have these settings take effect, but it requires the instance to be restarted.
+  impact: 5
+  refs:
+  - text: CloudSQL MySQL High Availability
+    url: https://cloud.google.com/sql/docs/mysql/high-availability
+    ref: link
+  - text: CloudSQL PostgreSQL High Availability
+    url: https://cloud.google.com/sql/docs/postgres/high-availability
+    ref: link
+  - text: CloudSQL Sqlserver High Availability
+    url: https://cloud.google.com/sql/docs/sqlserver/high-availability
+    ref: link
+  - ids:
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-66
+  guid: 323aca0a-eab5-5ecc-8e58-ea66f6cb8103
+  platform: gcp
+  title: CloudSQL Instances maintenance windows
+  description: The CloudSQL service performs maintenance functions on the instances
+    automatically, and the default configuration is for the time to be chosen by the
+    service.  However, an organization will often want to configure that time window
+    to fall during hours when traffic levels are lowest, batch processing is not occurring,
+    or when operations teams are available to troubleshoot application issues.
+  validation: |2-
+
+    In each project, run `gcloud sql instances list --format=json | jq -r '.[] | select(.settings.maintenanceWindow.day==0 and .settings.maintenanceWindow.hour==0) | "(.name) Type: (.settings.maintenanceWindow.day) (.settings.maintenanceWindow.hour)"'` and ensure no entries are listed as "0 0".
+  remediation: |2-
+
+    Configure the maintenance preferences on the CloudSQL instance to a preferred window that has the days and hours when updates should occur, and select the order of update to be "Any", "Earlier", or "Later" to correspond to the timing of when the rolling updates should include this instance.  Typically, development instances should be set to "Earlier" and production instances set to "Later" to help validate upgrades and patches on less critical databases first.  Also, opt-in to email notifications for maintenance on the communications page at `https://console.cloud.google.com/user-preferences/communication`.
+  impact: 5
+  refs:
+  - text: CloudSQL MySQL Maintenance Windows
+    url: https://cloud.google.com/sql/docs/mysql/maintenance
+    ref: link
+  - text: CloudSQL PostgreSQL Maintenance Windows
+    url: https://cloud.google.com/sql/docs/postgres/maintenance
+    ref: link
+  - text: CloudSQL Sqlserver Maintenance Windows
+    url: https://cloud.google.com/sql/docs/sqlserver/maintenance
+    ref: link
+  - ids:
+    - PR.MA-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-67
+  guid: e8f23fba-c1ab-5c39-8a2b-faf957ded12c
+  platform: gcp
+  title: CloudSQL Instance automatic backups with point-in-time recovery
+  description: By default, CloudSQL instances have automatic backups with point-in-time
+    recovery enabled.  It's important that these settings are not disabled to ensure
+    that all databases can be restored to a known-good state should a security incident
+    occur.  For example, a SQL injection attack that results in the deletion or modification
+    of tables in the database.
+  validation: |2-
+
+    In each project, run `gcloud sql instances list --format=json | jq -r '.[] | select(.settings.backupConfiguration.enabled==false) | "(.name) Backups on: (.settings.backupConfiguration.enabled) and PITR on: (.settings.backupConfiguration.binaryLogEnabled)"'` and ensure no entries are listed.
+  remediation: |2-
+
+    Ensure all CloudSQL instances are configured with automatic backups during a desired window and point-in-time recovery is enabled.  Existing instances can be modified to have these settings take effect, but it requires the instance to be restarted.
+  impact: 9
+  refs:
+  - text: CloudSQL MySQL Backups
+    url: https://cloud.google.com/sql/docs/mysql/backup-recovery/backups
+    ref: link
+  - text: CloudSQL PostgreSQL Backups
+    url: https://cloud.google.com/sql/docs/postgres/backup-recovery/backups
+    ref: link
+  - text: CloudSQL Sqlserver Backups
+    url: https://cloud.google.com/sql/docs/sqlserver/backup-recovery/backups
+    ref: link
+  - ids:
+    - PR.IP-4
+    - PR.PT-5
+    - PR.IP-10
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-68
+  guid: 9bde9d05-e5e0-545e-bcea-a722d5e0d511
+  platform: k8s
+  title: Public nodes via SSH
+  description: The Kubernetes Worker nodes are exposed publicly via SSH.  This provides
+    convenient remote administrative access, but it affords only a single layer of
+    defense in front of the Kubernetes cluster and all applications and data inside.
+    Having "root" access to one Kubernetes cluster node is very often sufficient to
+    become "cluster-admin" in the cluster which grants full control of the cluster
+    and the underlying nodes.
+  validation: |2-
+
+    Ensure that all Kubernetes worker nodes are not available on TCP/22 from any IP address using a simple port probe. e.g. `nc -vz ip.of.the.worker 22`.
+  remediation: |2-
+
+    Configure the firewall rules on the Kubernetes worker systems to be restricted to a known set of IP ranges for SSH access.  In environments with bastion hosts or VPNs, their internal subnet range or security groups are commonly used.
+  impact: 5
+  refs:
+  - text: Kubernetes Security Best Practices
+    url: https://kubernetes.io/blog/2016/08/security-best-practices-kubernetes-deployment/
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-5
+    - PR.MA-2
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-69
+  guid: 68066452-dd6e-5468-a50d-f70ef5bb4adc
+  platform: k8s
+  title: Secrets in ConfigMaps
+  description: Kubernetes ConfigMaps can be used to store configuration key/value
+    pairs and files to be dynamically mounted into pods at runtime, and those can
+    often contain sensitive data like API keys and other credentials.  However, this
+    exposes them to users and other workloads that interact with the API server who
+    have the RBAC permission "get configmaps" in the cluster which is commonly a much
+    wider audience than desired.
+  validation: |2-
+
+    Run `kubectl get configmaps --all-namespaces -o yaml > cfgmaps.yml` and use a tool like TruffleHog to review the data for potentially sensitive items.
+  remediation: |2-
+
+    Ensure that no secret material is directly defined in ConfigMaps.  Instead, store them in a Secret and use the secretKeyRef mechanism to mount them in as files inside the container at runtime.
+  impact: 9
+  refs:
+  - text: Kubernetes ConfigMaps
+    url: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/
+    ref: link
+  - text: TruffleHog
+    url: https://github.com/dxa4481/truffleHog
+    ref: link
+  - ids:
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-70
+  guid: 0b473d00-130f-5be6-a6ff-3ef74e8ee55e
+  platform: k8s
+  title: Ensure resource specification enforcement is installed
+  description: By default in Kubernetes, the ability to create resources is only controlled
+    via RBAC authorization.  If a user has the ability to create or modify a Pod,
+    they are able to create or modify any setting during its creation.  This can include
+    settings that allow it to run as root/privileged, mount the host filesystem, to
+    add Linux system capabilities, to attach to the host's network and process namespace,
+    and more.  All of these settings are potential pathways for escaping to the underlying
+    nodes and compromising the entire cluster.  To prevent users from creating resources
+    with undesired configurations, an administrator can deploy an "Admission Controller"
+    such as PodSecurityPolicy or a "Dynamic Admission Control Webhook" to ask a service
+    like Gatekeeper.  If either determines the workload to not meet policy, it can
+    prevent the workload from running.
+  validation: |2-
+
+    Run `kubectl get psps --all-namespaces` to identify `PodSecurityPolicy` resources in place, or run `kubectl get deployments --all-namespaces` and look for `gatekeeper` or `k-rail` deployments to be present.
+  remediation: |2-
+
+    While PodSecurityPolicy is a native admission controller that can protect clusters from users running insecure pod workloads, it is still in Kubernetes beta, and it is limited only to Pod resources.  The Gatekeeper project, which uses Open Policy Agent as its policy engine, can be deployed more easily, can review any resource in the cluster if desired, and allows for full customization of what to look for.  Deploying either OPA/Gatekeeper or K-Rail is therefore the recommended solution for those that do not already have PodSecurityPolicy implemented.
+  impact: 9
+  refs:
+  - text: Kubernetes PodSecurityPolicy
+    url: https://kubernetes.io/docs/concepts/policy/pod-security-policy/
+    ref: link
+  - text: OPA/Gatekeeper
+    url: https://github.com/open-policy-agent/gatekeeper
+    ref: link
+  - text: K-rail
+    url: https://github.com/cruise-automation/k-rail
+    ref: link
+  - text: GKE PodSecurityPolicy
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/pod-security-policies
+    ref: link
+  - text: EKS PodSecurityPolicy
+    url: https://docs.aws.amazon.com/eks/latest/userguide/pod-security-policy.html
+    ref: link
+  - text: AKS PodSecurityPolicy
+    url: https://docs.microsoft.com/en-us/azure/aks/use-pod-security-policies
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.PT-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-71
+  guid: 261a1a40-e362-5bbc-ad48-cc59419ac436
+  platform: k8s
+  title: Validate NetworkPolicies are defined in each namespace
+  description: By default in Kubernetes, all Pods can communicate with each other
+    by IP and egress to any subnet (including the Internet) unless routing or firewalls
+    are added to prevent that traffic.  This presents ample opportunity for lateral
+    movement from the perspective of a compromised workload. One of the best ways
+    to reduce the scope of that movement is to deploy NetworkPolicy resources that
+    define firewall rules for pod-to-pod traffic.  All pod-to-pod and egress traffic
+    is allowed, and this means that pods that handle customer data can talk directly
+    to core Kubernetes system pods, the Internet, and other systems inside the VPC
+    if the security groups allow.
+  validation: |2-
+
+    Run `kubectl get networkpolicies --all-namespaces` and ensure each namespace has the desired policies defined.
+  remediation: |2-
+
+    Implement NetworkPolicy rules on the kube-system namespace to prevent all inbound traffic from non-kube-system namespaces to all workloads in the kube-system namespace with the exception of UDP/TCP 53 for DNS lookups.  Next, identify the network traffic patterns of externally exposed workloads and implement NetworkPolicies that restrict their traffic to the "next hop" service or ranges.  Finally, perform the same pattern to all internal workloads.  Considerations: Implementing NetworkPolicies should be performed in a development environment to fully understand implications and to avoid introducing an outage in production.
+  impact: 9
+  refs:
+  - text: Kubernetes Network Policies
+    url: https://kubernetes.io/docs/concepts/services-networking/network-policies/
+    ref: link
+  - text: NetworkPolicy Recipes
+    url: https://github.com/ahmetb/kubernetes-network-policy-recipes
+    ref: link
+  - ids:
+    - PR.AC-5
+    ref: csf
+  tags:
+  - dbc
+  - k8s-logging
+- name: dbc-72
+  guid: 1666b935-62e1-5594-a7a6-ab0395b90ed4
+  platform: k8s
+  title: ServiceAccount mounted unnecessarily
+  description: By default, the "default" Service Account in each namespace will be
+    mounted inside every container in every Pod unless explicitly configured to use
+    another Service Account or to not be mounted.  The Service Account token that
+    is mounted for convenience inside the pod in case the container workload needs
+    a valid credential to communicate with the Kubernetes API.  However, most workloads
+    do not require this access, and so they should be explicitly configured not to
+    mount it to minimize exposure to these credentials.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -ojson | jq -r '.items[] | .metadata.namespace +"/"+ .metadata.name +": "+ .spec.serviceAccount'` and review the listing for pods that mount service accounts where API access is not required.  Typically, workloads that mount the "default" service account are likely candidates as pods should be mounting dedicated service accounts if needed.
+  remediation: |2-
+
+    For every non-kube-system namespace, modify all Service Accounts to opt out of automounting API credentials by setting automountServiceAccountToken: false.  Ensure RBAC bindings to all "default" Service Accounts are removed, and use dedicated Service Accounts for each workload that needs API Access with dedicated RBAC Role/ClusterRoleBindings.
+  impact: 5
+  refs:
+  - text: Kubernetes ServiceAccounts
+    url: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+    ref: link
+  - ids:
+    - PR.AC-1
+    - PR.AC-4
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-73
+  guid: 9feaff35-13bb-5856-aac9-7cd93cae3beb
+  platform: k8s
+  title: Orphaned Persistent Volume Claims found
+  description: Multiple persistent disk volume claims were found to be in the "Released"
+    state, and they indicate a potential misconfiguration in a deployment or statefulset
+    leaving them behind.
+  validation: |2-
+
+    Run `kubectl get pvc --all-namespaces` and look for items in the "Released" state.  Ideally, all should be in use.
+  remediation: |2-
+
+    Ensure the workloads that created and abandoned the affected persistent volume claims correctly clean up after themselves and delete the persistent volume claims if they are no longer needed.
+  impact: 2
+  refs:
+  - text: Kubernetes Persistent Volumes
+    url: https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+    ref: link
+  - ids:
+    - PR.IP-6
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-74
+  guid: 329030a1-3e54-50be-99c1-ff580fce5595
+  platform: k8s
+  title: Inconsistent use of CPU/RAM requests/limits
+  description: By default in Kubernetes, workloads that do not specify how many resources
+    they expect to use and/or a limit to their resources receive the default settings.  The
+    default settings depend on a LimitRange resource in the namespace, and the default
+    is to request 1/10th of a CPU core (100 millicores or "100m"), no request for
+    RAM, and no CPU or RAM limits.  This means that every pod is able to burst up
+    to the total physical resources of the node, and the scheduler will tightly pack
+    pods on a node.  This configuration is typically no problem at low or average
+    load, so it might take a while to surface and cause resource constraint problems.  But
+    when those resources are exhausted, the node becomes "Unready" and all workloads
+    are evicted.  When they land on the other nodes that are already heavily loaded,
+    it overloads them until they evict all pods.  This can cause a cascading resource
+    failure outage.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -ojson | jq -r '.items[] | .metadata.namespace as $ns | .metadata.name as $name| .spec.containers[] | $ns +"/"+ $name +"["+ .name +"]: "+ .resources.requests.cpu +","+ .resources.limits.cpu +","+ .resources.requests.memory +","+ .resources.limits.memory'` to get a comma separated listing of "CPU Req, CPU Limits, Memory Reqs, Memory Limits" for each container in every pod.  All containers should specify all four values explicitly.
+  remediation: |2-
+
+    For every deployment in the cluster, ensure it has the proper settings for CPU and Memory "Requests" and CPU and Memory "Limits".  The "Requests" settings are vital for the scheduler to correctly place workloads on nodes without going over actual capacity.  The "Limits" settings are vital for the node to ensure the workload does not consume all physical resources on the node.  "Requests" should be set at 10% above average consumption and "Limits" should be 10-20% higher than maximum consumption.  Use "kubectl top node" and "kubectl top pods --all-namespaces" to see actual usage for running workloads.
+  impact: 9
+  refs:
+  - text: Kubernetes Resourcing
+    url: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/
+    ref: link
+  - text: Kubectl Cheat Sheet
+    url: https://kubernetes.io/docs/reference/kubectl/cheatsheet/#interacting-with-running-pods
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-75
+  guid: d8276fe4-4044-5077-be5c-d95fc59f6e14
+  platform: k8s
+  title: Ensure all pods reference container images from known sources
+  description: By default, Kubernetes allows users with the ability to create pods
+    to reference any container image path, including public registries like DockerHub.  This
+    allows developers to share and use pre-made container images easily, but it enables
+    unvalidated and untrusted code to run inside your cluster with potential access
+    to mounted secrets and service account tokens.  Container images should be verified
+    to be conformant to security standards before being run, and the first step to
+    this is to validate that all container images are being pulled from a known set
+    of registries.  This helps development teams and security teams work from the
+    same base location for running and validating images.
+  validation: |2-
+
+    Run `kubectl get po -A -ojsonpath='{..image}' | kubectl get pods --all-namespaces -o jsonpath='{..image}' |tr -s '[[:space:]]' '
+    ' | sort | uniq -c ` and ensure all images are sourced from the official Kubernetes or cloud provider registries and your own internal container registries.
+  remediation: |2-
+
+    Review all deployments and pod specifications, and find any that reference non-approved container registries.  Create a dedicated container registry in your environment, validate those container images meet your security policies, and store/mirror them to that dedicated container registry/registries.  Consider enforcing image sources early with a validation step in the CI/CD pipeline and enforcing the policy with OPA/Gatekeeper or other policy-based admission controller inside the cluster.
+  impact: 9
+  refs:
+  - text: Kubectl List Images
+    url: https://kubernetes.io/docs/tasks/access-application-cluster/list-all-running-container-images/
+    ref: link
+  - text: DockerHub Library
+    url: https://hub.docker.com/u/library
+    ref: link
+  - text: Google Container Registry
+    url: https://cloud.google.com/container-registry
+    ref: link
+  - ids:
+    - PR.DS-6
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-76
+  guid: 51a10d61-4108-5f95-9db4-c172cc4d03a7
+  platform: k8s
+  title: Containers are not built using centralized, automated CI pipeline
+  description: Currently, the custom containers are built manually from an administrator's
+    workstation and not via a centralized, automated process.  The key concern is
+    reproducibility.  Without centralizing the source code and the code and configuration
+    to build images, only one person with a specific laptop can build and change container
+    images confidently.
+  validation: |2-
+
+    For each running container image, ensure that there is a source control repository where it holds the instructions for how to build the image and that it leverages a CI or automated build system to generate a new image artifact.  Review the build history to ensure there are recent passing builds.
+  remediation: |2-
+
+    Implement a CI system or leverage native container build services within the cloud provider to build newly tagged container images and push them to a private registry.  This ensures repeatability of the process by any member of the team as well as a shared history for build success and failures are present.
+  impact: 9
+  refs:
+  - text: GCP Cloud Build
+    url: https://cloud.google.com/cloud-build/docs/
+    ref: link
+  - text: Google Container Registry
+    url: https://cloud.google.com/container-registry/docs/
+    ref: link
+  - ids:
+    - ID.SC-4
+    - ID.SC-2
+    - PR.IP-2
+    - PR.IP-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-77
+  guid: df3d2443-7fdc-5024-a970-135a7e32d438
+  platform: k8s
+  title: Ensure continuous container scanning and redeployment
+  description: When deploying container images into a Kubernetes cluster, they should
+    first be reviewed to meet an acceptable risk profile.  This is typically done
+    using automated container vulnerability scans at build time.  However, container
+    deployments with infrequent needs for changes will mean that they can exist for
+    long periods without being rebuilt in order to receive security fixes.  As the
+    number of deployments grows, this process must be automated or it will be quickly
+    beyond a human's ability to manage.
+  validation: |2-
+
+    Ensure a solution is implemented, validate that it is deployed in all clusters if needed, and verify that all container registries and images are being scanned daily (or more frequently) for new vulnerabilities.  If possible, validate that a policy is in place to alert administrators of severe vulnerabilities and even block them from being deployed.
+  remediation: |2-
+
+    Deploy either a cloud provider solution or leverage a third party tool that continuously scans images in use against all current vulnerabilities.  Configure a security policy such that all high/critical vulnerabilities alert the appropriate teams.  If possible, configure the tooling to automatically trigger a new container build.
+  impact: 9
+  refs:
+  - text: Kritis
+    url: https://github.com/grafeas/kritis
+    ref: link
+  - text: Grafeas
+    url: https://github.com/grafeas/kritis/blob/master/docs/tutorial.md
+    ref: link
+  - text: Sysdig
+    url: https://sysdig.com
+    ref: link
+  - text: Twistlock
+    url: https://twistlock.com
+    ref: link
+  - text: Aqua Security
+    url: https://aquasec.com
+    ref: link
+  - text: GKE Binary Authorization
+    url: https://cloud.google.com/binary-authorization/docs/setting-up
+    ref: link
+  - text: GCP Container Analysis
+    url: https://cloud.google.com/container-registry/docs/container-analysis
+    ref: link
+  - ids:
+    - ID.SC-4
+    - ID.SC-2
+    - PR.DS-6
+    - PR.MA-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-78
+  guid: 86d03ac3-702b-567a-9407-7bd74e633bc3
+  platform: k8s
+  title: Cluster workloads mount the Docker socket directly
+  description: In Kubernetes clusters running on nodes that leverage Docker for running
+    containers, providing access to the /var/run/docker.sock is equivalent to granting
+    that container 'root' on the underlying host as it allows for running containers
+    on the node with any permission.  It should not be mounted inside a container
+    as it bridges two layers in the infrastructure that should be kept independent
+    from each other.  With the socket mounted, cluster users do not have to have 'cluster
+    admin' to be able to get 'root' on the nodes.  Instead, they only need the 'exec
+    pod' permission in this namespace to be able to exec commands inside this container
+    to become 'root' on the nodes and compromise the cluster.  In addition, many Kubernetes
+    distributions are moving to ContainerD which does not have a listening Docker
+    socket and therefore a smaller attack surface.  In GKE, this workload cannot operate
+    on the newer 'COS_CONTAINERD' image types.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -ojson | jq -r '.items[] | .metadata.namespace as $ns | .metadata.name as $name| .spec.volumes[] |select(.hostPath.path|tostring|test(".sock")) | $ns +"/"+ $name +"["+ .name +"]: "+ .hostPath.path'` and validate that no pods are returned that mount "/var/run/docker.sock" or similar.
+  remediation: |2-
+
+    Consider modifying the workload or choosing another workload that does similar functionality but does not mount the Docker socket.  This will remove the attack surface added by this workload and also enable the migration to the COS_CONTAINERD image type when it becomes the default.
+  impact: 9
+  refs:
+  - text: GKE Containerd
+    url: https://cloud.google.com/kubernetes-engine/docs/concepts/using-containerd
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.PT-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-79
+  guid: 7ff475ce-ef30-5d68-b04a-e96be923090a
+  platform: k8s
+  title: Ensure privileged containers are only in system namespaces
+  description: Container run in Kubernetes that require deep access to the underlying
+    worker nodes are often run in a `privileged` security context.  Common examples
+    are daemonsets that implement functionality for container and host logging or
+    metrics export, driver installation, and container and host security detection.  Privileged
+    containers are essentially "root" on the underlying node, and they should therefore
+    be kept in "system" namespaces to allow for proper RBAC and admission control
+    policies to be created to protect them.  If they are in namespaces with other
+    normal application workloads, it becomes difficult to ensure proper separation
+    and prevent host escapes.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -ojson | jq -r '.items[] | "(.metadata.namespace)/(.metadata.name): (.spec.containers[].securityContext.privileged)"' | grep -v "null$"` and validate that all privileged pods are in namespaces named and dedicated for system workloads.
+  remediation: |2-
+
+    Either leverage the `kube-system` namespace or deploy privileged daemonsets to dedicated namespaces only used for these purposes.  Restrict RBAC permissions and admission control policies to only permit the required admins access to operate and exec into them for troubleshooting.
+  impact: 5
+  refs:
+  - text: Kubernetes port-forward
+    url: https://kubernetes.io/docs/tasks/access-application-cluster/port-forward-access-application-cluster/
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.IP-1
+    - PR.PT-3
+    - PR.AT-2
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-80
+  guid: 3957d9b0-4a99-5b41-9520-2b7228e9d343
+  platform: k8s
+  title: Container images do not refer to the exact tag or commit
+  description: When referring to a container image stored in a registry, it's common
+    practice for the owner of the image to tag the most recent image with a semver
+    tag and also the `latest` tag when uploading it.  This is a convenenience for
+    users wanting to work with the most up-to-date image, but it presents an opportunity
+    for inconsistencies inside Kubernetes.  If a deployment with more than one replica
+    references an image with the tag `latest`, the underlying node will pull and run
+    that image at that time.  If the image in the registry is updated with a new `latest`
+    image and the deployment scales the number of replicas such that a new worker
+    node is to run it, that node will potentially pull the newer `latest` image. This
+    could result in multiple pods in a single deployment running a different image
+    with different functionality or even cause a difficult to trace outage.  During
+    the image build process, it's common practice to tag the image with shortened
+    hash from the git commit that triggered the image build to help with tracing an
+    image directly back to the code and process that created it and to satisfy certain
+    auditing requirements.
+  validation: |2-
+
+    Run `kubectl get po -A -ojsonpath='{..image}' | kubectl get pods --all-namespaces -o jsonpath='{..image}' |tr -s '[[:space:]]' '
+    ' | sort | uniq -c | grep latest` and ensure no images reference the `latest` tag.
+  remediation: |2-
+
+    Review all deployments and pod specifications, and modify any that reference the `latest` tag to use a specific version tag or even the `sha256` hash.  Consider enforcing this practice early with a validation step in the CI/CD pipeline and enforcing the policy with OPA/Gatekeeper or other policy-based admission controller inside the cluster.
+  impact: 5
+  refs:
+  - text: Container Image Tagging
+    url: https://docs.docker.com/engine/reference/commandline/build/#tag-an-image--t
+    ref: link
+  - text: Kubectl List Images
+    url: https://kubernetes.io/docs/tasks/access-application-cluster/list-all-running-container-images/
+    ref: link
+  - text: Kubernetes Configuration Best Practices
+    url: https://kubernetes.io/docs/concepts/configuration/overview/#container-images
+    ref: link
+  - ids:
+    - PR.DS-6
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-81
+  guid: 640b3852-f894-5537-b656-6bb5501f9602
+  platform: k8s
+  title: Inconsistent use of Liveness and Readiness probes on pods listening on a
+    port
+  description: By default, pods that listen on ports do not have Liveness and Readiness
+    probes configured.  These are both required for pods to be able to support zero-downtime
+    deployment upgrades for services that handle continuous traffic.  Readiness probes
+    are network or command checks that have to succeed before the pod goes to the
+    'Ready' state.  This means traffic routed to them by a Service will not occur
+    until they are 'ready' to handle that traffic successfully.  Liveness probes are
+    network or command checks that have to succeed on a routine basis for the pod
+    to remain in the 'Ready' state.  If the checks fail, the pod will be removed from
+    the 'Ready' state, and the service will know not to route traffic to that pod.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -ojson | jq -r '.items[] | .metadata.namespace as $ns | .metadata.name as $name| .spec.containers[] | select(.ports) | $ns +"/"+ $name + "["+ .name +"]: "+ (.readinessProbe.successThreshold|tostring) +" "+ (.livenessProbe.successThreshold|tostring)'` and ensure every container that exposes ports also has non-zero numbers representing the readiness and liveness probes.
+  remediation: |2-
+
+    All pods that listen on ports behind services should have Liveness and Readiness probes configured in their pod specification to behave properly and reduce network-related errors.
+  impact: 5
+  refs:
+  - text: Liveness and Readiness Probes
+    url: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-82
+  guid: 39a7bf62-d40d-5b79-93e3-3abc0512d3a3
+  platform: k8s
+  title: AppArmor profiles are not implemented
+  description: AppArmor is a Linux kernel security module that supplements the standard
+    Linux user and group based permissions to confine programs to a limited set of
+    resources. AppArmor can be configured for any application to reduce its potential
+    attack surface and provide greater in-depth defense. It is configured through
+    profiles tuned to whitelist the access needed by a specific program or container,
+    such as Linux capabilities, network access, file permissions, etc.  AppArmor can
+    help you to run a more secure deployment by restricting what containers are allowed
+    to do, and/or provide better auditing through system logs. It is important to
+    keep in mind that AppArmor is not a full exploit prevention mechanism, but it
+    can reduce the abilities of a process inside a container that can limit further
+    damage.  GKE nodes running Ubuntu and COS or COS_CONTAINERD have AppArmor support
+    automatically enabled, but Kubernetes deployments must opt-in to be able to use
+    AppArmor pods when they are run.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -ojson | jq -r '.items[].metadata | "(.namespace)/(.name): (.annotations)"' | grep -v apparmor` to find the pods that do not specify an apparmor profile in their annotations.
+  remediation: |2-
+
+    For all non-kube-system deployments/statefulsets, annotate the pod specification with "container.apparmor.security.beta.kubernetes.io/<container_name>: "runtime/default" for each container in the pod specification.  This will enable the default AppArmor profile if the container is not running as a "privileged" container and afford protection against sensitive endpoints in /proc and /sys.
+  impact: 5
+  refs:
+  - text: Kubernetes AppArmor
+    url: https://kubernetes.io/docs/tutorials/clusters/apparmor/
+    ref: link
+  - text: Docker AppArmor
+    url: https://docs.docker.com/engine/security/apparmor/
+    ref: link
+  - text: Default AppArmor Profile
+    url: https://github.com/moby/moby/blob/master/profiles/apparmor/template.go
+    ref: link
+  - ids:
+    - PR.PT-3
+    - DE.CM-4
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-83
+  guid: d363bc20-2c74-582a-9bfd-8ac5bc228dbd
+  platform: k8s
+  title: Seccomp profiles are not implemented
+  description: Seccomp profiles define which system calls should be allowed or blocked,
+    and the container runtime will apply then at container start time so the kernel
+    can enforce it. Once applied, you are effectively decreasing your attack surface
+    and limiting the container processes from making privileged syscalls in the event
+    of a container compromise.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -ojson | jq -r '.items[].metadata | "(.namespace)/(.name): (.annotations)"' | grep -v seccomp` to find the pods that do not specify a seccomp profile in their annotations.
+  remediation: |2-
+
+    For all non-kube-system deployments/statefulsets, annotate the pod specification with "container.seccomp.security.alpha.kubernetes.io/<container_name>: "runtime/default" for each container in the pod specification.  This will enable the default Seccomp profile if the container is not running as a "privileged" container and afford protection against dangerous syscalls.
+  impact: 5
+  refs:
+  - text: Kubernetes SecurityContext
+    url: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    ref: link
+  - text: Kubernetes Seccomp
+    url: https://kubernetes.io/docs/concepts/policy/pod-security-policy/#seccomp
+    ref: link
+  - text: Seccomp Examples
+    url: https://github.com/kubernetes/kubernetes/blob/release-1.4/docs/design/seccomp.md#examples
+    ref: link
+  - text: Getting Started with Seccomp and Kubernetes
+    url: https://itnext.io/seccomp-in-kubernetes-part-i-7-things-you-should-know-before-you-even-start-97502ad6b6d6
+    ref: link
+  - ids:
+    - PR.PT-3
+    - DE.CM-4
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-84
+  guid: 5ad73b30-7bdd-51a2-8f89-0354a88a0878
+  platform: k8s
+  title: Namespaces do not have ResourceQuotas defined
+  description: ResourceQuotas can be applied to a Kubernetes namespace to ensure the
+    resources contained inside the namespace do not exceed a desired quota.  Setting
+    appropriate limits on each namespace can ensure workloads to not exhaust all available
+    resources and cause an outage.
+  validation: |2-
+
+    Run `kubectl get resourcequotas --all-namespaces` and ensure each namespace has a ResourceQuota resource configured.
+  remediation: |2-
+
+    In each non-kube-system namespace, define a ResourceQuota that places limits on the maximum number of pods, CPU, and memory that can be used.  Ensure that every workload running in the namespace specifies a valid CPU and RAM requests and limits setting.
+  impact: 2
+  refs:
+  - text: Kubernetes Resource Quotas
+    url: https://kubernetes.io/docs/concepts/policy/resource-quotas/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-85
+  guid: 870ac85c-d995-5c86-9a4f-f3b85491144b
+  platform: k8s
+  title: Namespaces do not have LimitRanges defined
+  description: LimitRanges can be applied to a Kubernetes namespace to ensure that
+    all pods that fail to set a CPU and RAM requests and limits setting get an appropriate
+    setting.  This ensures that pods are more accurately indicating to the Kubernetes
+    scheduler how many actual resources they require, and that translates to nodes
+    with more balanced workloads and avoids oversubscription situations that can cause
+    outages.
+  validation: |2-
+
+    Run `kubectl get limitranges --all-namespaces` and ensure each namespace has a LimitRange resource configured.
+  remediation: |2-
+
+    In each non-kube-system namespace, define a LimitRange that places a minimum setting for CPU and RAM requests/limits on all workloads that fail to define their own setting.
+  impact: 2
+  refs:
+  - text: Kubernetes LimitRanges
+    url: https://kubernetes.io/docs/concepts/policy/limit-range/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-86
+  guid: ca95e423-1cd2-5349-b256-e66fcc5570b8
+  platform: k8s
+  title: Malformed RBAC RoleBindings
+  description: A review of the ClusterRoleBindings and RoleBindings determined that
+    there were incorrectly formed entries that are not enforcing a desired policy.
+  validation: |2-
+
+    Run `kubectl get clusterrolebinding -o yaml` and `kubectl get rolebinding --all-namespaces -o yaml` and review the output to ensure each has a `roleRef` and a `subjects` block with one or more entries each.
+  remediation: |2-
+
+    Review each ClusterRoleBinding and Rolebinding for correctness and ensure that each one has valid `roleRef` and `subjects` blocks defined.
+  impact: 2
+  refs:
+  - text: Kubernetes RBAC
+    url: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    ref: link
+  - ids:
+    - PR.AC-4
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-87
+  guid: 16aab1d2-3514-5377-b886-f9ff87be9f63
+  platform: k8s
+  title: Application-level encryption of secrets in etcd is not implemented
+  description: The Kubernetes API Server has the ability to leverage an external KMS
+    provider for encryption and decryption of secrets stored inside etcd.  This provides
+    additional protection in the event of unauthorized access to the disk or datastore
+    where etcd maintains the cluster state.  It also ensures that the most sensitive
+    data in etcd backups are not directly readable if stored in cloud storage buckets.
+  validation: |2-
+
+    Follow the instructions for your specific cloud provider's Kubernetes offering to verify that application level encryption of Kubernetes Secrets with KMS keys is configured.
+  remediation: |2-
+
+    Follow the instructions for your specific cloud provider's Kubernetes offering to enable application level encryption of Kubernetes Secrets with KMS keys.
+  impact: 2
+  refs:
+  - text: Kubernetes KMS Provider
+    url: https://kubernetes.io/docs/tasks/administer-cluster/kms-provider/
+    ref: link
+  - text: GKE Application Secrets Encryption
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/encrypting-secrets
+    ref: link
+  - text: EKS Application Secrets Encryption
+    url: https://docs.aws.amazon.com/eks/latest/userguide/create-cluster.html
+    ref: link
+  - ids:
+    - PR.DS-1
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-88
+  guid: 128b1a5e-3506-549b-a527-31a2527c976c
+  platform: k8s
+  title: Pod Disruption Budgets are not used for all critical deployments
+  description: 'Deployments with more than one replica require two critical elements
+    to be able to handle a node failure or upgrade gracefully: Node anti-affinity
+    to keep pods from being scheduled on the same node, and PodDisruptionBudgets (PDBs)
+    which prevent the cluster from evicting pods unless enough other pods in that
+    same deployment are healthy.  Without a PDB in place, a single node failure can
+    temporarily evict too many pods and cause a service outage.'
+  validation: |2-
+
+    Run `kubectl get pdb --all-namespaces` and ensure that a PDB exists for each `deployment` and `statefulset`.
+  remediation: |2-
+
+    For each workload, determine if it requires high availability for the overall service to function.  If so, configure the deployment to have at least two replicas, have node anti-affinity to tell the Kubernetes scheduler to place them on separate nodes, use a service in front of the deployments for a discoverable name to reach, and configure a PodDisruptionBudget (PDB) to ensure that either a certain percentage of replicas are available or a certain number are not unavailable.
+  impact: 9
+  refs:
+  - text: Kubernetes PodDisruptionBudgets
+    url: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-89
+  guid: cb315c62-1b51-5a5f-b447-73a4fa73e305
+  platform: k8s
+  title: Container level malicious activity prevention/detection is not installed
+  description: In production Kubernetes clusters handling sensitive data, visibility
+    into potentially malicious activity inside the containers is vital for maintaining
+    positive control of the environment.  When a pod is compromised and actively being
+    used to gain further access into other applications or data, it's important to
+    be alerted immediately to be able to take defensive action to kill the pod, identify
+    the vulnerability, fix the container, and redeploy as quickly as possible.
+  validation: |2-
+
+    Run `kubectl get daemonsets --all-namespaces -o wide` and ensure that each node has a healthy instance of the per-node agent running.
+  remediation: |2-
+
+    Consider deploying a container security monitoring solution like Falco, Twistlock, or Aqua Security to monitor all nodes for container behavior that has high confidence of being malicious.  Configure it to alert to the primary on-call person for triage, and perform tuning to ensure it is not over-alerting with false positives.
+  impact: 9
+  refs:
+  - text: Sysdig
+    url: https://sysdig.com
+    ref: link
+  - text: Falco
+    url: https://falco.org
+    ref: link
+  - text: Palo Alto/Twistlock
+    url: https://twistlock.com
+    ref: link
+  - text: Aqua Security
+    url: https://aquasecurity.com
+    ref: link
+  - ids:
+    - DE.CM-1
+    - DE.CM-4
+    - DE.CM-7
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-90
+  guid: 5f994da4-66b3-5b4b-a187-c67970bc112b
+  platform: k8s
+  title: Automated Kubernetes resource backups are not configured
+  description: Backing up the contents of etcd is essential for backing up the desired
+    state of the Kubernetes cluster, and it could be vital as part of a disaster recovery
+    or security incident response plan to regain successful operation.
+  validation: |2-
+
+    Manually validate that the backup location is being populated on the schedule desired with backup files clearly marked with the timestamp.  Ensure that the latest backup file is readable and contains the necessary data.
+  remediation: |2-
+
+    Install and configure the latest version of VMWare's Velero (formerly Heptio Ark) to export automated backups of all resources in etcd to a cloud storage bucket.
+  impact: 9
+  refs:
+  - text: VMWare Velero
+    url: https://github.com/vmware-tanzu/velero
+    ref: link
+  - ids:
+    - PR.IP-4
+    - PR.MA-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-91
+  guid: 3bc617f8-f8c7-5073-9d3d-ebf8cb55477a
+  platform: k8s
+  title: Kubernetes resource backup/restore processes not exercised.
+  description: A key step for recovering a breached cluster is having a full backup
+    of etcd, but backups are not useful unless properly validated on a routine basis.  There
+    are any number of misconfigurations that could result in the backup having incorrect
+    or partial coverage, for example.
+  validation: |2-
+
+    Ensure the date/time of the last tested backup is within a desired timeframe (e.g. < 90 days).
+  remediation: |2-
+
+    Perform validation of the backups by testing the full restoration process on a routine basis, and configure alerts if the backup processes fail.
+  impact: 9
+  refs:
+  - text: VMWare Velero
+    url: https://github.com/vmware-tanzu/velero
+    ref: link
+  - ids:
+    - PR.IP-10
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-92
+  guid: ed41f165-65e0-57e9-b43d-9aedd95d911a
+  platform: k8s
+  title: Full operating system base images in use
+  description: |-
+    When building container images, choosing a base image that is based on a "full" operating system has several downsides:
+
+    * They are typically larger in size, and this increases bandwidth for pushing/pulling the image layers, storage costs, and image pull times during container startup.
+    * They often contain a large number of libraries and packages that may not be used by the container application, and this can exponentially increase the effort spent tracking and patching vulnerabilities in the container.
+    * They often include more administrative utilities by default such as `curl`, `wget`, and `nc` that an attacker can leverage if they get access to a running container.
+
+    Using a minimal base distribution with a small number of base packages can lead to smaller images with less vulnerabilities to patch.  Another approach is to use "distroless" images where the container is a "scratch" image with just a single compiled binary to be run.
+  validation: |2-
+
+    Perform a vulnerability scan of the last three minor releases of several base image types that your application could potentially use (e.g. `ubuntu` and `alpine`), and then scan the final images after your application is loaded.  Evaluate the results to find the balance between security, ease of maintenance, and application functionality.
+  remediation: |2-
+
+    Ensure all container image build pipelines are configured to leverage a known set of approved base images that have minimal base packages and a track record for low vulnerability counts in the base layers.  Another approach to consider is "Docker-Slim" for minifying your final images based on profiling a running container and automatically stripping out unneeded components.
+  impact: 5
+  refs:
+  - text: Snyk Analysis of top base images
+    url: https://snyk.io/blog/the-top-two-most-popular-docker-base-images-each-have-over-500-vulnerabilities/
+    ref: link
+  - text: Docker-Slim
+    url: https://github.com/docker-slim/docker-slim
+    ref: link
+  - ids:
+    - PR.IP-12
+    - DE.CM-8
+    - PR.PT-3
+    - PR.IP-1
+    - PR.MA-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-93
+  guid: cf0d95ac-b646-518d-aa8e-f216e45d7dab
+  platform: k8s
+  title: Large Number of Cluster Admins
+  description: The number of groups and/or users that have the RBAC permission "cluster-admin"
+    should be limited to a small number of total users.  When the majority of users
+    in a cluster are operating as administrators, it defeats the purpose for separation
+    of duties, increases the chances for an error to cause an outage, and it violates
+    the principle of least privilege.
+  validation: |2-
+
+    Run `kubectl get clusterrolebinding -o json | jq -r '.items[] | select((.roleRef.name=="cluster-admin") and .roleRef.kind=="ClusterRole") | .subjects[] | "(.kind) (.namespace) (.name)"'` and evaluate the listing to ensure it contains only the required cluster administrators.
+  remediation: |2-
+
+    Reduce the number of users with "cluster-admin" privileges to the smallest number feasible while still maintaining operational safety.  This is typically 3-6 users.  To ease administration, create groups and bind the permissions to the group.
+  impact: 5
+  refs:
+  - text: Kubernetes RBAC
+    url: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.PT-3
+    - PR.AT-2
+    - PR.IP-1
+    - PR.MA-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-94
+  guid: 6728d76f-de9a-50a2-bbee-33f4da917054
+  platform: k8s
+  title: Ensure the Kubernetes Dashboard is not present
+  description: While the Kubernetes dashboard is not inherently insecure on its own,
+    it is often coupled with a misconfiguration of RBAC permissions that can unintentionally
+    overgrant access and is not commonly protected with `NetworkPolicies` preventing
+    all pods from being able to reach it.  In increasingly rare circumstances, the
+    Kubernetes dashboard is exposed publicly to the Internet.
+  validation: |2-
+
+    Running `kubectl get pods --all-namespaces -l k8s-app=kubernetes-dashboard` should not return any pods.
+  remediation: |2-
+
+    Instead of running a workload inside the cluster to display a UI, leverage the cloud provider's UI for listing/managing workloads or consider a tool such as Octant running on local systems.  Run `kubectl get pods --all-namespaces -l k8s-app=kubernetes-dashboard` to find pods part of deployments and use kubectl to delete those deployments.
+  impact: 3
+  refs:
+  - text: Kubernetes Dashboard
+    url: https://kubernetes.io/docs/tasks/access-application-cluster/web-ui-dashboard/
+    ref: link
+  - ids:
+    - PR.IP-1
+    - PR.AC-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-95
+  guid: b80127b9-8df6-5689-9449-18249a4e7c1f
+  platform: k8s
+  title: Unsupported Kubernetes Versions in use
+  description: The Kubernetes project is fast-moving and has historically released
+    a minor version 3-4 times per year, and it maintains release branches for the
+    three most recent minor releases (e.g. 1.18, 1.17, 1.16).  This means that the
+    "upstream" Kubernetes project maintains security and bug fixes for a given minor
+    release for about nine months.  When running on managed Kubernetes offerings like
+    AKS, EKS, and GKE, the support policy is slightly different as there is a delay
+    in validating and testing new minor releases before making them available to customers.  While
+    it might be technically possible to be running an unsupported version, it means
+    an upgrade is necessary to be able to get security and bug fixes, and managed
+    providers may not be able to automatically patch your cluster on your behalf.
+  validation: |2-
+
+    Run `kubectl version --short | grep "^Server"` to identify the version of the control plane.
+  remediation: |2-
+
+    Maintain awareness of the latest releases relative to the current running versions.  Perform upgrade testing in a development/sandbox environment first to avoid API deprecation issues.  If using a cloud provider's managed offering, consider enabling automatic upgrades in development/sandbox environments to ease administration burden and to identify issues early.  Practice and perform upgrades routinely to ensure the process does not go stale by administrators and application owners.
+  impact: 9
+  refs:
+  - text: Kubernetes Version Support
+    url: https://kubernetes.io/docs/setup/release/version-skew-policy/
+    ref: link
+  - text: GKE Versions
+    url: https://cloud.google.com/kubernetes-engine/versioning-and-upgrades
+    ref: link
+  - text: EKS Versions
+    url: https://docs.aws.amazon.com/eks/latest/userguide/kubernetes-versions.html
+    ref: link
+  - text: AKS Versions
+    url: https://docs.microsoft.com/en-us/azure/aks/supported-kubernetes-versions
+    ref: link
+  - ids:
+    - ID.AM-2
+    - ID.RA-1
+    - ID.SC-2
+    - PR.IP-1
+    - PR.MA-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-96
+  guid: a40a1f40-0597-5ea5-b72e-005fbeea3ac6
+  platform: k8s
+  title: Third party images should be validated for policy conformance before use
+  description: Container images that are not part of the default Kubernetes system
+    components and are not owned or maintained by the organization are considered
+    third-party images.  These images are often introduced via Helm Charts or Operators,
+    and they should be evaluated with the same scrutiny as any base image with regards
+    to packages, vulnerabilities, running as a non-root user, and more.
+  validation: |2-
+
+    Identify images from third-party registries in use, perform vulnerability scans regularly, and validate that they follow your organization's security standards.
+  remediation: |2-
+
+    Identify container images that are not controlled by the organization and determine if their posture meets your organization's security baseline.  If they do not and the original Dockerfile and supporting assets are available in public source control, consider maintaining a "fork" of that image with the security modifications necessary.  Alternatively, consider submitting patches upstream to that project so that they can be automatically incorporated going forward.  Focus on containers that run as "root" and may need privileged access to the host first.
+  impact: 5
+  refs:
+  - text: Snyk Analysis of top base images
+    url: https://snyk.io/blog/the-top-two-most-popular-docker-base-images-each-have-over-500-vulnerabilities/
+    ref: link
+  - text: Docker-Slim
+    url: https://github.com/docker-slim/docker-slim
+    ref: link
+  - ids:
+    - PR.IP-12
+    - DE.CM-8
+    - PR.PT-3
+    - PR.IP-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-97
+  guid: efb02cbe-f686-5e6c-b9bc-aa1fa5fee143
+  platform: k8s
+  title: Namespaces should be used to separate unrelated workloads
+  description: By default, user-managed resources will be placed in the `default`
+    namespace.  This makes it difficult to properly define policies for RBAC permissions,
+    service account usage, network policies, and more.  Creating dedicated namespaces
+    and running workloads and supporting resources in each helps support proper API
+    server permissions separation and network microsegmentation.
+  validation: |2-
+
+    Run `kubectl get all` in the `default`, `kube-public`, and if present, `kube-node-lease` namespaces.  There should only be the `kubernetes` service.
+  remediation: |2-
+
+    Create dedicated namespaces for each type of related workload, and migrate those resources into those namespaces.  Ensure that RBAC permissions are not granted at the cluster scope but per namespace for the application owners at each namespace level.
+  impact: 2
+  refs:
+  - text: Kubernetes Namespaces
+    url: https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.AC-5
+    - PR.IP-1
+    - PR.PT-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-98
+  guid: c89183b3-b5c8-57ef-af97-1d9df089335b
+  platform: k8s
+  title: Workloads do not have dedicated Kubernetes Service Accounts
+  description: By default, pods that do not specify a service account have the "default"
+    service account token for that namespace automatically mounted inside them.  This,
+    by definition, becomes a shared credential that multiple workloads will use.  Similarly,
+    workloads that do specify the same, non-default service account are also sharing
+    credentials.  Multiple workloads sharing a service account credential makes it
+    difficult to properly apply RBAC permissions following least privilege and also
+    more difficult to identify which pod/deployment was responsible for an API call
+    when reviewing audit logs during an incident.
+  validation: |2-
+
+    Run `kubectl get pods -o json -A | jq -r '.items[] | select(.spec.serviceAccountName!=null) | "(.metadata.namespace)/(.metadata.name): (.spec.serviceAccountName)"'` to help identify which pods are mapping service accounts and to see if any are shared across workloads.  For all workload namespaces, consider disabling the automounting of the "default" service account.  Finally, enforce the use of non-default service accounts via dynamic admission control (e.g. OPA/Gatekeeper).
+  remediation: |2-
+
+    Ensure all deployments, daemonsets, and statefulsets are only mounting a service account if necessary and ensure it is unique to that workload.  Typically, naming the deployment and the service account with the same prefix helps this process.  Also, consider configuring the namespace to prevent the default service account from being mounted.
+  impact: 5
+  refs:
+  - text: Default Mounting of Service Accounts
+    url: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/#use-the-default-service-account-to-access-the-api-server
+    ref: link
+  - text: OPA/Gatekeeper
+    url: https://github.com/open-policy-agent/gatekeeper
+    ref: link
+  - ids:
+    - PR.AC-1
+    - PR.AC-4
+    - PR.AC-6
+    - PR.IP-1
+    ref: csf
+  tags:
+  - dbc
+  - k8s-logging
+- name: dbc-99
+  guid: 26577009-7e3b-5ba7-9c94-e9b8cb293075
+  platform: k8s
+  title: Nodepools are not used to separate workloads of different resource profiles
+  description: While Kubernetes can manage workloads of different resource profiles
+    on the same physical compute and network capacity, situations can occur where
+    workloads can become "noisy neighbors" and compete for the same resources with
+    other Pods on the same node.  Pods that run resource-intensive data processing
+    jobs but are otherwise dormant are a good example.  Specifying inaccurate resource
+    requests and limits can further exacerbate this issue as the scheduler may overcrowd
+    the node.
+  validation: |2-
+
+    Review the resource usage of each type of workload and ensure workloads with "bursty" resource usage are placed on dedicated nodes.  `kubectl top nodes` and `kubectl top pods` can be helpful for point-in-time usage statistics, but observing workloads over 24-48 hrs is ideal.
+  remediation: |2-
+
+    Workloads that have variable resource needs should be physically separated from workloads with steady resource needs in terms of compute and network capacity.  The most common approach is to place a `taint` on a dedicated node pool/group and specify that `toleration` and node selector on the workloads that should only operate on that node pool.  In addition, ensure all workloads have accurate resource requests and limits assigned and that node pools/groups are configured to autoscale up to the total capacity plus 10-20% of headroom of the workloads configured to run on them.
+  impact: 5
+  refs:
+  - text: Node Selectors
+    url: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/
+    ref: link
+  - text: Taints and Tolerations
+    url: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-100
+  guid: 39a35933-b735-52f6-952d-f3903ce75ef6
+  platform: k8s
+  title: Secrets in Pod Environment Variables
+  description: Kubernetes pods can take statically defined environment variables,
+    and those can often contain sensitive data like API keys and other credentials.  However,
+    this exposes them to users and other workloads that interact with the API server
+    who have the RBAC permission "get pods" in the cluster which is commonly a much
+    wider audience than desired.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -ojson | jq -r '.items[] | select(.spec.containers[].env) | "(.metadata.namespace)/(.metadata.name): (.spec.containers[].env[].value)"'` and verify that no sensitive data is present.
+  remediation: |2-
+
+    Ensure that no secret material is directly defined in Pod environment variable specifications.  Instead, store them in a Secret and use the secretKeyRef mechanism to reference them as Environment variables in the container at runtime.
+  impact: 7
+  refs:
+  - text: Kubernetes ENV Variables from Secret
+    url: https://kubernetes.io/docs/tasks/inject-data-application/distribute-credentials-secure/#define-a-container-environment-variable-with-data-from-a-single-secret
+    ref: link
+  - ids:
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-101
+  guid: d0031c18-5bd3-5fa2-9533-07a464e0aa6f
+  platform: k8s
+  title: RBAC Roles/ClusterRoles use Wildcards
+  description: When defining `Roles` and `ClusterRoles` in Kubernetes RBAC, it's possible
+    to specify a wildcard using a `*` for both verbs and resources to simplify the
+    policy creation process.  However, the Kubernetes API can change in subtle ways
+    over time, and new resources and/or verbs may be introduced.  If a policy expresses
+    "all resources" using a `*` and a new version of Kubernetes exposes a sensitive
+    new resource, it may now match.  The intent of the previous policy will have been
+    altered and potentially to an undesired effect.
+  validation: |2-
+
+    Run `kubectl get roles --all-namespaces -o json | jq -r '.items[] | . as $role | .rules[] | select(((.resources!=null) and (.resources[] | contains("*")) or ((.nonResourceURLs!=null) and (.nonResourceURLs[] | contains("*")))) or select(.verbs[] | contains("*"))) | $role.metadata.name' | sort -u` to identify all `Roles` that specify a `*` for either resources or verbs.  Run `kubectl get clusterroles -o json | jq -r '.items[] | . as $role | .rules[] | select(((.resources!=null) and (.resources[] | contains("*")) or ((.nonResourceURLs!=null) and (.nonResourceURLs[] | contains("*")))) or select(.verbs[] | contains("*"))) | $role.metadata.name' | sort -u` for ClusterRoles.
+  remediation: |2-
+
+    Review all `ClusterRoles` and `Roles` and ensure that all resources and verbs do not use the `*` declaration.  If they do, modify that policy to decleare the explicity resources and verbs instead.
+  impact: 2
+  refs:
+  - text: Kubernetes RBAC
+    url: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.PT-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-102
+  guid: 0fb4069a-689c-53e1-a159-95c40cb065e8
+  platform: k8s
+  title: Pods are in an undesired state
+  description: Pods were identified with a current status that indicates a failure
+    condition or an incorrect deployment configuration, and they should be corrected
+    or removed.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -o json | jq -r '.items[] | select((.status.phase=="Failed") or select(.status.containerStatuses[].restartCount > 4)) | "(.metadata.namespace)/(.metadata.name) -- Status: (.status.phase), High Restart Count: (.status.containerStatuses[].restartCount > 4)"'` in each cluster to identify pods in an undesired state.  There should be none listed.
+  remediation: |2-
+
+    For each workload, identify the underlying cause of the failure condition.  It may need a correction to the container image, a pod specification adjustment, or the presence of a dependent resource such as a ConfigMap, a Secret, or a Persistent Volume.  Typically, the container logs (`kubectl logs`) and pod events (`kubectl describe pod) will provide the information needed to address the issue.
+  impact: 5
+  refs:
+  - text: Kubernetes Application Debugging
+    url: https://kubernetes.io/docs/tasks/debug-application-cluster/debug-application-introspection/
+    ref: link
+  - text: Kubernets Pod Lifecycle
+    url: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+    ref: link
+  - ids:
+    - PR.IP-5
+    - PR.PT-5
+    - DE.CM-2
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-103
+  guid: 29b51317-7143-5795-817b-e36d1da89363
+  platform: k8s
+  title: Replicasets that are not part of Deployments in use
+  description: In all but the most custom use cases, ReplicaSets should only be used
+    indirectly via a Deployment that manages it.  "Bare" ReplicaSets should be considered
+    for migration to a full Deployment resource to take advantage of useful management
+    features such as rolling update strategies, rollbacks, and garbage collection.
+  validation: |2-
+
+    Run `kubectl get rs --all-namespaces -o json | jq -r '.items[] | . as $rs | .metadata | select((.ownerReferences==null) or .ownerReferences[].kind!="Deployment") | "($rs.metadata.namespace)/($rs.metadata.name)"'` and ensure there are no items listed.
+  remediation: |2-
+
+    Consider redeploying the ReplicaSet as a Deployment resource.
+  impact: 2
+  refs:
+  - text: Kubernetes ReplicaSets
+    url: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+    ref: link
+  - text: Kubernetes Deployments
+    url: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+    ref: link
+  - ids:
+    - PR.IP-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-105
+  guid: 7b7f2133-9328-5767-8b43-3d5ac80c9192
+  platform: k8s
+  title: Deployments should have more than one desired replica
+  description: Deployments with only a single desired replica cannot maintain service
+    during upgrades or node failures as there will always be a delay for the system
+    to notice the pod is no longer running and when it can be scheduled on another
+    node.  In conjunction with having a PodDisruptionBudget configured, having multiple
+    replicas allows for continued availability of the workload during scheduled or
+    unscheduled outages.
+  validation: |2-
+
+    Run `kubectl get deployments --all-namespaces -o json | jq -r '.items[] | select(.status.replicas==1) | "(.metadata.namespace)/(.metadata.name)"'` and ensure that all deployments listed can be unavailable for up to 10 minutes without harming the successful operation of the cluster or dependent workloads.
+  remediation: |2-
+
+    Configure the Deployment replica count to be 2 or greater, and ensure a PodDisruptionBudget is configured for that deployment that enforces an appropriate `minAvailable` constraint.
+  impact: 5
+  refs:
+  - text: Kubernetes PodDisruptionBudgets
+    url: https://kubernetes.io/docs/tasks/run-application/configure-pdb/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-106
+  guid: 99976c03-eeca-5bba-90d4-fadeaa87c106
+  platform: k8s
+  title: Pods have a large TermintionGracePeriodSeconds set
+  description: When a Pod is told to exit, Kubernetes will wait `terminationGracePeriodSeconds`
+    before sending a SIGKILL signal to the container process.  The default is 30 seconds,
+    but it can and should be increased if the Pod requires extra time to finish processing
+    work cleanly or to execute a PreStop Hook.  However, if the timeout is extended
+    too far, this can cause long delays during node upgrades and rolling deployments.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -o json | jq -r '.items[] | select(.spec.terminationGracePeriodSeconds>299) | "(.metadata.namespace)/(.metadata.name): (.spec.terminationGracePeriodSeconds)"'` and consider the possibilities for reducing that timeout safely.
+  remediation: |2-
+
+    Identify workloads that have `terminationGracePeriodSeconds` set to 5 or more minutes and validate that they need that time.  If possible, engineer the workload to handle termination more quickly while still maintaining overall application state.
+  impact: 2
+  refs:
+  - text: Termination of Kubernetes Pods
+    url: https://kubernetes.io/docs/concepts/workloads/pods/pod/#termination-of-pods
+    ref: link
+  - ids:
+    - PR.IP-1
+    - PR.IP-2
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-107
+  guid: 88560633-a807-54c7-ad3a-4719d665468f
+  platform: k8s
+  title: Critical Workloads do not have Anti-Affinity Rules set
+  description: Deployments and Statefulsets that require a certain number of Pods
+    running at all times to maintain service availability should be configured with
+    anti-affinity rules to avoid situations where multiple replicas are scheduled
+    on the same node or in a common failure zone.  Should that node or failure zone
+    experience an outage, an unexpected service disruption could result.
+  validation: |2-
+
+    Run `kubectl get deployments --all-namespaces -o json | jq -r '.items[] | select(.spec.template.spec.affinity==null) | "(.metadata.namespace)/(.metadata.name)"'` and determine if affinity or anti-affinity rules are necessary to help avoid suboptimal scheduling.  Run `kubectl get deployments --all-namespaces -o json | jq -r '.items[] | select(.spec.template.spec.affinity==null) | "(.metadata.namespace)/(.metadata.name)"'` for statefulsets.
+  remediation: |2-
+
+    Review all Deployments and Statefulsets for criticality and determine if additional guidance should be given to the scheduler in the form of affinity and/or anti-affinity rules.  Most commonly, this is either a "hard" or "soft" requirement to ensure only one Pod of a Deployment lands on the same node.
+  impact: 8
+  refs:
+  - text: Assigning Pods to Nodes
+    url: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-108
+  guid: 2079b140-b95a-5c1a-b1df-a273809e5047
+  platform: k8s
+  title: Deployments/Statefulsets do not have minimum desired healthy
+  description: In a healthy cluster, all running pods should be active, and all Deployments
+    and Statefulsets should have the desired number of active pods.  There are any
+    number of reasons why the number of active replicas in a Deployment or Statefulset
+    is not equal to the desired number, but the result is typically that the services
+    being provided by the workload are degraded or even completely unavailable.
+  validation: |2-
+
+    Run `kubectl get deployments --all-namespaces -o json | jq -r '.items[] | . as $wkl | .status.conditions[] | select((.type=="Available") and .status!="True") | "($wkl.metadata.namespace)/($wkl.metadata.name): (.message)"'` to identify unhealthy workloads and investigate with `kubectl describe pod <podname>` how to alleviate the underlying issue. Run `kubectl get statefulsets --all-namespaces -o json | jq -r '.items[] | . as $wkl | .status.conditions[] | select((.type=="Available") and .status!="True") | "($wkl.metadata.namespace)/($wkl.metadata.name): (.message)"'` for statefulsets.
+  remediation: |2-
+
+    The most common cause of this issue is due to insufficient cluster capacity to be able to successfully run the pod(s).  They will typically appear in the "Pending" state, and running `kubectl describe pod` will reveal the reason why the pod can't be scheduled.  That root cause should be addressed to allow the workload to continue operating normally.  For example, if a pod is "Pending" because there aren't enough CPU resources to satisfy the pods "CPU request", the cluster either needs additional nodes or larger nodes with greater CPU capacity.
+  impact: 8
+  refs:
+  - text: Kubernetes Deployments
+    url: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-109
+  guid: f89d387b-a421-53a4-b5ea-142f243a4935
+  platform: k8s
+  title: Services have fewer than two healthy Endpoints
+  description: Cluster services that refer to pods via label selectors and port mappings
+    will results in having `endpoint` resources created.  A healthy `service` should
+    have at least 2 valid endpoints at all times which indicates that multiple pods
+    are alive and actively handling requests.  Having "none" is an indication of misconfiguraion
+    or outage, and having just one endpoint indicates a potential for service disruption
+    during upgrades or node failures.
+  validation: |2-
+
+    Run `for ns in $(kubectl get ns -o custom-columns=NAME:.metadata.name); do for svc in $(kubectl get -n $ns svc -o custom-columns=NAME:.metadata.name --no-headers); do EP="$(kubectl get endpoints -n $ns $svc -o json 2> /dev/null)";if [[ "$?" -ne 0 ]]; then echo "$ns/$svc has 0 endpoints"; else echo "$EP" | jq -r 'select((.subsets[].addresses | length) < 2) | "(.metadata.namespace)/(.metadata.name) has fewer than 2 endpoints"'; fi; done; done` to identify services with fewer than 2 healthy endpoints.
+  remediation: |2-
+
+    Review all services in all namespaces for having at least two valid endpoints and address the misconfiguration or number of replicas as needed to ensure the correct number are active.
+  impact: 5
+  refs:
+  - text: Debugging Services
+    url: https://kubernetes.io/docs/tasks/debug-application-cluster/debug-service/#does-the-service-have-any-endpoints
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-110
+  guid: c5d0ad1c-feaf-5997-9fdf-c5af4dcc7543
+  platform: k8s
+  title: Pods in the kube-system namespace should be configured to avoid eviction
+  description: Pods in the `kube-system` namespace should be assigned the "system-cluster-critical"
+    or "system-node-critical" `priorityClassName` to designate that the cluster should
+    evict other pods not critical to the cluster or node's operation first.  When
+    a worker node runs out of resources, it evicts the lowest priority pods that would
+    remedy the resource exhaustion first.  Setting a `priority` at or above 2 billion
+    (2000000000) indicates that a specific workload is critical to the functionality
+    of the cluster.
+  validation: |2-
+
+    Run `kubectl get pods -n kube-system -o json | jq -r '.items[] | select(.spec.priority < 2000000000) | "(.metadata.namespace)/(.metadata.name): (.spec.priority)"'` and ensure no items are listed.
+  remediation: |2-
+
+    Review the specifications for the pods in the `kube-system` namespace and ensure it specifies a `priorityClassName` that has a numeric priority value above 2 billion.
+  impact: 2
+  refs:
+  - text: Pod Quality of Service
+    url: https://kubernetes.io/docs/tasks/configure-pod-container/quality-service-pod/
+    ref: link
+  - text: Out of Resource Handling
+    url: https://kubernetes.io/docs/tasks/administer-cluster/out-of-resource/
+    ref: link
+  - text: Guaranteed Scheduling for Critical Pods
+    url: https://kubernetes.io/docs/tasks/administer-cluster/guaranteed-scheduling-critical-addon-pods/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-111
+  guid: b259e239-3547-5930-9d17-b1dc60f3a2ec
+  platform: k8s
+  title: Services specifications do not have the correct naming convention set
+  description: For the sake of clarity and current/future support for Istio service
+    mesh, all port names in `service` definitions need to follow a convention to aid
+    in proper protocol identification.  For example, a service exposes TCP port 443,
+    but it's not clear to the service mesh if that is passing plain TCP, HTTP, HTTPS,
+    TLS, or gRPC traffic.  Naming the port `tls` or `tls-foo` makes it clear what
+    protocol is intended to pass through this service.
+  validation: |2-
+
+    Run `kubectl get svc -A -o json | jq -r '.items[] | . as $svc | .spec.ports[] | select(.name | test("^grpc|^http|^mongo|^mysql|^redis|^tcp|^tls|^udp")|not) | "($svc.metadata.namespace)/($svc.metadata.name): (.name)"'` and ensure no items are listed.
+  remediation: |2-
+
+    Review all the ports exposed by services and ensure they follow the <protocol>[-<suffix>] naming convention.
+  impact: 2
+  refs:
+  - text: Istio Service Naming Convention
+    url: https://istio.io/docs/reference/config/analysis/ist0118/
+    ref: link
+  - ids:
+    - PR.IP-1
+    - PR.IP-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-112
+  guid: af258b39-ba3c-56cf-ab22-fc0f082f9fb0
+  platform: k8s
+  title: Containers should have ImagePullPolicy set to Always
+  description: 'Pod specifications should explicitly set the `imagePullPolicy` to
+    `Always` to ensure the correct version of the image is always being used.  This
+    helps avoid issues where container image tags were overwritten in the container
+    registry but the node uses its local cached version instead.  Note that the caching
+    semantics of the underlying image provider make even imagePullPolicy: Always efficient.
+    With Docker, for example, if the image already exists, the pull attempt is fast
+    because all image layers are cached and no image download is needed.'
+  validation: |2-
+
+    Run `kubectl get pods -A -o json | jq -r '.items[] | . as $pod | .spec.containers[] | select(.imagePullPolicy!="Always") | "($pod.metadata.namespace)/($pod.metadata.name): (.name) (.imagePullPolicy)"'` and ensure no items are listed.
+  remediation: |2-
+
+    Review all containers in pod specifications and ensure the `imagePullPolicy` setting is configured to be `Always`.
+  impact: 2
+  refs:
+  - text: Kubernetes Best Practices
+    url: https://kubernetes.io/docs/concepts/configuration/overview/#container-images
+    ref: link
+  - ids:
+    - PR.IP-1
+    - PR.IP-5
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-113
+  guid: f46f6fd4-1a4b-562d-934b-3ef8b9f07075
+  platform: k8s
+  title: Containers should have no sensitive information in Command or Args specifications
+  description: Kubernetes pods can specify the `command` and `args` for a container
+    to use at runtime, and those can often contain sensitive data like API keys and
+    other credentials.  However, this exposes them to users and other workloads that
+    interact with the API server who have the RBAC permission "get pods" in the cluster
+    which is commonly a much wider audience than desired.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -ojson | jq -r '.items[] | . as $pod | .spec.containers[] | select((.command) or .args) | .command as $cmd | .args as $args | "($pod.metadata.namespace)/($pod.metadata.name)[(.name)]: ($cmd) ($args)"'` and review the output.  Ensure no secret material is present.
+  remediation: |2-
+
+    Ensure that no secret material is directly defined in container `command` or `args` specifications.  Instead, store them in a Secret and use the secretKeyRef mechanism to reference them as files in the container at runtime.
+  impact: 2
+  refs:
+  - text: Kubernetes Container Command and Arguments
+    url: https://kubernetes.io/docs/tasks/inject-data-application/define-command-argument-container/
+    ref: link
+  - ids:
+    - PR.DS-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-114
+  guid: d5adf736-690c-53dd-af10-67bc040f2db4
+  platform: k8s
+  title: All resources should have a standard set of labels for ownership and purpose
+  description: Kubernetes resources have a standard labeling mechanism that can take
+    arbitrary key/value pairs, and this makes tagging resources with labels for ownership,
+    environment, data sensitivity, and more straightforward.  In addition to being
+    able to quickly understand the intent of a workload or resource, labels can be
+    used in the definition of security policies.  As cluster resources grow, having
+    a standard convention for labeling resources helps keep track of things and maintain
+    flexible policies.
+  validation: |2-
+
+    Run `kubectl get all -A -o json | jq -r '.items[] | "(.kind)/(.metadata.namespace)/(.metadata.name) (.metadata.labels | tostring)"'` and ensure all resources contain the desired labels.
+  remediation: |2-
+
+    Ensure that all resources created and updated contain appropriate values for a small number of labels that make sense for the organization.  Suggested labels are `owner`, `env`, `app`, and `data` for the team responsbile, the dev/stage/prod type, the name of the application, and the sensitivity of the data in the workload, respectively.  Enforcement can be done with OPA/Gatekeeper admission control.
+  impact: 3
+  refs:
+  - text: Kubernetes Labels
+    url: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+    ref: link
+  - text: OPA/Gatekeeper
+    url: https://github.com/open-policy-agent/gatekeeper
+    ref: link
+  - text: OPA/Gatekeeper Sample Policy
+    url: https://github.com/open-policy-agent/gatekeeper/tree/master/library/general/requiredlabels
+    ref: link
+  - ids:
+    - ID.AM-2
+    - ID.AM-5
+    - PR.IP-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-115
+  guid: 8ed3cd97-4415-5024-9d9a-dab55cd0fe53
+  platform: k8s
+  title: Nodeport Services directly exposed
+  description: While Kubernetes supports exposing pods via a port on the underlying
+    node from the TCP/30000-32768 range via the `NodePort` service type, it's not
+    typically the desired approach.  Typically, clusters expose a shared set of load
+    balancers and ingress controllers to handle external service exposure via standard
+    APIs that handle path routing, logging, access control lists, and more.  `NodePort`
+    services require opening uncommon TCP ports in the firewall and typicaly require
+    tight coupling of worker node IPs to be used successfully, and that becomes problematic
+    when nodes fail or when a scale event occurs.
+  validation: |2-
+
+    Run `kubectl get svc -A -o json | jq -r '.items[] | select(.spec.type=="NodePort") | "(.metadata.namespace)/(.metadata.name): (.spec.type):(.spec.ports[].nodePort)"'` and ensure that no items are listed.
+  remediation: |2-
+
+    Convert `NodePort` services into type `LoadBalancer` or consider leveraging an ingress controller to expose the service on a specific hostname and port instead.
+  impact: 2
+  refs:
+  - text: NodePort Services
+    url: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
+    ref: link
+  - ids:
+    - PR.AC-5
+    - PR.DS-5
+    - PR.PT-4
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-116
+  guid: 90ce3f57-138b-566e-a61e-77c95a9a243b
+  platform: k8s
+  title: Services should have ExternalTrafficPolicy set to Local to preserve source
+    IP address
+  description: In certain cloud providers, service specifications can be set to the
+    default of 'Cluster' or 'Local'.  Cluster obscures the client source IP and may
+    cause a second hop to another node, but should have good overall load-spreading.
+    Local preserves the client source IP and avoids a second hop for `LoadBalancer`
+    and `NodePort` type services, but risks potentially imbalanced traffic spreading.  Preserving
+    the client source IP is critical to being able to perform attribution if an attacker
+    is probing or exploiting an exposed service.
+  validation: |2-
+
+    Run `kubectl get svc -A -o json | jq -r '.items[] | select(.spec.type!="ClusterIP") | "(.metadata.namespace)/(.metadata.name): (.spec.externalTrafficPolicy)"'` and validate that no items are listed.
+  remediation: |2-
+
+    In GCP/GKE, ensure IP Aliasing is enabled on the subnet where the cluster is created and the cluster is configured to utilize those ranges.  In AWS, using the "Network Load Balancer" instead of the "Elastic Load Balancer" in combination with this setting, the source IP can be preserved.
+  impact: 5
+  refs:
+  - text: Preserving the Source IP
+    url: https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    ref: link
+  - ids:
+    - ID.AM-3
+    - PR.AC-3
+    - PR.AC-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-117
+  guid: 95220b3a-127b-5240-aece-35c61d8bc3f9
+  platform: k8s
+  title: Ingresses should point to active services with multiple healthy endpoints
+  description: Ingress resources describe how to route traffic based on hostname and/or
+    URI path to a desired service, and it's very easy to misconfigure an ingress configuration
+    to point to an invalid service or an "empty" service.
+  validation: |2-
+
+    Run `for entry in "$( kubectl get ingress -A -o json | jq -r '.items[] | . as $svc | .spec | .. | .backend? | select(.!=null) | "($svc.metadata.namespace) (.serviceName)"')"; do ns="$(echo $entry | awk '{print $1}')"; svc="$(echo $entry | awk '{print $2}')"; EP="$(kubectl get endpoints -n $ns $svc -o json 2> /dev/null)"; if [[ "$?" -ne 0 ]]; then echo "$ns/$svc has 0 endpoints"; else echo "$EP" | jq -r 'select(.subsets) // "(.metadata.namespace)/(.metadata.name) has fewer than 2 endpoints"'; echo "$EP" | jq -r 'select(.subsets) | select((.subsets[].addresses | length) < 2) | "(.metadata.namespace)/(.metadata.name) has fewer than 2 endpoints"'; fi; done` and ensure that no services are listed.
+  remediation: |2-
+
+    Review all ingress resource configurations, and ensure the `backend` configurations that point to a `service` are pointing to a service that exists and one that has healthy endpoints.
+  impact: 5
+  refs:
+  - text: Kubernetes Ingress
+    url: https://kubernetes.io/docs/concepts/services-networking/ingress/#the-ingress-resource
+    ref: link
+  - text: Kubernetes Services
+    url: https://kubernetes.io/docs/concepts/services-networking/service/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-118
+  guid: de9455b1-f948-5a70-8645-cd9176125614
+  platform: k8s
+  title: All Nodes are Ready and Schedulable
+  description: Healthy clusters running at optimal efficiency have all nodes in the
+    "Ready" state and are actively receiving workloads.  Nodes that are not in the
+    "Ready" state or are cordoned/unschedulable are incurring costs but are not contributing
+    to the cluster's capacity.
+  validation: |2-
+
+    Run `kubectl get nodes -o json | jq -r '.items[] | . as $node | .status.conditions[] | select((.type=="Ready") and .status!="True") | "($node.metadata.name): (.message)"'` and ensure no nodes are listed.  Also, run `kubectl get nodes -o json | jq -r '.items[] | . as $node | select(.spec.unschedulable==true) | "($node.metadata.name): cordoned/unschedulable"'` and validate no nodes are listed.
+  remediation: |2-
+
+    Repair all unhealthy nodes, and migrate workloads off of cordoned nodes before removing nodes.
+  impact: 3
+  refs:
+  - text: Node Cordoning
+    url: https://kubernetes.io/docs/concepts/architecture/nodes/#manual-node-administration
+    ref: link
+  - ids:
+    - PR.IP-1
+    - PR.IP-2
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-119
+  guid: 7230ef0b-0924-509b-9b12-6c245add2d06
+  platform: k8s
+  title: All Nodes are running the identical OS, Image, and Version
+  description: To ensure consistent and reliable operation of the cluster and its
+    workloads, the worker nodes should be running identical versions of the operating
+    system image, kernel version, kube-proxy version, and kubelet version for each
+    node pool or operating system type.
+  validation: |2-
+
+    Run `kubectl get nodes -o json | jq -r '.items[] | "(.status.nodeInfo.containerRuntimeVersion)|(.status.nodeInfo.kernelVersion)|(.status.nodeInfo.kubeProxyVersion)|(.status.nodeInfo.kubeletVersion)|(.status.nodeInfo.osImage)"' | wc -l` and ensure the output equals "1" to indicate that all nodes are identical.  Clusters that have multiple node pools or mixed operating system types should have one line count per nodepool or OS type.
+  remediation: |2-
+
+    Upgrade all nodes of each node pool to a common version for each underlying component.  Mixed operating system clusters should have identical versions per operating system.
+  impact: 2
+  refs:
+  - text: Kubernetes Version Skew Support
+    url: https://kubernetes.io/docs/setup/release/version-skew-policy/
+    ref: link
+  - ids:
+    - PR.MA-1
+    - PR.IP-1
+    - PR.IP-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-120
+  guid: f0521c23-989d-53f5-bd2f-c235b6b4abe3
+  platform: k8s
+  title: All Nodes have > 20% capacity allocatable
+  description: Kubernetes can pack workloads tightly onto nodes for excellent resource
+    efficiency, but overutilized nodes are more prone to exhausting available resources.
+    This can cause other colocated applications to run more slowly or even cause the
+    kubelet to become unhealthy and evict workloads.  In addition, clusters should
+    always have at least one node's worth of excess capacity ready to gracefully handle
+    workloads rescheduled due to node maintenance or evictions.
+  validation: |2-
+
+    Run `echo "Node CPU Memory"; kubectl top nodes --no-headers | awk '{print $1" "$3" "$5}'` and ensure that CPU and Memory are below 80% for all nodes.
+  remediation: |2-
+
+    Ensure allocated capacity per node remains below 80%, and ensure that workloads are scheduled evenly across nodes.  Consider scaling the number of nodes up to ensure the total workload doesn't exceed 80% of the total cluster capacity.
+  impact: 7
+  refs:
+  - text: Kubernetes Metrics Server
+    url: https://kubernetes.io/docs/tasks/debug-application-cluster/resource-metrics-pipeline/
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-121
+  guid: 5f226c37-de2c-56a0-8e19-3c94a23a9d7a
+  platform: k8s
+  title: All Nodes are spread evenly across availability zones
+  description: When running Kubernetes clusters on cloud providers, production clusters
+    should have their nodes spread as evenly as possible across multiple availability-zones
+    in a given region.  Coupled with anti-affinity rules on critical workloads and
+    multi-zone aware persistent-volumes, it's possible to withstand a single availability-zone
+    outage should one occur.
+  validation: |2-
+
+    Run `kubectl get nodes -ojson | jq -r '.items[].metadata | select(.annotations."failure-domain.beta.kubernetes.io/zone") | "(.name): (.annotations."failure-domain.beta.kubernetes.io/zone")"'` and validate there are multiple availability zones listed and an equal (or near equal) number of nodes in each.
+  remediation: |2-
+
+    Configure the node pool/groups to leverage multiple availability zones.  Three zones are recommended in most cases.  Most cloud providers have a configuration option for spreading nodes of the same group across multiple availability zones.
+  impact: 2
+  refs:
+  - text: Kubernetes Node Labels
+    url: https://kubernetes.io/docs/reference/kubernetes-api/labels-annotations-taints/#topologykubernetesiozone
+    ref: link
+  - text: AKS Multiple AZ Node Groups
+    url: https://docs.microsoft.com/en-us/azure/aks/availability-zones#create-an-aks-cluster-across-availability-zones
+    ref: link
+  - text: EKS Multiple AZ Node Pools
+    url: https://docs.aws.amazon.com/eks/latest/userguide/create-managed-node-group.html
+    ref: link
+  - text: GKE Multiple AZ Node Pools
+    url: https://cloud.google.com/kubernetes-engine/docs/how-to/creating-a-regional-cluster
+    ref: link
+  - ids:
+    - PR.DS-4
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-122
+  guid: 390bbf33-bc2c-514d-a878-e1d17282157f
+  platform: k8s
+  title: Local disk PersistentVolumes should not mount sensitive host paths
+  description: While pods can be configured to mount a directory of the underlying
+    worker node's filesystem to "escape" from the container, another similar pathway
+    is by manually creating a "Local/HostPath" persistent volume and mounting it into
+    the pod.  PodSecurityPolicy has native controls for the former approach, but it
+    cannot prevent the latter.  The approach requires RBAC permissions to either create
+    or use a custom storageclass, manually create or use a custom persistent volume,
+    and permissions to create pods, so it is less likely to be available to non-privileged
+    users.
+  validation: |2-
+
+    Run `kubectl get pv -o json | jq -r '.items[] | select(.spec.hostPath) | "(.metadata.name): (.spec.hostPath.path)"'` and `kubectl get pv -o json | jq -r '.items[] | select(.spec.local) | "(.metadata.name): (.spec.local.path)"'` and verify that no entries are listed.
+  remediation: |2-
+
+    Ensure that permissions for creating custom storage classes are only granted to cluster admins, and review all storage classes and currently bound persistent volumes do not permit mounting sensitive paths on the underlying nodes in pod specifications.  Consider enforcing with a dynamic admission controller such as OPA/Gatekeeper.
+  impact: 2
+  refs:
+  - text: Kubernetes Local Persistent Volumes
+    url: https://kubernetes.io/docs/concepts/storage/volumes/#local
+    ref: link
+  - text: OPA/Gatekeeper
+    url: https://github.com/open-policy-agent/gatekeeper
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.PT-3
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-123
+  guid: c578b676-324d-51fe-ac5c-2af5a73044d6
+  platform: k8s
+  title: Only approved Mutating/ValidatingWebHookConfigurations in use
+  description: Mutating and Validating Webhooks (Webhooks) are powerful extensions
+    to the API server request flow, and they are typically used for adding functionality
+    to resources before they are persisted and for enforcing security policy by way
+    of dynamic admission controllers.  Because they defer authorization to an arbitrary
+    location and get a full copy of the request, they can potentially see sensitive
+    information.  They also can introduce latency in the API requiest flow as the
+    API server needs to get a response or wait for a timeout before allowing the request
+    to proceed.  Therefore, their usage should be limited to the smallest number necessary.
+  validation: |2-
+
+    Run `kubectl get mutatingwebhookconfiguration -A -oyaml` and `kubectl get validatingwebhookconfiguration -A -oyaml` and ensure the listed entries are desired.
+  remediation: |2-
+
+    Review the current configuration and ensure only the desired and authorized Webhooks are installed and that they are only watching the specific resourcesneeded.
+  impact: 9
+  refs:
+  - text: Dynamic Admission Control
+    url: https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/
+    ref: link
+  - ids:
+    - PR.AC-4
+    - PR.IP-1
+    - PR.IP-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-124
+  guid: 16bf3c73-d5c7-5f71-abc2-e440f81c761b
+  platform: k8s
+  title: PersistentVolumes should use cross-zone/Regional StorageClasses
+  description: Where possible, deployments and statefulsets that mount persistent
+    volumes should be using storageclasses that support being mounted in multiple
+    zones.  By default, cloud provider network attached storage disks are only available
+    in a single zone.  Should a zone experience a failure or outage, that data cannot
+    be remounted by a pod until a healthy node in that zone returns unless that disk
+    is configured as a type that should be replicated automatically.
+  validation: |2-
+
+    Run `kubectl get storageclass -o json | jq -r '.items[]'` and review the storage classes available inside the cluster and their settings to see if regional support (vs single zone) is configured.  Then run `kubectl get deployments -A -o json | jq -r '.items[] | .spec.template.spec.volumes'` and `kubectl get sts -A -o json | jq -r '.items[] | .spec.template.spec.volumes'` to see which types of storageclass for persistent volumes are in use.
+  remediation: |2-
+
+    If supported, configure the storageclass to support multiple zones and ensure that all critical deployments and statefulsets are configured to use them.
+  impact: 5
+  refs:
+  - text: Kubernetes Persistent Volumes
+    url: https://kubernetes.io/docs/concepts/storage/volumes/
+    ref: link
+  - text: Kubernetes Storageclasses
+    url: https://kubernetes.io/docs/concepts/storage/storage-classes/
+    ref: link
+  - ids:
+    - PR.PT-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-125
+  guid: d62c8685-fcf8-5cec-941a-0c07c7db2eb6
+  platform: k8s
+  title: CronJobs/Jobs should be healthy
+  description: Jobs and CronJobs can often become unhealthy over time and may go unnoticed
+    unless manually reviewed.  A common example is that of the VMWare Valero backup
+    job to backup the contents of etcd to an external location like a cloud storage
+    bucket.  Without that backup running successfully at a regular interval, the ability
+    to restore the cluster to a recent state in a failure situation is compromised.
+  validation: |2-
+
+    Run `kubectl get job -A -ojson | jq -r '.items[] | select(.status.conditions) | select(.status.conditions[].type=="Failed" and .status.conditions[].status=="True") | "(.metadata.namespace)/(.metadata.name) failed: (.status.conditions[].message)"'` and `kubectl get cronjob -A -ojson | jq -r '.items[] | select(.status.conditions) | select(.status.conditions[].type=="Failed" and .status.conditions[].status=="True") | "(.metadata.namespace)/(.metadata.name) failed: (.status.conditions[].message)"'` and ensure no entries are listed.
+  remediation: |2-
+
+    Manually examine all CronJobs and Jobs resources for a successful execution history and resolve any issues identified.  If the Job is no longer needed, remove it.
+  impact: 5
+  refs:
+  - text: Kubernetes Jobs
+    url: https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion/
+    ref: link
+  - ids:
+    - PR.PT-5
+    - PR.IP-5
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-126
+  guid: '0991c5c8-2e42-5237-a66b-c0b7ad84317d'
+  platform: k8s
+  title: Nodes should have only one valid Certificate Signing Request
+  description: Some Kubernetes clusters initially provision their nodes using "bootstrap"
+    credentials that are just used to create and issue a certificate signing request
+    via the Kubernetes API for a certificate keypair to be used by that node's kubelet
+    process.  This should be a one-time event, but it may be possible for an attacker
+    that has compromised a worker node to generate a second keypair and impersonate
+    the kubelet.  This process would leave traces by way of the API server having
+    more than one valid CSR entry for that node.
+  validation: |2-
+
+    The output of `kubectl get nodes --no-headers | wc -l` and `kubectl get csr -A -o json | jq -r '.items[] | select(.spec.groups) | select(.spec.groups[] | contains("system:nodes")) | .spec.username' | sort -u | wc -l` should be identical, signaling that only one per node has been created.
+  remediation: |2-
+
+    Periodically inspect the certificate signing requests used by bootstrap credentials to ensure that only one has been created.  If more than one is present, validate the details of each one to see if it was potentially created by a malicious user.
+  impact: 3
+  refs:
+  - text: Kubernetes Certificate Signing Requests
+    url: https://kubernetes.io/docs/tasks/tls/managing-tls-in-a-cluster/#create-a-certificate-signing-request
+    ref: link
+  - ids:
+    - PR.AC-1
+    - PR.AC-6
+    - PR.PT-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-127
+  guid: da93b32f-bb47-51a9-b6ac-4ce2aa5936c5
+  platform: k8s
+  title: RBAC Roles/ClusterRoles should not grant permissions to system:anonymous
+  description: The built-in group named `system:anonymous` includes any user, group,
+    or service account without a valid credential to the API server.  In earlier versions
+    of Kubernetes, this "meta" group had a small number of permissions related to
+    API discovery, but it is no longer intended for direct use.  This group should
+    not be used to grant permissions to cluster subjects in nearly any legitimate
+    situation, but it can occur by mistake and lead to unnecessary pathways to data
+    leakage and privilege escalation.
+  validation: |2-
+
+    Run `kubectl get clusterrolebinding -o json | jq -r '.items[] | . as $crb | select(.subjects) | .subjects[] | select(.name=="system:anonymous" and .kind=="Group") | $crb.roleRef.name'` and `kubectl get rolebinding -A -o json | jq -r '.items[] | . as $crb | select(.subjects) | .subjects[] | select(.name=="system:anonymous" and .kind=="Group") | $crb.roleRef.name'` and validate that no entries are listed that would indicate non-standard permissions were granted.
+  remediation: |2-
+
+    Review the permissions on the `system:anonymous` group and ensure that it has no granted permissions.  Remove or modify any ClusterRoleBinding that grants additional permissions, and grant permissions directly to authenticated users, groups, or service accounts instead.
+  impact: 5
+  refs:
+  - text: Kubernetes API Discovery Roles
+    url: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#discovery-roles
+    ref: link
+  - ids:
+    - PR.IP-1
+    - PR.AC-4
+    - PR.AC-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-128
+  guid: 7314bdf0-27f6-5102-a381-3bce416deb98
+  platform: k8s
+  title: RBAC Permissions for system:authenticated should not be elevated
+  description: The built-in group named `system:authenticated` includes any user,
+    group, or service account with a valid credential to the API server.  This "meta"
+    group is useful for providing a baseline set of permissions that all cluster users,
+    groups, and service accounts need for API discovery purposes.  This group should
+    not be used to grant additional permissions to cluster subjects beyond the defaults,
+    but it can occur by mistake and lead to unnecessary pathways to data leakage and
+    privilege escalation.
+  validation: |2-
+
+    Run `kubectl get clusterrolebinding -o json | jq -r '.items[] | . as $crb | select(.subjects) | .subjects[] | select(.name=="system:authenticated" and .kind=="Group") | $crb.roleRef.name' | egrep -v "system:basic-user|system:discovery|system:public-info-viewer"` and `kubectl get rolebinding -A -o json | jq -r '.items[] | . as $crb | select(.subjects) | .subjects[] | select(.name=="system:authenticated" and .kind=="Group") | $crb.roleRef.name' | egrep -v "system:basic-user|system:discovery|system:public-info-viewer"` to ensure no additional ClusterRoles or Roles have been granted to `system:authenticated`.  You can also run `kubectl auth can-i --list --as=system:authenticated` to see the current list of permissions.
+  remediation: |2-
+
+    Review the permissions on the `system:authenticated` group and ensure that it is only bound to the baseline ClusterRoles: `system:basic-user`, `system:discovery`, and `system:public-info-viewer`.  Remove or modify any ClusterRoleBinding that grants additional permissions beyond these, and grant permissions directly to users, groups, or service accounts instead.
+  impact: 8
+  refs:
+  - text: Kubernetes API Discovery Roles
+    url: https://kubernetes.io/docs/reference/access-authn-authz/rbac/#discovery-roles
+    ref: link
+  - ids:
+    - PR.IP-1
+    - PR.AC-4
+    - PR.AC-1
+    ref: csf
+  tags:
+  - dbc
+- name: dbc-129
+  guid: fa458515-7fca-52fb-b080-bec839be4779
+  platform: k8s
+  title: Tiller (Helm v2) should not be deployed
+  description: Helm version 1.x and 2.x rely on an in-cluster deployment named `Tiller`
+    to handle lifecycle management of Kubernetes application bundles called `charts`.  The
+    `Tiller` deployment is commonly granted elevated privileges to be able to carry
+    out creation/deletion of resources contained inside `charts`, and it exposes a
+    gRPC port on TCP/44134 without authentication or authorization, by default.  This
+    combination was common, and it afforded a simple and direct path to escalation
+    to cluster-admin from any pod in the cluster.  Now that Helm v3 no longer relies
+    on an in-cluster component, `Tiller` is a signal that the cluster administrators
+    have not upgraded to the more secure version.
+  validation: |2-
+
+    Run `kubectl get pods --all-namespaces -o name | grep tiller` and validate that no pods starting with the name `tiller-deploy-****` exist.
+  remediation: |2-
+
+    Refer to https://helm.sh/docs/topics/v2_v3_migration/ for guidance on migrating away from `Tiller`.  For new cluster deployments, use Helm v3 and above going forward.
+  impact: 10
+  refs:
+  - text: Helm
+    url: https://helm.sh
+    ref: link
+  - text: Tiller v2
+    url: https://helm.sh/docs/faq/#removal-of-tiller
+    ref: link
+  - text: Helm Migration from v2 to v3
+    url: https://helm.sh/docs/topics/v2_v3_migration/
+    ref: link
+  - text: Misusing Tiller
+    url: https://engineering.bitnami.com/articles/helm-security.html
+    ref: link
+  - ids:
+    - PR.AC-3
+    - PR.AC-5
+    - PR.DS-2
+    - PR.IP-1
+    - PR.IP-5
+    ref: csf
+  tags:
+  - dbc
