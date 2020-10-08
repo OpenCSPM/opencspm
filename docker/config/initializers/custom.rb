@@ -29,7 +29,7 @@ Rails.application.configure do
     config.hosts << config.cookie_domain
   else
     config.cookie_domain = 'localhost'
-    config.ui_host = 'http://localhost:8080'
+    config.ui_host = 'http://localhost:8000'
     config.session_store :cookie_store, key: '_opencspm_session'
   end
   config.middleware.use ActionDispatch::Cookies # Required for all session management

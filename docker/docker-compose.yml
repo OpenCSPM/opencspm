@@ -13,7 +13,7 @@ x-app: &app
   environment: &env
     NODE_ENV: ${NODE_ENV:-development}
     RAILS_ENV: ${RAILS_ENV:-development}
-  image: opencspm-dev:0.1.0
+  image: opencspm:0.1.0
   tmpfs:
     - /tmp
 
@@ -47,21 +47,24 @@ x-backend: &backend
 services:
   core:
     <<: *backend
+    hostname: core
     command: bundle exec rails server -p 5000 -b 0.0.0.0
     ports:
       - '5000:5000'
 
   ui:
     <<: *backend
+    hostname: ui
     working_dir: /app/ui
     command: yarn serve
     ports:
-      - '8080:8080'
+      - '8000:8080'
     depends_on:
       - core
 
-  jobs:
+  worker:
     <<: *backend
+    hostname: worker
     command: bundle exec sidekiq -C config/sidekiq.yml
     depends_on:
       redis:
@@ -69,6 +72,7 @@ services:
 
   db:
     image: postgres:13.0
+    hostname: db
     volumes:
       - .dockerdev/.psqlrc:/root/.psqlrc:ro
       - postgres:/var/lib/postgresql/data
@@ -84,6 +88,7 @@ services:
 
   redis:
     image: docker.io/redislabs/redisgraph:edge
+    hostname: redis
     volumes:
       - redis:/data
     ports:
@@ -93,6 +98,18 @@ services:
       interval: 1s
       timeout: 3s
       retries: 30
+
+  redis_ui:
+    image: docker.io/redislabs/redisinsight:latest
+    hostname: redis_ui
+    ports:
+      - '8001:8001'
+    depends_on:
+      - redis
+
+  shell:
+    <<: *backend
+    command: /bin/bash
 
 volumes:
   postgres:

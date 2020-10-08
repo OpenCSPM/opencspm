@@ -3,6 +3,10 @@
 docker/tmp
 docker/log
 
+# Ruby / RMV
+.ruby-version
+.ruby-gemset
+
 # Rails 
 *.rbc
 capybara-*.html
