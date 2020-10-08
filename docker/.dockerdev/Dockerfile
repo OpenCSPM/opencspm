@@ -46,17 +46,31 @@ RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get -yq dist-upgrad
 # Configure bundler
 ENV LANG=C.UTF-8 \
   BUNDLE_JOBS=4 \
-  BUNDLE_RETRY=3
+  BUNDLE_RETRY=3 \
+  BUNDLE_PATH=/gems \
+  BUNDLE_HOME=/gems \
+  GEM_HOME=/gems \
+  GEM_PATH=/gems
 
 # Uncomment this line if you want to run binstubs without prefixing with `bin/` or `bundle exec`
-ENV PATH /app/bin:$PATH
+ENV PATH /app/bin:/gems/bin:$PATH
 
 # Install new Bundler version
 RUN rm /usr/local/lib/ruby/gems/*/specifications/default/bundler-*.gemspec && \
   gem uninstall bundler && \
   gem install bundler -v $BUNDLER_VERSION
 
-# Create a directory for the app code
-RUN mkdir -p /app
+# remove unused user accounts
+  # games, lp, mail, news, uucp, proxy, www-data, list, irc, gnats
+
+# Create app user
+RUN groupadd -r app && useradd -r -g app -d /app -s /bin/bash app
+
+# Create directory for app code
+RUN mkdir -p /app /gems /app/ui/node_modules && \
+  chown -R app:app /app && \
+  chown -R app:app /gems
+
+USER app
 
 WORKDIR /app

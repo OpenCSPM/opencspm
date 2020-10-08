@@ -23,6 +23,7 @@ x-backend: &backend
   tty: true
   volumes:
     - .:/app:cached
+    - gems:/gems
     - rails_cache:/app/tmp/cache
     - bundle:/usr/local/bundle
     - node_modules:/app/ui/node_modules
@@ -119,8 +120,10 @@ services:
   shell:
     <<: *backend
     command: /bin/bash
+    hostname: shell
 
 volumes:
+  gems:
   postgres:
   redis:
   bundle:

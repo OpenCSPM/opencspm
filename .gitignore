@@ -7,6 +7,8 @@ docker/log
 # Ruby / RMV
 .ruby-version
 .ruby-gemset
+.bundle
+.gem
 
 # Rails 
 *.rbc
@@ -50,7 +52,8 @@ node_modules/
 /public/assets
 
 # Ignore yarn files
-/yarn-error.log
+.yarnrc
+yarn-error.log
 yarn-debug.log*
 .yarn-integrity
 

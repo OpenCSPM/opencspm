@@ -16,19 +16,6 @@ class User < ApplicationRecord
             length: { minimum: 6, maximum: 256 },
             format: { with: URI::MailTo::EMAIL_REGEXP }
 
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
-  # devise :database_authenticatable, :registerable,
-  #        :recoverable, :rememberable, :validatable,
-  #        :confirmable, :trackable, :omniauthable,
-  #        omniauth_providers: %w[google github gitlab]
-
-  # Override mailer to send through ActiveJob queue
-  #
-  # def send_devise_notification(notification, *args)
-  #   devise_mailer.send(notification, self, *args).deliver_later
-  # end
-
   #
   # https://sourcey.com/articles/rails-omniauth-using-devise-with-twitter-facebook-and-linkedin
   # JML - 2020-09-03
