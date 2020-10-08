@@ -1,7 +1,12 @@
 # opencspm
 Open Cloud Security Posture Management Engine
 
-setup
+### Docker Components
 
-- cd docker
-- docker-compose up
+![Docker Dashboard](./docs/img/docker-dashboard.png)
+
+
+
+### Development
+
+See [development environment documentation](development.md).
