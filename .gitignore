@@ -1,11 +1,9 @@
 #
-# Docker specific
+# General
 #
+.DS_Store
 docker/tmp
-
-#
-# Node specific
-#
+docker/log
 
 #
 # Rails specific
@@ -37,7 +35,6 @@ config/master.key
 # config/secrets.yml
 
 # dotenv
-# TODO Comment out this rule if environment variables can be committed
 .env
 
 ## Environment normalization:
