@@ -6,6 +6,7 @@
 FILE=.init
 MSG="[bundle] First run detected, installing..."
 CMD="bundle install"
+SETUP="bundle exec rails db:setup"
 RUN="bundle exec rails server -p 5000 -b 0.0.0.0"
 
 if [[ -f ${FILE} ]]; then
@@ -13,6 +14,6 @@ if [[ -f ${FILE} ]]; then
 else
   echo ${MSG}
   touch ${FILE}
-  ${CMD} && ${RUN}
+  ${CMD} && ${SETUP} && ${RUN}
 fi
 

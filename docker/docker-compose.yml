@@ -51,7 +51,9 @@ services:
     command: ./init.sh
     ports:
       - '5000:5000'
-
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:5000']
+      interval: 5s
   ui:
     <<: *backend
     hostname: ui
@@ -67,6 +69,10 @@ services:
     hostname: worker
     command: bundle exec sidekiq -C config/sidekiq.yml
     depends_on:
+      core:
+        condition: service_healthy
+      db:
+        condition: service_healthy
       redis:
         condition: service_healthy
 

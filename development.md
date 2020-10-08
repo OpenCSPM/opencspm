@@ -6,22 +6,12 @@ create RVM gemset (option to enable IDE integration with Solargraph and Rubocop)
 - bundle
 - code . (e.g. to start VS Code with access to local gemset)
 
-initial development setup
-- cd docker
-- docker-compose build
-
-core/api setup
-- docker-compose run core bundle install
-- docker-compose run core bundle exec rails db:setup
-
-web ui setup
-- docker-compose run ui yarn
-
-finish setup (clean up orphaned containers used during setup)
-- docker-compose down --remove-orphans
-
 bring up full environment
 - docker-compose up
+
+development setup
+- cd docker
+- docker-compose build
 
 bash shell
 - docker-compose exec shell bash

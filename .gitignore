@@ -2,6 +2,7 @@
 .DS_Store
 docker/tmp
 docker/log
+.init
 
 # Ruby / RMV
 .ruby-version
