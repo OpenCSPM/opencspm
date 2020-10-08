@@ -48,7 +48,7 @@ services:
   core:
     <<: *backend
     hostname: core
-    command: bundle exec rails server -p 5000 -b 0.0.0.0
+    command: ./init.sh
     ports:
       - '5000:5000'
 
@@ -56,7 +56,7 @@ services:
     <<: *backend
     hostname: ui
     working_dir: /app/ui
-    command: yarn serve
+    command: ./init.sh
     ports:
       - '8000:8080'
     depends_on:
