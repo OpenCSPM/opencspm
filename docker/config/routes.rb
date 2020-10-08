@@ -7,7 +7,7 @@ Rails.application.routes.draw do
   # ---------------
   # Health check route
   # ---------------
-  get 'healthz', to: 'healthcheck#index'
+  get 'healthz', to: 'healthcheck#index', as: 'health_check'
 
   # ---------------
   # Auth routes
