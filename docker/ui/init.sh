@@ -12,6 +12,6 @@ if [[ -f ${FILE} ]]; then
   ${RUN}
 else
   echo ${MSG}
-  touch ${FILE}
-  ${CMD} && ${RUN}
+  ${CMD} && touch ${FILE}
+  ${RUN}
 fi

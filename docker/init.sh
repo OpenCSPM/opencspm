@@ -14,7 +14,7 @@ if [[ -f ${FILE} ]]; then
   ${CLEANUP} && ${RUN}
 else
   echo ${MSG}
-  touch ${FILE}
-  ${CMD} && ${SETUP} && ${RUN}
+  ${CMD} && ${SETUP} && touch ${FILE}
+  ${RUN}
 fi
 
