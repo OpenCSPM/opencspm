@@ -1,6 +1,6 @@
 TODO: enable `rails` without `bundle exec`
 
-create RVM gemset (option to enable IDE integration with Solargraph and Rubocop)
+create RVM gemset (optional to enable IDE integration with Solargraph and Rubocop)
 - rvm use 2.6.6@opencspm --create --ruby-version
 - gem install bundler:2.0.2
 - bundle
