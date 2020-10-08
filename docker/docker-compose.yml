@@ -25,7 +25,6 @@ x-backend: &backend
     - .:/app:cached
     - gems:/gems
     - rails_cache:/app/tmp/cache
-    - bundle:/usr/local/bundle
     - node_modules:/app/ui/node_modules
     - .dockerdev/.psqlrc:/root/.psqlrc:ro
     - .dockerdev/.bashrc:/root/.bashrc:ro
@@ -33,7 +32,7 @@ x-backend: &backend
     <<: *env
     REDIS_URL: redis://redis:6379/
     DATABASE_URL: postgres://postgres:postgres@db:5432
-    BOOTSNAP_CACHE_DIR: /usr/local/bundle/_bootsnap
+    BOOTSNAP_CACHE_DIR: /gems/_bootsnap
     WEB_CONCURRENCY: ${WEB_CONCURRENCY:-1}
     HISTFILE: /app/log/.bash_history
     PSQL_HISTFILE: /app/log/.psql_history
@@ -126,6 +125,5 @@ volumes:
   gems:
   postgres:
   redis:
-  bundle:
   node_modules:
   rails_cache:
