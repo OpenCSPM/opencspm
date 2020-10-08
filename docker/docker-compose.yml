@@ -52,7 +52,7 @@ services:
     ports:
       - '5000:5000'
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:5000']
+      test: ['CMD', 'curl', '-f', 'http://localhost:5000/healthz']
       interval: 10s
       timeout: 5s
       retries: 60

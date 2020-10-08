@@ -5,6 +5,11 @@ Rails.application.routes.draw do
   mount Sidekiq::Web => '/sidekiq'
 
   # ---------------
+  # Health check route
+  # ---------------
+  get 'healthz', to: 'healthcheck#index'
+
+  # ---------------
   # Auth routes
   # ---------------
   get 'auth/:provider/callback', to: 'sessions#create'
