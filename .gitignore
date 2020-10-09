@@ -10,10 +10,14 @@ docker/log
 .bundle
 .gem
 
+# Docker
+.psqlrc
+.bashrc
+
 # Rails 
+.local
 *.rbc
 capybara-*.html
-.rspec
 /public/system
 /coverage/
 /spec/tmp
