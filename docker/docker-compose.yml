@@ -26,8 +26,9 @@ x-backend: &backend
     - gems:/gems
     - rails_cache:/app/tmp/cache
     - node_modules:/app/ui/node_modules
-    - .dockerdev/.psqlrc:/root/.psqlrc:ro
-    - .dockerdev/.bashrc:/root/.bashrc:ro
+    - .dockerdev/.psqlrc:/app/.psqlrc:ro
+    - .dockerdev/.bashrc:/app/.bashrc:ro
+    - ../../opencspm-controls:/app/controls/:ro
   environment:
     <<: *env
     REDIS_URL: redis://redis:6379/
