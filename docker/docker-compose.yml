@@ -23,6 +23,9 @@ x-backend: &backend
   tty: true
   volumes:
     - .:/app:cached
+    - ../assets:/app/data
+    - ../config:/app/load_config
+    - ../../opencspm-controls:/app/controls
     - gems:/gems
     - rails_cache:/app/tmp/cache
     - node_modules:/app/ui/node_modules

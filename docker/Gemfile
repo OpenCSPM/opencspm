@@ -22,6 +22,10 @@ gem 'omniauth-google-oauth2', '~> 0.8.0'
 gem 'omniauth-github', '~> 1.4'
 gem 'rolify', '~> 5.3'
 gem 'lograge', '~> 0.11.2'
+gem 'addressable', '~> 2.7'
+gem 'json_schemer', '~> 0.2.15'
+gem 'redisgraph', '~> 2.0'
+gem 'rspec', '~> 3.9'
 
 group :development do
   gem 'listen', '~> 3.2'
