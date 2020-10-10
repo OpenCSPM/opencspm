@@ -20,8 +20,8 @@ RUN apt-get update -qq && \
   truncate -s 0 /var/log/*log
 
 # Add PostgreSQL to sources list
-RUN curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
-  && echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
+RUN curl -sSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+  echo 'deb http://apt.postgresql.org/pub/repos/apt/ buster-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
 
 # Add NodeJS to sources list
 RUN curl -sL https://deb.nodesource.com/setup_$NODE_MAJOR.x | bash -
@@ -60,8 +60,16 @@ RUN rm /usr/local/lib/ruby/gems/*/specifications/default/bundler-*.gemspec && \
   gem uninstall bundler && \
   gem install bundler -v $BUNDLER_VERSION
 
-# remove unused user accounts
-  # games, lp, mail, news, uucp, proxy, www-data, list, irc, gnats
+# remove unused accounts
+RUN deluser -q games && \
+  deluser -q lp && \
+  deluser -q news && \
+  deluser -q uucp && \
+  deluser -q proxy && \
+  deluser -q www-data && \
+  deluser -q list && \
+  deluser -q irc && \
+  deluser -q gnats
 
 # Create app user
 RUN groupadd -r app && useradd -r -g app -d /app -s /bin/bash app

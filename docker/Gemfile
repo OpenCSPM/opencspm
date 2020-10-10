@@ -10,6 +10,7 @@ gem 'bootsnap', '>= 1.4.2', require: false
 gem 'rack-cors', '~> 1.1'
 
 # app gems
+gem 'listen', '~> 3.2'
 gem 'redis', '~> 4.2'
 gem 'fast_jsonapi', '~> 1.5'
 gem 'sidekiq', '~> 6.1'
@@ -24,7 +25,6 @@ gem 'rolify', '~> 5.3'
 gem 'lograge', '~> 0.11.2'
 
 group :development do
-  gem 'listen', '~> 3.2'
   gem 'spring'
   gem 'spring-watcher-listen', '~> 2.0.0'
 
