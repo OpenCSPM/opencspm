@@ -11,6 +11,8 @@ if File.directory?(LISTEN_DIR) && Socket.gethostname == CORE_CONTAINER
     logger.debug("modified absolute path: #{modified}")
     logger.debug("added absolute path: #{added}")
     logger.debug("removed absolute path: #{removed}")
+    logger.debug('running PackJob...')
+    PackJob.new.perform
   end
 
   # non blocking
