@@ -3,7 +3,7 @@ Open Cloud Security Posture Management Engine
 
 ### Docker Components
 
-![Docker Dashboard](./docs/img/docker-dashboard.png)
+![Docker Dashboard](./site/img/docker-dashboard.png)
 
 
 
