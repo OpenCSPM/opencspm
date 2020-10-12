@@ -6,7 +6,7 @@
           <!-- Repo name and link -->
           <div class="min-w-0 space-y-3">
             <div class="flex items-center space-x-3">
-              <span v-if="ds.status === 'active'"
+              <span v-if="ds.status !== 'disabled'"
                     aria-label="Running"
                     class="h-4 w-4 bg-green-100 rounded-full flex items-center justify-center">
                 <span class="h-2 w-2 bg-green-400 rounded-full"></span>
@@ -16,12 +16,6 @@
                     class="h-4 w-4 bg-gray-100 rounded-full flex items-center justify-center">
                 <span class="h-2 w-2 bg-gray-400 rounded-full"></span>
               </span>
-              <span v-if="['scan_requested', 'scanning'].includes(ds.status)"
-                    aria-label="Scanning"
-                    class="h-4 w-4 bg-orange-100 rounded-full flex items-center justify-center">
-                <span class="h-2 w-2 bg-orange-400 rounded-full"></span>
-              </span>
-
               <span class="block">
                 <h2 class="text-sm font-medium leading-5">
                   <span>
@@ -80,7 +74,7 @@
                                   d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
                                   clip-rule="evenodd" />
                           </svg>
-                          Scan Now
+                          Analyze Now
                         </span>
                       </button>
                       <div class="border-t border-gray-100"></div>
@@ -120,7 +114,7 @@
   export default {
     props: ['source', 'menuOpen'],
     methods: {
-      scan: function () {
+      scan: function() {
         let payload = {
           source: {
             status: 'scan_requested'
@@ -133,18 +127,13 @@
             this.check()
           })
       },
-      check: function () {
+      check: function() {
         this.$http.get(this.url)
           .then(res => {
             this.ds = res.data
-            if (['scan_requested', 'scanning'].includes(this.ds.status)) {
-              setTimeout(() => {
-                this.check()
-              }, this.scanTimeout)
-            }
           })
       },
-      disable: function () {
+      disable: function() {
         let payload = {
           source: {
             status: 'disabled'
@@ -156,17 +145,17 @@
             this.ds = res.data
           })
       },
-      toggle: function () {
+      toggle: function() {
         this.actionPanelOpen = !this.actionPanelOpen
       },
-      close: function () {
+      close: function() {
         setTimeout(() => {
           this.actionPanelOpen = false
         }, 100)
       }
     },
     filters: {
-      moment: function (value) {
+      moment: function(value) {
         return moment(value).fromNow()
       }
     },

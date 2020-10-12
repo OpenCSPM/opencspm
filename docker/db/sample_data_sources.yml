@@ -1,6 +1,6 @@
 ---
 - name: Cloud Asset Inventory
-  location: gcs://bucket-acme-8765/cai
+  location: file://demo-gcp-cai
   status: 1
 - name: Kubernetes Sync Inventory
   location: gcs://bucket-acme-8765/k8s

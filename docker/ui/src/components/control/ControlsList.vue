@@ -41,7 +41,7 @@
                     <div class="mt-2 flex items-center space-x-4">
                       <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium leading-4 bg-gray-100 text-gray-600"
                             @click="openModal(control.id)">
-                        {{ control.name }}
+                        {{ control.control_id }}
                       </span>
                       <div class="space-x-4 invisible group-hover:visible">
                         <Tag v-for="(tag, idx) in control.tags"

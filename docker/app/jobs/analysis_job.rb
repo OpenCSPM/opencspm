@@ -36,7 +36,7 @@ class AnalysisJob < ApplicationJob
     options << '-fCspmFormatter'
     RSpec::Core::Runner.run(options)
 
-    results = JSON.parse(File.read('/tmp/results'))
+    # results = JSON.parse(File.read(RunnerJob::RESULTS_FILE))
 
     RSpec.clear_examples
     RSpec.world.reset

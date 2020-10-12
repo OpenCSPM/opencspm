@@ -55,4 +55,5 @@
   platform: Kubernetes
   author: Darkbit
   tags:
-    - k8s-logging
+    - gce
+    - iam

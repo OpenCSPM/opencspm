@@ -108,7 +108,11 @@
 
                             <p
                                class="text-cool-gray-500 truncate group-hover:text-cool-gray-900 transition ease-in-out duration-150">
-                              Data source scheduled check
+                              {{ event.kind }} job
+                              <span
+                                    class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium leading-4 bg-gray-100 text-gray-400">
+                                {{ event.guid }}
+                              </span>
                             </p>
                           </a>
                         </div>

@@ -1,8 +1,6 @@
 result_loader_job:
-  name: 'Start result processing jobs'
-  cron: '0 */6 * * *'
+  name: 'Start runner job'
+  cron: '*/15 * * * *'
   class: RunnerJob
   queue: default
   description: Runs runner job
-  args:
-    source_id: 1

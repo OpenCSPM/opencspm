@@ -3,16 +3,14 @@ class RunnerJob < ApplicationJob
   # not supported by sidekiq-cron
   # sidekiq_options retry: 5
 
-  # 40% fail rate
-  STATUSES = [-1, -1, -1, -1, -1, -1, 1, 1, 1, 1].freeze
   RESULTS_FILE = '/tmp/results'.freeze
   TYPE = :run
 
   def perform(*_args)
-    logger.debug('job for runner starting...')
-
     # Shared GUID
     guid = Digest::UUID.uuid_v5(Digest::UUID::OID_NAMESPACE, Time.now.utc.to_s)
+
+    logger.info("#{guid} Runner job started")
 
     # Track the job
     job = Job.create(status: :running, kind: TYPE, guid: guid)
@@ -80,6 +78,6 @@ class RunnerJob < ApplicationJob
       job.complete!
     end
 
-    logger.debug('job for runner done.')
+    logger.info("#{guid} Runner job finished")
   end
 end

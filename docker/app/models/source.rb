@@ -7,9 +7,6 @@ class Source < ApplicationRecord
   }
 
   def schedule_worker
-    if scan_requested?
-      scanning!
-      LoaderJob.perform_later({ source_id: id })
-    end
+    RunnerJob.perform_later if scan_requested?
   end
 end
