@@ -27,7 +27,7 @@ OpenCSPM has several key components that work together:
 1. Structured configuration and metadata is collected from the GCP Cloud Asset Inventory and Kubernetes API to a Storage Bucket or local filesystem.
 2. The data is parsed and loaded into a Graph Database with complex relationships intact.
 3. One or more customizable sets of policy checks ("control packs") are run against the parsed inventory data, and results are stored.
-4. The
+4. The API/Engine serves up the user interface, handles tracking of campaigns, and notifications.
 
 ## Getting Started
 
