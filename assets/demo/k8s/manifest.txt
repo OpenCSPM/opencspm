@@ -1,0 +1,2 @@
+gke_demo1-bad_us-central1_prod-cluster1.json
+gke_demo1-good_us-central1_prod-cluster1.json

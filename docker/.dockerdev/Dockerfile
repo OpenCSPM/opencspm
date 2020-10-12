@@ -75,8 +75,9 @@ RUN deluser -q games && \
 RUN groupadd -r app && useradd -r -g app -d /app -s /bin/bash app
 
 # Create directory for app code
-RUN mkdir -p /app /gems /app/ui/node_modules && \
+RUN mkdir -p /app /data /gems /app/ui/node_modules && \
   chown -R app:app /app && \
+  chown -R app:app /data && \
   chown -R app:app /gems
 
 USER app

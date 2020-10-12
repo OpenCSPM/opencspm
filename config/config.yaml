@@ -1,0 +1,40 @@
+---
+db:
+  url: redis://redis:6379
+  #password: replaceme
+accounts:
+- id: 1234567890
+  platform: gcp
+  name: lonimbus.com
+  datasources:
+#  - storage: bucket
+#    path: gs://mygcpbucketname/
+#    datatypes:
+#    - format: cai-gcp
+#      path_prefix: gcp
+#    - format: cai-iam
+#      path_prefix: iam
+  - storage: file
+    path: /app/data/demo/
+    datatypes:
+    - format: cai-gcp
+      path_prefix: gcp
+    - format: cai-iam
+      path_prefix: gcp-iam
+    #- format: cai-k8s
+    #  path_prefix: k8s
+#- id: 9876543210
+#  platform: aws
+#  name: aws-prod
+#  datasources:
+#  - storage: bucket
+#    path: s3://mys3bucketname/
+#    datatypes:
+#    - format: cai-gcp
+#      path_prefix: gcp
+#    - format: cai-aws
+#      path_prefix: aws
+#    - format: cai-iam
+#      path_prefix: iam
+#    - format: cai-k8s
+#      path_prefix: k8s
