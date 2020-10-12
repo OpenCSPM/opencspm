@@ -1,12 +1,41 @@
-# opencspm
-Open Cloud Security Posture Management Engine
+# OpenCSPM
+Open Cloud Security Posture Management, OpenCSPM, is an open-source platform for gaining deeper insight into your cloud configuration and metadata to help understand and reduce risk over time.
 
-### Docker Components
+##Who is OpenCSPM for?
 
-![Docker Dashboard](./site/img/docker-dashboard.png)
+* Security teams running infrastructure in cloud environments looking to gain visibility into security risk across the entire account and track the resolution of those issues.
+* Development and Infrastructure teams looking for a set of security best-practices to follow as they develop new systems and bake security in early and often.
+* Red Teams wanting to create targeted scenarios specific to their environment with the highest impact and benefit to their Blue Team.
+* Any organization looking to establish a baseline of security issues, prioritize them by risk, and track them to closure over time.
 
+## What does OpenCSPM do?
 
+When deployed inside your environment, it can:
 
-### Development
+1. collect several types of cloud configuration data on a one-time or recurring basis from your cloud account resources (VMs, Clusters, IAM, etc),
+2. parse and load that data into a graph database with deep linked relationships between resources to support advanced querying capabilities,
+3. run a customizable series of policy checks to determine conformance and record passing/failing resources on a recurring basis,
+4. create custom groupings of related policy checks that aid in tracking remediation efforts and reduction in risk over time,
+5. and provide notifications when deviations from desired baselines occur to multiple destinations.
 
-See [development environment documentation](development.md).
+### High-level Architecture
+
+OpenCSPM has several key components that work together:
+
+![opencspm high level architecture diagram](site/img/high-level-arch.png)
+
+## Getting Started
+
+Ready to get going?  Follow the [instructions for getting started](site/getting_started.md)
+
+## Support and Community
+
+OpenCSPM is undergoing active development and community assistance is available via the [OpenCSPM Slack Channel](#).  If you have found an issue, please file it using a GitHub [issue](https://github.com/opencspm/opencspm/issues/new).
+
+## Contributing
+
+We invite you to submit requests for new features and bug reports using a Github [issue](https://github.com/opencspm/opencspm/issues/new). If you would like to contribute to OpenCSPM, please review our [contributing guidelines](development.md).
+
+## Creators
+
+OpenCSPM was made open-source software by [Josh Larsen](https://github.com/joshlarsen) and [Brad Geesaman](https://github.com/bgeesaman), the co-founders of [Darkbit.io](https://darkbit.io). Darkbit is a cloud-native security assessment consulting firm based in the US that helps organizations understand the risks in their cloud and Kubernetes resource configurations.
