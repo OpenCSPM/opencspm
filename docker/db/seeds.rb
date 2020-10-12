@@ -40,13 +40,26 @@ profiles.each do |p|
   res.update(p)
 end
 
-# Controls
-# sample_controls = YAML.load(File.read('db/sample_controls.yml'))
-controls = YAML.load(File.read('db/controls.yaml'))
+# Import Controls from Control Packs
+Dir['controls/**/config.yaml'].each do |file|
+  control_pack = JSON.parse(YAML.load(File.read(file)).to_json, object_class: OpenStruct)
 
-controls.each do |c|
-  res = Control.find_or_create_by(guid: c['guid'])
-  res.tags.destroy_all
-  c['tags']&.map { |t| res.tags << Tag.find_or_create_by(name: t) }
-  res.update(c.slice('guid', 'name', 'title', 'description', 'impact', 'platform', 'validation', 'remediation', 'refs'))
+  control_pack&.controls&.each do |control|
+    puts "Control: #{control_pack.id} - #{control.id}"
+    res = Control.find_or_create_by(control_pack: control_pack.id, control_id: control.id)
+    res.tags.destroy_all
+    control&.tags&.map { |t| res.tags << Tag.find_or_create_by(name: t) }
+    res.update(
+      guid: Digest::UUID.uuid_v5(Digest::UUID::OID_NAMESPACE, control_pack.id + control.id),
+      control_pack: control_pack.id,
+      control_id: control.id,
+      title: control.title,
+      description: control.description,
+      impact: control.impact,
+      platform: control.platform,
+      validation: control.validation,
+      remediation: control.remediation,
+      refs: control.refs
+    )
+  end
 end

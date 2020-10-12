@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_02_205546) do
+ActiveRecord::Schema.define(version: 2020_10_12_194457) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -30,7 +30,8 @@ ActiveRecord::Schema.define(version: 2020_10_02_205546) do
 
   create_table "controls", force: :cascade do |t|
     t.string "guid"
-    t.string "name"
+    t.string "control_pack"
+    t.string "control_id"
     t.string "title"
     t.text "description"
     t.string "platform"
@@ -43,8 +44,9 @@ ActiveRecord::Schema.define(version: 2020_10_02_205546) do
     t.integer "resources_total", default: 0
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.index ["control_id"], name: "index_controls_on_control_id"
+    t.index ["control_pack"], name: "index_controls_on_control_pack"
     t.index ["guid"], name: "index_controls_on_guid"
-    t.index ["name"], name: "index_controls_on_name"
     t.index ["platform"], name: "index_controls_on_platform"
     t.index ["title"], name: "index_controls_on_title"
   end
@@ -69,12 +71,13 @@ ActiveRecord::Schema.define(version: 2020_10_02_205546) do
   end
 
   create_table "jobs", force: :cascade do |t|
-    t.string "token"
     t.integer "status"
     t.integer "issue_count"
+    t.integer "kind"
+    t.string "guid"
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.index ["token"], name: "index_jobs_on_token"
+    t.index ["guid"], name: "index_jobs_on_guid"
   end
 
   create_table "organizations", force: :cascade do |t|

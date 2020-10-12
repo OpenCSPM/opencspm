@@ -3,12 +3,14 @@
 docker/tmp
 docker/log
 .init
+.viminfo
 
 # Ruby / RMV
 .ruby-version
 .ruby-gemset
 .bundle
 .gem
+.irb_history
 
 # Docker
 .psqlrc

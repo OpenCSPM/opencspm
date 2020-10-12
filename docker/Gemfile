@@ -12,9 +12,10 @@ gem 'rack-cors', '~> 1.1'
 # app gems
 gem 'listen', '~> 3.2'
 gem 'redis', '~> 4.2'
-gem 'fast_jsonapi', '~> 1.5'
+gem 'redisgraph', '~> 2.0'
 gem 'sidekiq', '~> 6.1'
 gem 'sidekiq-cron', '~> 1.2'
+gem 'fast_jsonapi', '~> 1.5'
 gem 'recursive-open-struct', '~> 1.1'
 gem 'pundit', '~> 2.1'
 gem 'bcrypt', '~> 3.1'
@@ -23,10 +24,9 @@ gem 'omniauth-google-oauth2', '~> 0.8.0'
 gem 'omniauth-github', '~> 1.4'
 gem 'rolify', '~> 5.3'
 gem 'lograge', '~> 0.11.2'
+gem 'rspec', '~> 3.9'
 gem 'addressable', '~> 2.7'
 gem 'json_schemer', '~> 0.2.15'
-gem 'redisgraph', '~> 2.0'
-gem 'rspec', '~> 3.9'
 
 group :development do
   gem 'spring'
@@ -38,6 +38,7 @@ group :development do
   gem 'pry', '~> 0.13.1'
   gem 'better_errors', '~> 2.7'
   gem 'binding_of_caller', '~> 0.8.0'
+  gem 'awesome_print', '~> 1.8'
 end
 
 group :development, :test do

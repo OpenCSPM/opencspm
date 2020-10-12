@@ -12,7 +12,7 @@ class MyOutput
   end
 
   def puts(rspec_runner)
-    @rspec_runner.output_hash ||= ""
+    @rspec_runner.output_hash ||= ''
     @rspec_runner.output_hash << rspec_runner
   end
 
@@ -23,11 +23,22 @@ class AnalysisJob < ApplicationJob
   queue_as :default
   attr_accessor :output_hash
 
-  def perform(*args)
-    logger.info "Job run started"
-    job = Job.create(status: :running)
+  TYPE = :analyze
 
-    RSpec::world.reset
+  def perform(args)
+    unless args.has_key?(:guid)
+      logger.info 'Analysis job not running without a GUID.'
+      return nil
+    end
+
+    # shared GUID
+    guid = args[:guid]
+    logger.info "#{guid} Analysis job started"
+
+    # Track the job
+    job = Job.create(status: :running, kind: TYPE, guid: guid)
+
+    RSpec.world.reset
     RSpec.reset
     RSpec.clear_examples
 
@@ -38,13 +49,13 @@ class AnalysisJob < ApplicationJob
     options << '-fCspmFormatter'
     RSpec::Core::Runner.run(options)
 
-    results = JSON.parse(File.read('/tmp/results') )
+    results = JSON.parse(File.read('/tmp/results'))
 
     RSpec.clear_examples
-    RSpec::world.reset
+    RSpec.world.reset
     RSpec.reset
-  
+
     job.complete!
-    logger.info "Job run ended"
+    logger.info "#{guid} Analysis job finished"
   end
 end
