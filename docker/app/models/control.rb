@@ -3,6 +3,7 @@ class Control < ApplicationRecord
   has_many :tags, through: :taggings
   has_many :results
   has_many :issues, through: :results
+  has_many :resources, -> { distinct }, through: :results
 
   enum status: { failed: -1, unknown: 0, passed: 1 }
 

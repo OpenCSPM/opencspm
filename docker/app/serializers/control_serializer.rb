@@ -3,6 +3,6 @@ class ControlSerializer
   attributes :resources, :tags
 
   attribute :tags do |control|
-    control.tags.map(&:control_id)
+    control.tags.map(&:name)
   end
 end
