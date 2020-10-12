@@ -24,6 +24,11 @@ OpenCSPM has several key components that work together:
 
 ![opencspm high level architecture diagram](site/img/high-level-arch.png)
 
+1. Structured configuration and metadata is collected from the GCP Cloud Asset Inventory and Kubernetes API to a Storage Bucket or local filesystem.
+2. The data is parsed and loaded into a Graph Database with complex relationships intact.
+3. One or more customizable sets of policy checks ("control packs") are run against the parsed inventory data, and results are stored.
+4. The
+
 ## Getting Started
 
 Ready to get going?  Follow the [instructions for getting started](site/getting_started.md)
