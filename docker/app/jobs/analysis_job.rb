@@ -6,19 +6,6 @@ require_relative 'spec/formatters/custom_formatter'
 require_relative 'spec/support/db_helper'
 require 'json'
 
-class MyOutput
-  def initialize(rspec_runner)
-    @rspec_runner = rspec_runner
-  end
-
-  def puts(rspec_runner)
-    @rspec_runner.output_hash ||= ''
-    @rspec_runner.output_hash << rspec_runner
-  end
-
-  def flush; end
-end
-
 class AnalysisJob < ApplicationJob
   queue_as :default
   attr_accessor :output_hash
