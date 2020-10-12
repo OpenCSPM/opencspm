@@ -1,7 +1,7 @@
 # OpenCSPM
 Open Cloud Security Posture Management, OpenCSPM, is an open-source platform for gaining deeper insight into your cloud configuration and metadata to help understand and reduce risk over time.
 
-##Who is OpenCSPM for?
+## Who is OpenCSPM for?
 
 * Security teams running infrastructure in cloud environments looking to gain visibility into security risk across the entire account and track the resolution of those issues.
 * Development and Infrastructure teams looking for a set of security best-practices to follow as they develop new systems and bake security in early and often.
