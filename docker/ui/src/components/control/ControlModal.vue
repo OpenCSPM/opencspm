@@ -83,20 +83,6 @@
               </div>
             </div>
           </div>
-          <div class="pt-5 pb-2 flex text-sm text-gray-600">
-            <div class="w-full">
-              <h3 class="text-lg leading-6 font-medium text-gray-800">
-                Campaigns
-              </h3>
-              <div>
-                <div class="text-sm text-gray-500 truncate"
-                     v-for="(resource, idx) in resources"
-                     :key="idx">
-                  {{ resource.name }}
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
