@@ -35,7 +35,7 @@ Ready to get going?  Follow the [instructions for getting started](site/getting_
 
 ## Support and Community
 
-OpenCSPM is undergoing active development and community assistance is available via the [OpenCSPM Slack Channel](#).  If you have found an issue, please file it using a GitHub [issue](https://github.com/opencspm/opencspm/issues/new).
+OpenCSPM is undergoing active development and community assistance is available via the [OpenCSPM Slack Channel](https://opencspm.slack.com/).  If you have found an issue, please file it using a GitHub [issue](https://github.com/opencspm/opencspm/issues/new).
 
 ## Contributing
 
