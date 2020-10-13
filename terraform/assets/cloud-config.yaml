@@ -1,0 +1,55 @@
+#cloud-config
+
+users:
+- name: composer
+  uid: 2000
+  groups: docker
+write_files:
+- path: /var/lib/docker/daemon.json
+  permissions: 0644
+  owner: root
+  content: |
+    {
+      "live-restore": true,
+      "storage-driver": "overlay2",
+      "log-opts": {
+        "max-size": "1024m"
+      }
+    }
+- path: /home/composer/auth.sh
+  permissions: 0755
+  owner: composer
+  content: |
+    TOKEN=$(curl -s -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token)
+    ACCESS=$(echo $${TOKEN} | grep --extended-regexp --only-matching "(ya29.[0-9a-zA-Z._-]*)")
+    /usr/bin/docker login -u oauth2accesstoken -p "$${ACCESS}" https://gcr.io
+- path: /home/composer/docker-compose.yml
+  permissions: 0644
+  owner: composer
+  content: |
+    version: "3.7"
+    services:
+      app:
+        image: gcr.io/google-samples/hello-app:1.0
+- path: /etc/systemd/system/composer.service
+  permissions: 0644
+  owner: root
+  content: |
+    [Unit]
+    Description=Composer Service
+    Requires=docker.service network-online.target
+    After=docker.service network-online.target
+    [Service]
+    User=composer
+    Environment="HOME=/home/composer"
+    ExecStartPre=sh /home/composer/auth.sh  
+    ExecStart=/usr/bin/docker run --rm -v  /var/run/docker.sock:/var/run/docker.sock -v "/home/composer/.docker:/root/.docker" -v "/home/composer:/home/composer" -w="/home/composer" docker/compose:1.27.4 up
+    ExecStop=/usr/bin/docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v "/home/composer/.docker:/root/.docker" -v "/home/composer:/home/composer" -w="/home/composer" docker/compose:1.27.4 rm -f
+    Restart=on-failure
+    RestartSec=10
+    [Install]
+    WantedBy=multi-user.target
+runcmd:
+- systemctl daemon-reload
+- systemctl enable --now --no-block composer.service
+- echo "success" > /etc/bootstrapped-by-tf
