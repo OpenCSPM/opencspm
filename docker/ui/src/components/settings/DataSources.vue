@@ -24,12 +24,25 @@
                 </h2>
               </span>
             </div>
-            <span class="relative group flex items-center space-x-2.5">
-              <div
+            <div v-for="(source, idx) in ds.datasources"
+                 :key=idx
+                 class="ml-6 relative group flex flex-col space-y-2">
+              <div v-for="(type, idx) in source.datatypes"
+                   :key=idx
                    class="text-sm leading-5 text-gray-500 group-hover:text-gray-900 font-medium truncate">
-                {{ ds.location }}
+                <span
+                      class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium leading-4 bg-indigo-100 text-indigo-800">
+                  <svg class="mr-1.5 h-2 w-2 text-indigo-400"
+                       fill="currentColor"
+                       viewBox="0 0 8 8">
+                    <circle cx="4"
+                            cy="4"
+                            r="3" />
+                  </svg>
+                  {{ type.path_prefix }} / {{ type.format }}
+                </span>
               </div>
-            </span>
+            </div>
           </div>
           <!-- Repo meta info -->
           <div class="hidden sm:flex flex-col flex-shrink-0 items-end space-y-3">
@@ -74,24 +87,8 @@
                                   d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
                                   clip-rule="evenodd" />
                           </svg>
-                          Analyze Now
+                          Re-load data
                         </span>
-                      </button>
-                      <div class="border-t border-gray-100"></div>
-                      <button @click="disable"
-                              class="py-1 w-full">
-                        <a href="#"
-                           class="group flex items-center px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 hover:text-gray-900 focus:outline-none focus:bg-gray-100 focus:text-gray-900"
-                           role="menuitem">
-                          <svg class="mr-3 h-5 w-5 text-gray-400 group-hover:text-gray-500 group-focus:text-gray-500"
-                               viewBox="0 0 20 20"
-                               fill="currentColor">
-                            <path fill-rule="evenodd"
-                                  d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                                  clip-rule="evenodd" />
-                          </svg>
-                          Disable
-                        </a>
                       </button>
                     </div>
                   </div>
@@ -99,7 +96,7 @@
               </div>
             </div>
             <p class="flex text-gray-500 text-sm leading-5 space-x-2">
-              <span>Last activity {{ ds.updated_at | moment }}</span>
+              <span>Last updated {{ ds.updated_at | moment }}</span>
             </p>
           </div>
         </div>

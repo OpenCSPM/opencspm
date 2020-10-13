@@ -48,6 +48,6 @@ class SourcesController < ApplicationController
 
   # Only allow a trusted parameter "white list" through.
   def source_params
-    params.require(:source).permit(:name, :location, :status)
+    params.require(:source).permit(:name, :status)
   end
 end

@@ -13,15 +13,12 @@
            role="dialog"
            aria-modal="true"
            aria-labelledby="modal-headline">
-        <div class="pb-2">
-          <control-activity />
-        </div>
         <div class="px-2 py-2 flex justify-between">
           <div>
             <div class="inline-flex items-center pl-1 pr-2 mb-3 bg-indigo-100 rounded-full">
               <span
                     class="px-2 py-px mr-2 text-xs font-bold text-blue-100 uppercase bg-blue-700 rounded-full">{{ data.platform }}</span>
-              <span class="mr-1 text-sm leading-loose text-blue-800">{{ data.name }}</span>
+              <span class="mr-1 text-sm leading-loose text-blue-800">{{ data.control_id }}</span>
             </div>
           </div>
           <div class="mr-1">
@@ -49,9 +46,8 @@
           </div>
         </div>
         <div class="mx-2 pb-4 space-x-4">
-          <Tag>pci-1.2</Tag>
-          <Tag>cis-1.6</Tag>
-          <Tag>dbp-6.2</Tag>
+          <Tag v-for="(tag, idx) in data.tags"
+               :key=idx>{{ tag }}</Tag>
         </div>
         <div class="px-2 py-2">
           <h3 class="text-lg leading-6 font-medium text-gray-800">
@@ -92,13 +88,11 @@
 
 <script>
   import Tag from '../shared/Tag'
-  import ControlActivity from './ControlActivity'
 
   export default {
     props: ['control'],
     components: {
       Tag,
-      ControlActivity
     },
     mounted() {
       let url = `/controls/${this.control.id}`

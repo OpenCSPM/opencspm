@@ -30,20 +30,16 @@
       <div class="mt-6 flex justify-between items-center">
         <div class="flex text-sm leading-5 text-gray-500">
           <span>
-            <StatusDot status="active"
-                       text="active" />
-          </span>
-          <span class="ml-4">
-            <span
-                  class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium leading-4 bg-gray-100 text-indigo-800">
-              {{ profile.controls.length }} controls
-            </span>
+            <StatusDot :status="profile.controls.length > 0 ? 'active' : 'inactive'"
+                       :text="profile.controls.length > 0 ? 'active' : 'inactive'" />
           </span>
         </div>
-        <div>
-          <div class="text-xs leading-5 font-medium text-gray-500">
-            last checked 3 hours ago
-          </div>
+        <div class="py-0.5">
+          <span v-if="profile.controls.length > 0"
+                class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium leading-4 bg-gray-100 text-indigo-800">
+            {{ profile.controls.length }}
+            {{ profile.controls.length === 1 ? 'control': 'controls' }}
+          </span>
         </div>
       </div>
     </div>
