@@ -84,4 +84,4 @@ Refer to the `/terraform` directory for instructions on deploying OpenCSPM in yo
 
 ## Development
 
-Refer to the [development guide](site/development.md) for more information.
+Refer to the [development guide](development.md) for more information.
