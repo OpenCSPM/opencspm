@@ -3,6 +3,28 @@
     <!-- Background color split screen for large screens -->
     <div class="relative flex flex-col">
 
+      <div class="flex-grow w-full lg:flex">
+        <div class="flex-1 min-w-0 bg-white xl:flex">
+          <div class="bg-white lg:min-w-0 lg:flex-1">
+            <div
+                 class="pl-4 pr-6 pt-4 pb-4 border-b border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
+              <div class="flex items-center justify-end text-xs text-gray-500">
+                <div>
+                  <span @click="settingsToggle"
+                        class="inline-flex rounded-md shadow-sm">
+                    <button type="button"
+                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-cool-gray-700 bg-cool-gray-100 hover:bg-cool-gray-50 focus:outline-none focus:border-cool-gray-300 focus:shadow-outline-indigo active:bg-indigo-200 transition ease-in-out duration-150">
+
+                      Settings
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Chart class="chart mx-0 p-4 bg-white"
              v-if="loaded"
              :data="chartData.data"
@@ -28,73 +50,11 @@
           Loading...
         </div>
       </div>
-
-      <!-- 3 column wrapper -->
-      <div class="flex-grow w-full lg:flex">
-        <!-- Left sidebar & main wrapper -->
-        <div class="flex-1 min-w-0 bg-white xl:flex">
-          <!-- Projects List -->
-          <div class="bg-white lg:min-w-0 lg:flex-1">
-            <div
-                 class="pl-4 pr-6 pt-4 pb-4 border-b border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
-              <div class="flex items-center justify-end text-xs text-gray-500">
-                <div>
-                  <span @click="settingsToggle"
-                        class="inline-flex rounded-md shadow-sm">
-                    <button type="button"
-                            class="inline-flex items-center px-2.5 py-1.5 border border-transparent text-xs leading-4 font-medium rounded text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition ease-in-out duration-150">
-                      Settings
-                    </button>
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <!-- Tabs -->
-    <div class="-ml-4 my-4">
-      <nav class="flex">
-        <button v-on:click="selectedTab = 'controls'"
-                class="ml-4 px-3 py-2 font-medium text-sm leading-5 rounded-md"
-                v-bind:class="{'text-gray-800 bg-gray-200 focus:outline-none focus:bg-gray-200': selectedTab === 'controls','text-gray-600 hover:text-gray-800 focus:outline-none focus:text-gray-800 focus:bg-gray-200': selectedTab !== 'controls'  }">
-          <div class="flex items-center space-x-2">
-            <svg class="h-5 w-5 text-gray-400"
-                 viewBox="0 0 20 20"
-                 fill="currentColor">
-              <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z" />
-              <path fill-rule="evenodd"
-                    d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z"
-                    clip-rule="evenodd" />
-            </svg>
-            <span class="text-sm text-gray-500 leading-5 font-medium">Controls</span>
-          </div>
-        </button>
-        <button v-on:click="selectedTab = 'activity'"
-                class="ml-4 px-3 py-2 font-medium text-sm leading-5 rounded-md"
-                v-bind:class="{'text-gray-800 bg-gray-200 focus:outline-none focus:bg-gray-200': selectedTab === 'activity','text-gray-600 hover:text-gray-800 focus:outline-none focus:text-gray-800 focus:bg-gray-200': selectedTab !== 'activity'  }">
-          <div class="flex items-center space-x-2">
-            <svg class="h-5 w-5 text-gray-400"
-                 viewBox="0 0 20 20"
-                 fill="currentColor">
-              <path
-                    d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
-            </svg>
-            <span class="text-sm text-gray-500 leading-5 font-medium">Activity</span>
-          </div>
-        </button>
-      </nav>
     </div>
     <!-- Tab Content -->
     <div>
-      <div v-if="selectedTab === 'activity'">
-        <CampaignActivity />
-      </div>
-      <div v-if="selectedTab === 'controls'">
-        <ControlsList v-if="controls"
-                      :controls="controls" />
-      </div>
+      <ControlsList v-if="controls"
+                    :controls="controls" />
     </div>
     <CampaignSettings v-show="settingsOpen"
                       @close="settingsToggle"
@@ -107,14 +67,14 @@
   import moment from 'moment'
   import Chart from '../shared/BarChartChartjs'
   import CampaignSettings from './CampaignSettings'
-  import CampaignActivity from './CampaignActivity'
+  // import CampaignActivity from './CampaignActivity'
   import ControlsList from '../control/ControlsList'
 
   export default {
     components: {
       Chart,
       CampaignSettings,
-      CampaignActivity,
+      // CampaignActivity,
       ControlsList
     },
     mounted() {
@@ -199,7 +159,6 @@
             let results = Array(span).fill(0)
             let labels = Array(span).fill('-')
 
-            console.log('r', this.results)
             // bar data
             this.results
               .map(x => results.push(x.controls_failed))

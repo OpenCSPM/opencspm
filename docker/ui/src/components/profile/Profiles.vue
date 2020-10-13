@@ -5,8 +5,10 @@
       <div class="flex-1 min-w-0">
         <div class="lg:min-w-0 lg:flex-1">
           <div class="mt-6 grid gap-5 max-w-lg mx-auto lg:grid-cols-3 lg:max-w-none">
-            <ProfileCard v-for="(profile, idx) in profiles" :key="idx" :profile="profile"
-              :idx="idx" />
+            <ProfileCard v-for="(profile, idx) in profiles"
+                         :key="idx"
+                         :profile="profile"
+                         :idx="idx" />
           </div>
         </div>
       </div>
@@ -23,16 +25,17 @@
       ProfileCard
     },
     methods: {
-      filteredProfiles: function (t) {
+      filteredProfiles: function(t) {
         return this.profiles.filter(x => x.profile_type === t)
       }
     },
-    mounted: function () {
+    mounted: function() {
       let url = '/profiles'
 
       this.$http.get(url)
         .then(res => {
-          this.profiles = res.data.data.map(x => x.attributes)
+          this.profiles = res.data.data.map(x => x.attributes).sort((a, b) => a.controls
+            .length > b.controls.length ? -1 : 1)
         })
         .catch(err => {
           console.info(err)

@@ -24,11 +24,15 @@ unless demo_user
 end
 
 # Data sources (Loaders)
-sources = YAML.load(File.read('db/sample_data_sources.yml'))
+sources = JSON.parse(YAML.load(File.read('load_config/config.yaml')).to_json)
 
-sources.each do |ds|
+sources['accounts'].each do |ds|
   res = Source.find_or_create_by(name: ds['name'])
-  res.update(ds)
+  puts "Source: #{ds['name']}"
+  res.update(
+    name: ds['name'],
+    datasources: ds['datasources']
+  )
 end
 
 # Profiles
