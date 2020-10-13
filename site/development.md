@@ -2,7 +2,7 @@
 
 ## Docker Components
 
-![Docker Dashboard](site/img/docker-dashboard.png)
+![Docker Dashboard](/site/img/docker-dashboard.png)
 
 
 ## Development Environment Setup
