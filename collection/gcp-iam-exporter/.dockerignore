@@ -1,0 +1,6 @@
+Dockerfile
+README.md
+.ruby-version
+.bundle/
+vendor/
+build.sh
