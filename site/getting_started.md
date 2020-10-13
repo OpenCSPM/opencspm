@@ -81,3 +81,7 @@ $ docker volume prune
 ### Dedicated Mode
 
 Refer to the `/terraform` directory for instructions on deploying OpenCSPM in your environment.
+
+## Development
+
+Refer to the [development guide](site/development.md) for more information.
