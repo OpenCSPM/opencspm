@@ -39,7 +39,7 @@ OpenCSPM is undergoing active development and community assistance is available 
 
 ## Contributing
 
-We invite you to submit requests for new features and bug reports using a Github [issue](https://github.com/opencspm/opencspm/issues/new). If you would like to contribute to OpenCSPM, please review our [contributing guidelines](development.md).
+We invite you to submit requests for new features and bug reports using a Github [issue](https://github.com/opencspm/opencspm/issues/new). If you would like to contribute to OpenCSPM, please review our [development guide](site/development.md).
 
 ## Creators
 

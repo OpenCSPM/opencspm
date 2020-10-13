@@ -1,8 +1,13 @@
+# Development Guide
+
+## Docker Components
+
+![Docker Dashboard](site/img/docker-dashboard.png)
 
 
-### Development Environment Setup
+## Development Environment Setup
 
-#### IDE integration (optional)
+### IDE integration (optional)
 
 Create an RVM gemset so IDEs (like VS Code) will be able to use Ruby integration with Solargraph and Rubocop for formatting and linting.
 
@@ -28,9 +33,7 @@ Launch IDE from within `docker` directory:
 ~/docker $ code .
 ```
 
-
-
-#### Launch Full Environment
+### Launch Full Environment
 
 To just run the full environment locally, run `docker-compose up` from within the `docker` directory. The initial run will take several minutes - at roughly 1 minute to build the Docker image, roughly 2 more minutes to install all Ruby gems (`core` container) and JavaScript packages (`ui` container).
 
@@ -66,19 +69,12 @@ worker_1    | 2020-10-08T19:10:01.284Z pid=1 tid=gnzrya5pl INFO: Upgrade to Side
 worker_1    | 2020-10-08T19:10:01.284Z pid=1 tid=gnzrya5pl INFO: Starting processing, hit Ctrl-C to stop
 ```
 
+### Application URLs & Endpoints
 
-
-#### Application URLs & Endpoints
-
-Web UI: http://localhost:8000
-
-Rails API: http://localhost:5000
-
-Sidekiq console: http://localhost:5000/sidekiq
-
-Redis Insight UI: http://localhost:8001
-
-
+* Web UI: http://localhost:8000
+* Rails API: http://localhost:5000
+* Sidekiq console: http://localhost:5000/sidekiq
+* Redis Insight UI: http://localhost:8001
 
 ### Development Environment Details
 
@@ -108,7 +104,7 @@ Loading development environment (Rails 6.0.3.4)
 irb(main):001:0> 
 ```
 
-#### Restarting Containers
+### Restarting Containers
 
 Frontend UI (HTML/JavaScript) and Rails changes are reflected in their respective containers in real-time. However, certain changes will require a container restart. For example:
 
@@ -116,9 +112,7 @@ Frontend UI (HTML/JavaScript) and Rails changes are reflected in their respectiv
 $ docker-compose restart core
 ```
 
-
-
-#### Running Rails Rspec Tests
+### Running Rails Rspec Tests
 
 Run tests in a dedicated container (with the correct environment set) and remove it afterwards:
 
@@ -126,15 +120,13 @@ Run tests in a dedicated container (with the correct environment set) and remove
 $ docker-compose run core bundle exec rspec -e RAILS_ENV=test
 ```
 
-#### Clean up
+### Clean up
 
 To stop the containers but leave the volumes intact:
 
 ```console
 $ docker-compose down
 ```
-
-
 
 To stop the contianers and remove the volumes:
 
@@ -143,12 +135,9 @@ $ docker-compose down --remove
 $ docker volume prune
 ```
 
-
-
 To re-run a clean "initial" setup, remove the `.init` artifacts after deleting volumes, then re-run `docker-compose up`:
 
 ```console
 $ rm .init ui/.init
 $ docker-compose up
 ```
-
