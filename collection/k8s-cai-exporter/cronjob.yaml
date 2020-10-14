@@ -59,7 +59,7 @@ spec:
           serviceAccountName: opencspm
           containers:
           - name: opencspm
-            image: gcr.io/opencspm/k8s-cai-exporter:v0.1.4
+            image: gcr.io/opencspm/k8s-cai-exporter:v0.1.6
             env:
             - name: "GCS_BUCKET_NAME"
               value: "darkbit-collection-us-cspm"
