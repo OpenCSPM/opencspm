@@ -2,6 +2,7 @@ class Control < ApplicationRecord
   has_many :taggings, dependent: :destroy
   has_many :tags, through: :taggings
   has_many :results
+  has_many :jobs, through: :results
   has_many :issues, through: :results
   has_many :resources, -> { distinct }, through: :results
 
