@@ -34,6 +34,7 @@
                         </label>
                         <div class="relative rounded-md shadow-sm">
                           <input v-model="name"
+                                 @keydown.enter="update"
                                  id="project_name"
                                  class="form-input block w-full sm:text-sm sm:leading-5 transition ease-in-out duration-150">
                         </div>
