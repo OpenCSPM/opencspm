@@ -8,8 +8,11 @@
           <div class="bg-white lg:min-w-0 lg:flex-1">
             <div
                  class="pl-4 pr-6 pt-4 pb-4 border-b border-gray-200 sm:pl-6 lg:pl-8 xl:pl-6 xl:pt-6 xl:border-t-0">
-              <div class="flex items-center justify-end text-xs text-gray-500">
+              <div class="flex items-center justify-between">
                 <div>
+                  <h2>{{ campaign.data.attributes.name }}</h2>
+                </div>
+                <div class=" text-xs text-gray-500">
                   <span @click="settingsToggle"
                         class="inline-flex rounded-md shadow-sm">
                     <button type="button"
@@ -78,7 +81,7 @@
       ControlsList
     },
     mounted() {
-      this.loadControls()
+      this.loadCampaign()
       this.loadResults()
     },
     methods: {
@@ -93,7 +96,7 @@
         this.campaign = res.data
         this.settingsOpen = false
       },
-      loadControls() {
+      loadCampaign() {
         let id = this.$route.params.campaign_id
         let url = `/campaigns/${id}`
 
