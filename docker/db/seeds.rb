@@ -21,6 +21,7 @@ unless demo_user
   )
 
   demo_user.save(validate: false)
+  demo_user.add_role(:admin)
 end
 
 # Data sources (Loaders)
