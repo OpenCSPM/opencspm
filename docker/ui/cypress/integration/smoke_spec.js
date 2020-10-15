@@ -1,16 +1,15 @@
+/// <reference types="Cypress" />
+
 describe('Smoke Test', () => {
+  // runs once before all tests in the block
   before(() => {
-    // runs once before all tests in the block
+    cy.clearCookies()
     cy.login()
   })
 
+  // maintain current session through smoke tests
   beforeEach(() => {
-    // maintain current session through smoke tests
     Cypress.Cookies.preserveOnce('_opencspm_session', '_opencspm_token')
-  })
-
-  after(() => {
-    cy.clearCookies()
   })
 
   it('can see current campaigns', () => {
