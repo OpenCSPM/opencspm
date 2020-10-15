@@ -17,6 +17,9 @@ docker/log
 .psqlrc
 .bashrc
 
+# Cypress
+ui/cypress/videos/*
+
 # Rails 
 .local
 *.rbc

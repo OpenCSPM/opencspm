@@ -5,7 +5,8 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build && rm -rf docs/* && cp -R dist/* docs/ && cd docs; ln -s index.html 404.html",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "smoke": "cypress run --browser chrome --spec cypress/integration/smoke_spec.js --headless"
   },
   "dependencies": {
     "@tailwindcss/ui": "^0.5.0",
