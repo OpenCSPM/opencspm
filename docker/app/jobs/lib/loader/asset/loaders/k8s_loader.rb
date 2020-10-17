@@ -12,7 +12,7 @@ class K8sLoader < AssetLoader
 
   def load
     asset_name = sanitize_value(asset['name'])
-    puts "k8sloader #{asset_name}"
+    #puts "k8sloader #{asset_name}"
     #puts asset
   end
 end
