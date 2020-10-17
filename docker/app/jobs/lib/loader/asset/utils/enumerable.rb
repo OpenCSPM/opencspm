@@ -1,3 +1,6 @@
+# frozen-string-literal: true
+
+# Custom patch to flatten keys and sanitize values
 module Enumerable
   def flatten_with_path(parent_prefix = nil)
     res = {}
@@ -18,7 +21,7 @@ module Enumerable
         if v.is_a?(String)
           res[key] = sanitize_value(v)
         elsif v.nil?
-          res[key] = "null"
+          res[key] = 'null'
         else
           res[key] = v
         end
@@ -27,8 +30,9 @@ module Enumerable
 
     res
   end
+
   def sanitize_value(value)
-    value = CGI.escape(value) if value.start_with?("{")
-    value.gsub(/^\/\//,'') unless value.nil?
+    value = CGI.escape(value) if value.start_with?('{')
+    value&.gsub(%r{/^//}, '')
   end
 end
