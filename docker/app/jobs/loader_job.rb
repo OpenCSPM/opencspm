@@ -1,6 +1,5 @@
 # Add lib to the load path
 $:.unshift(File.expand_path('lib', __dir__))
-require 'config/config_loader'
 require 'batch_importer'
 require 'pry'
 
@@ -22,13 +21,8 @@ class LoaderJob < ApplicationJob
     # Track the job
     job = Job.create(status: :running, kind: TYPE, guid: guid)
 
-    config_file = 'load_config/config.yaml'
-
-    logger.info 'Loading configuration'
-    config = ConfigLoader.new(config_file).parsed_config
-
-    logger.info 'Loading data...'
-    BatchImporter.new(config).import
+    logger.info 'Loading data'
+    BatchImporter.new("load_config/config.yaml").import
 
     job.complete!
     logger.info "#{guid} Loader job finished"

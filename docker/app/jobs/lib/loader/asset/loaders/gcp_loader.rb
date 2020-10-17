@@ -1,5 +1,7 @@
-class GCPLoader < AssetLoader
+# frozen-string-literal: true
 
+# comment
+class GCPLoader < AssetLoader
   attr_reader :asset, :import_id, :db, :asset_name, :asset_type, :asset_label, :asset_parent, :asset_parent_label
 
   def initialize(asset, db, import_id)
@@ -21,18 +23,18 @@ class GCPLoader < AssetLoader
     load
   end
 
+  # See if a custom loader is defined or send to the default
   def load
-   
-    # See if a custom loader is defined or send to the default
     if Object.const_defined?(asset_label)
-      Object.const_get(asset_label).new(asset, db, import_id) 
+      Object.const_get(asset_label).new(asset, db, import_id)
     else
-      GCP_DEFAULT.new(asset, db, import_id) 
+      GCP_DEFAULT.new(asset, db, import_id)
     end
 
     add_resource_hierarchy(asset_label, asset_name, asset_parent_label, asset_parent)
-
   end
+
+  private
 
   def add_resource_hierarchy(asset_label, asset_name, asset_parent_label, asset_parent)
     # Organization has no parents
@@ -65,5 +67,25 @@ class GCPLoader < AssetLoader
   def compute_url_to_compute_name(url)
     return "" if url.nil? || url.empty?
     url.gsub(/.*googleapis.com\/compute\/v1/, 'compute.googleapis.com').gsub(/.*container.googleapis.com\/v1/, 'container.googleapis.com')
+  end
+
+  def get_gcp_asset_label(asset_type)
+    if asset_type =~ /\.googleapis\.com\//
+      label = asset_type.gsub(/\.googleapis\.com\//, '_').split('/').first.upcase
+      label = label.gsub(/_ORGANIZATIONS$/, '_ORGANIZATION')
+      label = label.gsub(/_FOLDERS$/, '_FOLDER')
+      label = label.gsub(/_PROJECTS$/, '_PROJECT')
+      return "GCP_#{label}"
+    end
+  end
+
+  def get_gcp_asset_parent(asset_label, ancestors)
+    gcp_base = 'cloudresourcemanager.googleapis.com/'
+    case asset_label
+    when 'GCP_CLOUDRESOURCEMANAGER_FOLDER', 'GCP_CLOUDRESOURCEMANAGER_PROJECT'
+      return gcp_base + ancestors[1]
+    else
+      return gcp_base + ancestors.first
+    end
   end
 end

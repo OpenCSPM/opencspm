@@ -1,5 +1,4 @@
-class GCPIAMLoader < AssetLoader
-
+class GCPIAMLoader < GCPLoader
   attr_reader :asset, :import_id, :db
 
   def initialize(asset, db, import_id)
@@ -91,8 +90,7 @@ class GCPIAMLoader < AssetLoader
                                    }]->(r)
         """
         graphquery(query)
-
-      end 
+      end
     end
   end
 end
