@@ -1,5 +1,5 @@
 <template>
-  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium leading-4 bg-gray-100 text-indigo-800"
+  <span class="mr-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium leading-4 bg-gray-100 text-indigo-800"
         @click="doAction">
     <svg class="mr-1.5 h-2 w-2 text-indigo-400"
          fill="currentColor"
