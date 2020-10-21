@@ -43,7 +43,7 @@ class CampaignsController < ApplicationController
     @campaign = Campaign.find_by_id!(params[:id])
   end
 
-  # Only allow a trusted parameter "white list" through.
+  # Only allow a trusted parameter "allow list" through.
   def campaign_params
     params.require(:campaign).permit(:name, :notes, filters: {})
   end

@@ -45,7 +45,7 @@
             </div>
           </div>
         </div>
-        <div class="mx-2 pb-4 space-x-4">
+        <div class="mx-2 pb-4">
           <Tag v-for="(tag, idx) in data.tags"
                :key=idx>{{ tag }}</Tag>
         </div>

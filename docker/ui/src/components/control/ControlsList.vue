@@ -43,7 +43,7 @@
                             @click="openModal(control.id)">
                         {{ control.control_id }}
                       </span>
-                      <div class="space-x-4 invisible group-hover:visible">
+                      <div class="invisible group-hover:visible">
                         <Tag v-for="(tag, idx) in control.tags"
                              :key="idx"
                              :tag="tag"
