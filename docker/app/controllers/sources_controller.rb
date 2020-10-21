@@ -46,7 +46,7 @@ class SourcesController < ApplicationController
     @source = Source.find(params[:id])
   end
 
-  # Only allow a trusted parameter "white list" through.
+  # Only allow a trusted parameter "allow list" through.
   def source_params
     params.require(:source).permit(:name, :status)
   end

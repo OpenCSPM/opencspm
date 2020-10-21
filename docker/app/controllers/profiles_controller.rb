@@ -15,22 +15,6 @@ class ProfilesController < ApplicationController
     render json: ProfileSerializer.new(@profile)
   end
 
-  #
-  #
-  # TEMP DEBUG
-  #
-  #
-  def reset_all_data
-    if current_user.is_admin?
-      Profile.all.each do |p|
-        p.results.destroy_all
-        p.update(issue_count: 0)
-      end
-    end
-
-    render json: {}, status: :ok
-  end
-
   private
 
   # Use callbacks to share common setup or constraints between actions.
@@ -38,7 +22,7 @@ class ProfilesController < ApplicationController
     @profile = Profile.find_by_id!(params[:id])
   end
 
-  # Only allow a trusted parameter "white list" through.
+  # Only allow a trusted parameter "allow list" through.
   def profile_params
     params.require(:profile).permit(:name, :author, :provider, :category, :status)
   end
