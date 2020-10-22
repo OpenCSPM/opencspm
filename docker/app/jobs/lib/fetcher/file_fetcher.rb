@@ -1,6 +1,7 @@
 # frozen-string-literal: true
 
-require 'pry'
+require 'fetcher/types/bucket_fetcher'
+require 'fetcher/types/local_fetcher'
 
 # Fetches files from buckets to a local dir
 class FileFetcher
@@ -17,6 +18,7 @@ class FileFetcher
   # Grabs from local dirs to load_dir
   # Returns an array of json files in load_dir
   def fetch
+    clean_load_dir
     pull_from_remote_buckets(@remote_buckets)
     pull_from_local_dirs(@local_dirs)
     load_dir_json_files
@@ -24,16 +26,24 @@ class FileFetcher
 
   private
 
+  # Clean up load dir where this job will fetch new files
+  # from all locations (buckets and local fs dirs)
+  # and place them in to be loaded/parsed
+  def clean_load_dir
+    puts "Cleaning #{@load_dir}"
+    FileUtils.rm_rf(@load_dir)
+  end
+
   # Pull buckets to load_dir
   def pull_from_remote_buckets(buckets)
     return if buckets.nil?
-    # TODO: Call bucket loader
+    BucketFetcher.new(buckets, @load_dir).fetch
   end
 
   # Pull local_dirs to load_dir
   def pull_from_local_dirs(local_dirs)
     return if local_dirs.nil?
-    # TODO: Call local loader
+    LocalFetcher.new(local_dirs, @load_dir).fetch
   end
 
   # Return list of files from local dir

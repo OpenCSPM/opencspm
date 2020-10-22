@@ -31,6 +31,8 @@ class GCPIAMLoader < GCPLoader
     """
     graphquery(query)
 
+    return unless iam_policy['bindings'].is_a?(Array)
+
     iam_policy['bindings'].each do |iam_binding|
       role = iam_binding['role']
       iam_binding['members'].each do |member|

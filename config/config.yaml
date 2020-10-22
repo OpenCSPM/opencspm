@@ -2,11 +2,11 @@
 db:
   host: redis
   port: 6379
-#buckets:
-#  - gs://darkbit-collection-us-cspm
+buckets:
+  - gs://darkbit-collection-us-cspm
 #  - s3://my-other-bucket-here
-local_dirs:
-  - /app/data
+#local_dirs:
+#  - /app/data/demo
 #---
 #db:
 #  url: redis://redis:6379
