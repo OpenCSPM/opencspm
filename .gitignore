@@ -73,3 +73,6 @@ yarn-debug.log*
 
 # Ignore pry
 docker/.local/*
+
+# tmp load files
+load_dir/*.json
