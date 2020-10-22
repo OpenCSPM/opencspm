@@ -13,7 +13,7 @@ module Enumerable
       end
 
       key = parent_prefix ? "#{parent_prefix}_#{k}" : k # assign key name for result hash
-      key = key.gsub(/-/,'_')
+      key = key.gsub(/-/,'_').gsub(/\./, '_dot_').gsub(/\//, '_slash_')
 
       if v.is_a? Enumerable
         res.merge!(v.flatten_with_path(key)) # recursive call to flatten child elements

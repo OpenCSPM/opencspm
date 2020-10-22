@@ -37,6 +37,9 @@ class AssetRouter
     # GCP CAI K8s resources are incomplete
     return if @asset['asset_type'].start_with?('k8s.io')
 
+    # TODO: Remove
+    #return if @asset['asset_type'] == 'compute.googleapis.com/SslCertificate'
+
     if @asset['iam_policy'].nil?
       # GCP CAI Resource
       GCPLoader.new(@asset, @db, @import_id)
