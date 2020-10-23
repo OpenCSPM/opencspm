@@ -22,6 +22,7 @@ gem 'bcrypt', '~> 3.1'
 gem 'omniauth', '~> 1.9'
 gem 'omniauth-google-oauth2', '~> 0.8.0'
 gem 'omniauth-github', '~> 1.4'
+gem 'google-cloud-storage', '~> 1.29'
 gem 'rolify', '~> 5.3'
 gem 'lograge', '~> 0.11.2'
 gem 'rspec', '~> 3.9'
@@ -48,5 +49,3 @@ group :development, :test do
   gem 'rspec-rails', '~> 4.0'
   gem 'factory_bot_rails', '~> 6.1'
 end
-
-gem "google-cloud-storage", "~> 1.29"
