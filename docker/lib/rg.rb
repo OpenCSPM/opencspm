@@ -2,117 +2,156 @@
 # require 'redis'
 # require 'redisgraph'
 # require 'awesome_print'
+require 'rg/aws_graph_db_loader.rb'
+require 'rg/loaders.rb'
 
 class Rg
   def initialize
     @r = RedisGraph.new('recon')
   end
 
-  def delete_all
-    q = 'MATCH (n) DETACH DELETE n'
+  #
+  # Execute a Cypher query
+  #
+  def query(q)
     res = @r.query(q)
-    res.stats
+    # p res.stats if res
+  end
+
+  def delete_all
+    puts 'Deleting all RedisGraph nodes...'
+    q = 'MATCH (n) DETACH DELETE n'
+    res = query(q)
   end
 
   def create_all
-    # type we care about
-    # types = %w[instance cluster]
-    types = %w[instance]
-
-    resources = []
+    puts 'Loading all RedisGraph nodes...'
 
     # read recon .json
-    t = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+    time_start = _time
+
     IO.foreach(Rails.root.join('tmp', 'recon.json')) do |line|
       json = JSON.parse(line, object_class: OpenStruct)
-      # p json if types.include?(json.asset_type)
 
-      # puts json.name if types.include?(json.asset_type) && insert(json)
-      insert(json) if types.include?(json.asset_type)
+      # binding.pry
+
+      if json.service.downcase == 'ec2'
+        # binding.pry
+        q = AwsEc2Loader.new(json).to_q
+
+        if q
+          # puts q
+          query(q)
+        end
+      end
+
+      # insert(json) if types.include?(json.asset_type)
     end
 
-    p Process.clock_gettime(Process::CLOCK_MONOTONIC) - t
+    puts "Elapsed time: #{_time - time_start}"
   end
 
   def insert(res)
     resource = res.asset_type
-    relationship = 'runs_in'
-
-    stuff = [
-      { instance_id: 'i-124243', hostname: 'dev-test-1' },
-      { instance_id: 'i-224243', hostname: 'dev-test-2' },
-      { instance_id: 'i-324243', hostname: 'dev-test-3' }
-    ].to_json
-
-    stuff = 'tbd'
 
     # basic sanity check
     return unless res.name &&
                   res.region &&
-                  res.resource.data.instance_type
+                  res.service &&
+                  (res.resource.data.instance_type || res.resource.data.vpc_id)
 
-    region = %w[us-east-1 us-east-2 us-east-3].sample
+    #
+    # EC2 Instances
+    #
+    if res.resource.data.instance_type
+      q = %{
+          MERGE (i:AWS_INSTANCE { name: '#{res.name}' })
+          ON CREATE SET
+              i.service_type = '#{res.service}',
+              i.asset_type = '#{resource}',
+              i.loader_type = 'aws',
+              i.instance_type = '#{res.resource.data.instance_type}'
+          ON MATCH SET
+              i.service_type = '#{res.service}',
+              i.asset_type = '#{resource}',
+              i.loader_type = 'aws',
+              i.instance_type = '#{res.resource.data.instance_type}'
+      }
 
-    # q = "(:instance {name:'i-a1b2c3d4e5f6', type: 'x1e.16xlarge'})-[:runs_in]->(:region {name:'us-east-2'})," \
+      # print q
+      printf '[.]'
 
-    # q = %{
-    #   MERGE (i:#{resource} { name: '#{res.name}' })
-    #   ON CREATE SET
-    #       i.asset_type = \"#{resource}\",
-    #       i.loader_type = \"aws\",
-    #       i.instance_type = \"#{res.resource.data.instance_type}\"
-    #   ON MATCH SET
-    #       i.asset_type = \"#{resource}\",
-    #       i.loader_type = \"aws\",
-    #       i.instance_type = \"#{res.resource.data.instance_type}\"
-    #   MERGE (r:AWS_REGION { name: \"#{region}\" })
-    #   ON CREATE SET
-    #       r.asset_type = \"aws_non_china_region\",
-    #       r.loader_type = \"aws\"
-    #   ON MATCH SET
-    #       r.asset_type = \"aws_non_china_region\",
-    #       r.loader_type = \"aws\"
-    #   MERGE (i)-[:#{relationship.upcase}]->(r)
-    #   }
+      res_instance = @r.query(q)
+    end
 
-    q = %{
-        MERGE (i:#{resource} { name: '#{res.name}' })
+    #
+    # EC2 vpc -> Region relationships
+    # EC2 instance -> Region relationships
+    #
+    if res.region
+      # vpc -> region
+      q = %{
+        MATCH (v:AWS_VPC { name: '#{res.name}' })
+        MERGE (r:AWS_REGION { name: '#{res.region}' })
         ON CREATE SET
-            i.asset_type = '#{resource}',
-            i.loader_type = 'aws',
-            i.instance_type = '#{res.resource.data.instance_type}'
+            r.asset_type = 'region',
+            r.loader_type = 'aws'
         ON MATCH SET
-            i.asset_type = '#{resource}',
-            i.loader_type = 'aws',
-            i.instance_type = '#{res.resource.data.instance_type}'
-    }
+            r.asset_type = 'region',
+            r.loader_type = 'aws'
+        MERGE (v)-[:LIVES_IN]->(r)
+      }
 
-    print q
+      printf '->'
+      res_vpc_region = @r.query(q)
 
-    # 'CREATE ' \
-    # "(#{resource} { name: '#{res.name}', type: '#{res.resource.data.instance_type}' })-[#{relationship}]->(:region { name: '#{region}' })"
+      # instance -> region
+      q = %{
+        MATCH (i:AWS_INSTANCE { name: '#{res.name}' })
+        MERGE (r:AWS_REGION { name: '#{res.region}' })
+        ON CREATE SET
+            r.asset_type = 'region',
+            r.loader_type = 'aws'
+        ON MATCH SET
+            r.asset_type = 'region',
+            r.loader_type = 'aws'
+        MERGE (i)-[:RUNS_IN]->(r)
+      }
 
-    # ap q
-    res_instance = @r.query(q)
-    # res.stats
+      printf '->'
+      res_instance_region = @r.query(q)
+    end
 
-    q = %{
-      MATCH (i:#{resource} { name: \"#{res.name}\" })
-      MERGE (r:AWS_REGION { name: \"#{region}\" })
+    #
+    # EC2 instance -> VPC relationships
+    #
+    if res.resource.data.vpc_id
+      q = %{
+      MATCH (i:AWS_INSTANCE { name: '#{res.name}' })
+      MERGE (r:AWS_VPC { name: '#{res.resource.data.vpc_id}' })
       ON CREATE SET
-          r.asset_type = \"aws_non_china_region\",
-          r.loader_type = \"aws\"
+          r.region = '#{res.region}',
+          r.asset_type = 'vpc',
+          r.loader_type = 'aws'
       ON MATCH SET
-          r.asset_type = \"aws_non_china_region\",
-          r.loader_type = \"aws\"
-      MERGE (i)-[:#{relationship.upcase}]->(r)
+          r.region = '#{res.region}',
+          r.asset_type = 'vpc',
+          r.loader_type = 'aws'
+      MERGE (i)-[:IS_MEMBER_OF]->(r)
     }
 
-    res_region = @r.query(q)
-    # res = @r.query(q)
+      printf '->'
+      res_vpcs = @r.query(q)
+    end
 
-    !!res_instance && !!res_region
-    # !!res
+    true
+  end
+  puts '!!!'
+
+  private
+
+  def _time
+    Process.clock_gettime(Process::CLOCK_MONOTONIC)
   end
 end
 
