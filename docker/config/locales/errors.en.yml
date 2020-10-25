@@ -7,3 +7,5 @@ en:
     database_connect_timeout:
       code: 5001
       message: 'The database connection timed out.'
+    graph_loader_params_missing:
+      message: 'Missing parameters'

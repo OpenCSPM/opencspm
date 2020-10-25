@@ -28,6 +28,7 @@ class Rg
     vpc
     security_group
     network_interface
+    subnet
   ].freeze
 
   def initialize
@@ -58,6 +59,9 @@ class Rg
     # read recon .json
     time_start = _time
 
+    #
+    # Load AWS Recon .json file
+    #
     IO.foreach(Rails.root.join('tmp', 'recon.json')) do |line|
       json = JSON.parse(line, object_class: OpenStruct)
 
@@ -72,126 +76,30 @@ class Rg
         # TODO: AWSLoader::EC2::NetworkInterface
         AwsEc2Loader.new(json).to_q&.each do |q|
           # binding.pry
-          puts q
+          # puts q
           query(q)
           c += 1
         end
       end
-
-      # insert(json) if types.include?(json.asset_type)
     end
 
     puts "\nQueries: #{c}"
     puts "Elapsed time: #{_time - time_start}"
   end
 
-  def insert(res)
-    resource = res.asset_type
-
-    # basic sanity check
-    return unless res.name &&
-                  res.region &&
-                  res.service &&
-                  (res.resource.data.instance_type || res.resource.data.vpc_id)
-
-    #
-    # EC2 Instances
-    #
-    if res.resource.data.instance_type
-      q = %{
-          MERGE (i:AWS_INSTANCE { name: '#{res.name}' })
-          ON CREATE SET
-              i.service_type = '#{res.service}',
-              i.asset_type = '#{resource}',
-              i.loader_type = 'aws',
-              i.instance_type = '#{res.resource.data.instance_type}'
-          ON MATCH SET
-              i.service_type = '#{res.service}',
-              i.asset_type = '#{resource}',
-              i.loader_type = 'aws',
-              i.instance_type = '#{res.resource.data.instance_type}'
-      }
-
-      # print q
-      printf '[.]'
-
-      res_instance = @r.query(q)
-    end
-
-    #
-    # EC2 vpc -> Region relationships
-    # EC2 instance -> Region relationships
-    #
-    if res.region
-      # vpc -> region
-      q = %{
-        MATCH (v:AWS_VPC { name: '#{res.name}' })
-        MERGE (r:AWS_REGION { name: '#{res.region}' })
-        ON CREATE SET
-            r.asset_type = 'region',
-            r.loader_type = 'aws'
-        ON MATCH SET
-            r.asset_type = 'region',
-            r.loader_type = 'aws'
-        MERGE (v)-[:LIVES_IN]->(r)
-      }
-
-      printf '->'
-      res_vpc_region = @r.query(q)
-
-      # instance -> region
-      q = %{
-        MATCH (i:AWS_INSTANCE { name: '#{res.name}' })
-        MERGE (r:AWS_REGION { name: '#{res.region}' })
-        ON CREATE SET
-            r.asset_type = 'region',
-            r.loader_type = 'aws'
-        ON MATCH SET
-            r.asset_type = 'region',
-            r.loader_type = 'aws'
-        MERGE (i)-[:RUNS_IN]->(r)
-      }
-
-      printf '->'
-      res_instance_region = @r.query(q)
-    end
-
-    #
-    # EC2 instance -> VPC relationships
-    #
-    if res.resource.data.vpc_id
-      q = %{
-      MATCH (i:AWS_INSTANCE { name: '#{res.name}' })
-      MERGE (r:AWS_VPC { name: '#{res.resource.data.vpc_id}' })
-      ON CREATE SET
-          r.region = '#{res.region}',
-          r.asset_type = 'vpc',
-          r.loader_type = 'aws'
-      ON MATCH SET
-          r.region = '#{res.region}',
-          r.asset_type = 'vpc',
-          r.loader_type = 'aws'
-      MERGE (i)-[:IS_MEMBER_OF]->(r)
-    }
-
-      printf '->'
-      res_vpcs = @r.query(q)
-    end
-
-    true
-  end
-  puts '!!!'
-
+  # DEBUG
   def _clear_log
     File.write(DEBUG_LOG_FILE, '', mode: 'w')
   end
 
   private
 
+  # DEBUG
   def _log(msg)
     File.write(DEBUG_LOG_FILE, msg, mode: 'a')
   end
 
+  # DEBUG
   def _time
     Process.clock_gettime(Process::CLOCK_MONOTONIC)
   end

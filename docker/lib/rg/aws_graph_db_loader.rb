@@ -4,9 +4,10 @@
 #
 class AwsGraphDbLoader
   LOADER_TYPE = 'aws'.freeze
-  FILTERED_ATTRS = [:user_data].freeze
+  FILTERED_ATTRIBUTES = [:user_data].freeze
 
   def initialize(json)
+    @account = json.account
     @service = json.service
     @region = json.region
     @asset_type = json.asset_type
@@ -14,46 +15,44 @@ class AwsGraphDbLoader
     @data = json.resource.data
   end
 
-  # Return Cypher formatted attribute hash for every top-level key in a hash
-  def flatten_attributes(key, struct = @data)
-    # filter out any non-strings
-    hash = struct.to_h.select { |_k, v| v.class == String }
-
-    # filter out fields we don't want or that may have sketchy formatting
-    hash.reject! { |x| FILTERED_ATTRS.include?(x) }
-
-    # return a formatted string
-    hash.map { |k, v| "#{key}.#{k} = '#{v}'"}.join(', ')
-  end
-
-  # Every? resource belongs to a region
-  def map_to_region
-    puts 'mapping resource to region'
-  end
-
-  def map_to_node(_parent_node_type, _parent_node_name)
-    puts 'mapping resource to parent resource'
-  end
-
   private
 
   #
   # Cypher query to create/upsert a node
   #
-  def _build_query(node)
+  def _upsert(opts)
+    o = OpenStruct.new(opts)
+
+    raise ApplicationError::GraphLoaderParamsMissing unless o.node && o.id
+
     %(
-      MERGE (n:#{node} { name: '#{@name}' })
+      MERGE (n:#{o.node} { name: '#{o.id}' })
       ON CREATE SET #{_base_attrs('n')}
       ON MATCH SET #{_base_attrs('n')}
     )
   end
 
   #
-  # Cypher query to find an existing node, create/upsert a parent node, and attach a relationship
+  # Cypher query to find an existing node, create/upsert a parent node,
+  # and attach a relationship
   #
-  # e.g. parent_node == AWS_VPC, child_node == AWS_INSTANCE, relationship == IS_MEMBER_OF
-  def _merge_query(opts)
+  # e.g.  parent_node == 'AWS_VPC',
+  #       parent_name == parent.arn,
+  #       parent_asset_type == 'instance',
+  #       service == 'EC2',
+  #       child_node == 'AWS_INSTANCE',
+  #       child_name == child.arn,
+  #       relationship == 'IS_MEMBER_OF'
+  def _upsert_and_link(opts)
     o = OpenStruct.new(opts)
+
+    raise ApplicationError::GraphLoaderParamsMissing unless o.parent_node &&
+                                                            o.parent_name &&
+                                                            o.parent_asset_type &&
+                                                            o.service &&
+                                                            o.child_node &&
+                                                            o.child_name &&
+                                                            o.relationship
 
     %(
       MATCH (c:#{o.child_node} { name: '#{o.child_name}' })
@@ -68,7 +67,6 @@ class AwsGraphDbLoader
   # Format the base attributes and additional attributes
   #
   # @param key String - arbitrary Cypher node ref
-  # TODO: key isn't really needed here
   #
   def _base_attrs(key)
     %(
@@ -76,7 +74,7 @@ class AwsGraphDbLoader
       \t#{key}.service_type = '#{@service}',
       \t#{key}.asset_type = '#{@asset_type}',
       \t#{key}.loader_type = '#{LOADER_TYPE}',
-      \t#{flatten_attributes(key, @data)}
+      \t#{_map_attributes(key, @data)}
     ).strip
   end
 
@@ -90,5 +88,20 @@ class AwsGraphDbLoader
       \t#{key}.asset_type = '#{asset_type}',
       \t#{key}.loader_type = '#{LOADER_TYPE}'
     ).strip
+  end
+
+  #
+  # Return a Cypher formatted attribute hash for every top-level key in a hash
+  # e.g. user_data and policy documents
+  #
+  def _map_attributes(key, struct = @data)
+    # only map string values
+    hash = struct.to_h.select { |_k, v| v.class == String }
+
+    # filter out fields we don't want or that may have sketchy formatting
+    hash.reject! { |x| FILTERED_ATTRIBUTES.include?(x) }
+
+    # return a formatted string
+    hash.map { |k, v| "#{key}.#{k} = '#{v}'"}.join(', ')
   end
 end

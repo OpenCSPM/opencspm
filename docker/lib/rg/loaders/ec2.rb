@@ -37,7 +37,7 @@ class AwsEc2Loader < AwsGraphDbLoader
     q = []
 
     # instance node
-    q.push(_build_query(node))
+    q.push(_upsert({ node: node, id: @name }))
 
     # vpc node and relationship
     if @data.vpc_id
@@ -51,7 +51,7 @@ class AwsEc2Loader < AwsGraphDbLoader
         relationship: 'MEMBER_OF'
       }
 
-      q.push(_merge_query(opts))
+      q.push(_upsert_and_link(opts))
     end
 
     # network_interfaces and relationship
@@ -66,7 +66,38 @@ class AwsEc2Loader < AwsGraphDbLoader
         relationship: 'ATTACHED_TO'
       }
 
-      q.push(_merge_query(opts))
+      q.push(_upsert_and_link(opts))
+    end
+
+    # security_groups and relationship
+    @data.security_groups.each do |sg|
+      opts = {
+        parent_node: 'AWS_SECURITY_GROUP',
+        parent_name: sg.group_id,
+        parent_asset_type: 'instance',
+        service: 'EC2',
+        child_node: node,
+        child_name: @name,
+        relationship: 'IN_GROUP'
+      }
+
+      q.push(_upsert_and_link(opts))
+    end
+
+    # subnets and relationship
+    if @data.subnet_id
+      opts = {
+        parent_node: 'AWS_SUBNET',
+        # parent_name: "arn:aws:ec2:#{@region}:#{@account}:subnet/#{@data.subnet_id}",
+        parent_name: @data.subnet_id,
+        parent_asset_type: 'instance',
+        service: 'EC2',
+        child_node: node,
+        child_name: @name,
+        relationship: 'IN_SUBNET'
+      }
+
+      q.push(_upsert_and_link(opts))
     end
 
     q
@@ -81,7 +112,7 @@ class AwsEc2Loader < AwsGraphDbLoader
     q = []
 
     # vpc node
-    q.push(_build_query('AWS_VPC'))
+    q.push(_upsert({ node: 'AWS_VPC', id: @name }))
   end
 
   #
@@ -93,7 +124,7 @@ class AwsEc2Loader < AwsGraphDbLoader
     q = []
 
     # security_group node
-    q.push(_build_query(node))
+    q.push(_upsert({ node: node, id: @name }))
 
     # vpc node and relationship
     if @data.vpc_id
@@ -107,7 +138,7 @@ class AwsEc2Loader < AwsGraphDbLoader
         relationship: 'MEMBER_OF'
       }
 
-      q.push(_merge_query(opts))
+      q.push(_upsert_and_link(opts))
     end
   end
 
@@ -122,7 +153,7 @@ class AwsEc2Loader < AwsGraphDbLoader
     q = []
 
     # network interface
-    q.push(_build_query(node))
+    q.push(_upsert({ node: node, id: @name }))
 
     # vpc node and relationship
     if @data.vpc_id
@@ -136,7 +167,7 @@ class AwsEc2Loader < AwsGraphDbLoader
         relationship: 'MEMBER_OF'
       }
 
-      q.push(_merge_query(opts))
+      q.push(_upsert_and_link(opts))
     end
 
     # security_groups and relationship
@@ -151,69 +182,98 @@ class AwsEc2Loader < AwsGraphDbLoader
         relationship: 'IN_GROUP'
       }
 
-      q.push(_merge_query(opts))
+      q.push(_upsert_and_link(opts))
     end
 
     q
   end
 
   def _subnet
+    node = 'AWS_SUBNET'
     q = []
 
-    q.push(_build_query('AWS_SUBNET'))
+    # use subnet_id instead of ARN
+    q.push(_upsert({ node: node, id: @data.subnet_id }))
+
+    # vpc node and relationship
+    if @data.vpc_id
+      opts = {
+        parent_node: 'AWS_VPC',
+        parent_name: @data.vpc_id,
+        parent_asset_type: 'vpc',
+        service: 'EC2',
+        child_node: node,
+        # child_name: @name,
+        child_name: @data.subnet_id,
+        relationship: 'MEMBER_OF'
+      }
+
+      q.push(_upsert_and_link(opts))
+    end
+
+    q
   end
 
   def _address
+    node = 'AWS_EIP_ADDRESS'
     q = []
 
-    q.push(_build_query('AWS_EIP_ADDRESS'))
+    q.push(_upsert({ node: node, id: @name }))
   end
 
   def _nat_gateway
+    node = 'AWS_NAT_GATEWAY'
     q = []
 
-    q.push(_build_query('AWS_NAT_GATEWAY'))
+    q.push(_upsert({ node: node, id: @name }))
   end
 
   def _route_table
+    node = 'AWS_ROUTE_TABLE'
     q = []
 
-    q.push(_build_query('AWS_ROUTE_TABLE'))
+    q.push(_upsert({ node: node, id: @name }))
   end
 
   def _image
+    node = 'AWS_IMAGE'
     q = []
 
-    q.push(_build_query('AWS_IMAGE'))
+    q.push(_upsert({ node: node, id: @name }))
   end
 
   def _snapshot
+    node = 'AWS_SNAPSHOT'
     q = []
 
-    q.push(_build_query('AWS_SNAPSHOT'))
+    q.push(_upsert({ node: node, id: @name }))
   end
 
   def _flow_log
+    node = 'AWS_FLOW_LOG'
     q = []
 
-    q.push(_build_query('AWS_FLOW_LOG'))
+    q.push(_upsert({ node: node, id: @name }))
   end
 
   def _volume
+    node = 'AWS_VOLUME'
     q = []
 
-    q.push(_build_query('AWS_VOLUME'))
+    q.push(_upsert({ node: node, id: @name }))
   end
 
   def _vpn_gateway
+    node = 'AWS_VPN_GATEWAY'
     q = []
 
-    q.push(_build_query('AWS_VPN_GATEWAY'))
+    q.push(_upsert({ node: node, id: @name }))
   end
 
   def _vpc_peering_connection
+    node = 'AWS_PEERING_CONNECTION'
     q = []
 
-    q.push(_build_query('AWS_PEERING_CONNECTION'))
+    q.push(_upsert({ node: node, id: @name }))
   end
 end
