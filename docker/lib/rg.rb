@@ -6,6 +6,30 @@ require 'rg/aws_graph_db_loader.rb'
 require 'rg/loaders.rb'
 
 class Rg
+  DEBUG_LOG_FILE = 'tmp/redisgraph.log'.freeze
+  # TYPES = %w[
+  #   instance
+  #   vpc
+  #   security_group
+  #   network_interface
+  #   subnet
+  #   address
+  #   nat_gateway
+  #   route_table
+  #   image
+  #   snapshot
+  #   flow_log
+  #   volume
+  #   vpn_gateway
+  #   peering_connection
+  # ].freeze
+  TYPES = %w[
+    instance
+    vpc
+    security_group
+    network_interface
+  ].freeze
+
   def initialize
     @r = RedisGraph.new('recon')
   end
@@ -14,7 +38,9 @@ class Rg
   # Execute a Cypher query
   #
   def query(q)
+    # _log(q)
     res = @r.query(q)
+    printf '.'
     # p res.stats if res
   end
 
@@ -25,7 +51,9 @@ class Rg
   end
 
   def create_all
-    puts 'Loading all RedisGraph nodes...'
+    c = 0
+
+    puts "\nLoading all RedisGraph nodes..."
 
     # read recon .json
     time_start = _time
@@ -35,19 +63,25 @@ class Rg
 
       # binding.pry
 
-      if json.service.downcase == 'ec2'
-        # binding.pry
-        q = AwsEc2Loader.new(json).to_q
+      if json.service.downcase == 'ec2' && TYPES.include?(json.asset_type)
+        # if json.service.downcase == 'ec2'
 
-        if q
-          # puts q
+        # TODO: AWSLoader::EC2::Instance
+        # TODO: AWSLoader::EC2::Vpc
+        # TODO: AWSLoader::EC2::SecurityGroup
+        # TODO: AWSLoader::EC2::NetworkInterface
+        AwsEc2Loader.new(json).to_q&.each do |q|
+          # binding.pry
+          puts q
           query(q)
+          c += 1
         end
       end
 
       # insert(json) if types.include?(json.asset_type)
     end
 
+    puts "\nQueries: #{c}"
     puts "Elapsed time: #{_time - time_start}"
   end
 
@@ -148,13 +182,17 @@ class Rg
   end
   puts '!!!'
 
+  def _clear_log
+    File.write(DEBUG_LOG_FILE, '', mode: 'w')
+  end
+
   private
+
+  def _log(msg)
+    File.write(DEBUG_LOG_FILE, msg, mode: 'a')
+  end
 
   def _time
     Process.clock_gettime(Process::CLOCK_MONOTONIC)
   end
 end
-
-# z = Rg.new
-# z.delete_all
-# z.create_all

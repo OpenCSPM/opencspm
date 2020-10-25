@@ -27,128 +27,193 @@ class AwsEc2Loader < AwsGraphDbLoader
   private
 
   #
-  # Format the base attributes and additional attributes
+  # belongs_to: vpc
+  # has_many: network_interfaces
+  # has_many: security_groups,  through: network_interfaces
+  # has_many: subnets,          through: network_interfaces
   #
-  # @param key String - arbtrary Cypher node ref
-  #
-  def _base_attrs(key)
-    %(
-      \t#{key}.service_type = '#{@service}',
-      \t#{key}.asset_type = '#{@asset_type}',
-      \t#{key}.loader_type = 'aws',
-      \t#{flatten_attributes(key, @data)}
-    ).strip
-  end
-
   def _instance
-    %(
-      MERGE (i:AWS_INSTANCE { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('i')}
-      ON MATCH SET #{_base_attrs('i')}
-    )
+    node = 'AWS_INSTANCE'
+    q = []
+
+    # instance node
+    q.push(_build_query(node))
+
+    # vpc node and relationship
+    if @data.vpc_id
+      opts = {
+        parent_node: 'AWS_VPC',
+        parent_name: @data.vpc_id,
+        parent_asset_type: 'vpc',
+        service: 'EC2',
+        child_node: node,
+        child_name: @name,
+        relationship: 'MEMBER_OF'
+      }
+
+      q.push(_merge_query(opts))
+    end
+
+    # network_interfaces and relationship
+    @data.network_interfaces.each do |ni|
+      opts = {
+        parent_node: 'AWS_NETWORK_INTERFACE',
+        parent_name: ni.network_interface_id,
+        parent_asset_type: 'instance',
+        service: 'EC2',
+        child_node: node,
+        child_name: @name,
+        relationship: 'ATTACHED_TO'
+      }
+
+      q.push(_merge_query(opts))
+    end
+
+    q
   end
 
+  #
+  # has_many: instances
+  # has_many: network_interfaces
+  # has_many: security_groups,    through: network_interfaces
+  #
   def _vpc
-    %(
-      MERGE (v:AWS_VPC { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('v')}
-      ON MATCH SET #{_base_attrs('v')}
-    )
+    q = []
+
+    # vpc node
+    q.push(_build_query('AWS_VPC'))
   end
 
+  #
+  # belongs_to: instance
+  # belongs_to: vpc
+  #
   def _security_group
-    %(
-      MERGE (sg:AWS_SECURITY_GROUP { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('sg')}
-      ON MATCH SET #{_base_attrs('sg')}
-    )
+    node = 'AWS_SECURITY_GROUP'
+    q = []
+
+    # security_group node
+    q.push(_build_query(node))
+
+    # vpc node and relationship
+    if @data.vpc_id
+      opts = {
+        parent_node: 'AWS_VPC',
+        parent_name: @data.vpc_id,
+        parent_asset_type: 'vpc',
+        service: 'EC2',
+        child_node: node,
+        child_name: @name,
+        relationship: 'MEMBER_OF'
+      }
+
+      q.push(_merge_query(opts))
+    end
   end
 
+  #
+  # belongs_to: instance
+  # belongs_to: vpc
+  # belongs_to: subnet
+  # has_many: security_group
+  #
   def _network_interface
-    %(
-      MERGE (ni:AWS_NETWORK_INTERFACE { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('ni')}
-      ON MATCH SET #{_base_attrs('ni')}
-    )
+    node = 'AWS_NETWORK_INTERFACE'
+    q = []
+
+    # network interface
+    q.push(_build_query(node))
+
+    # vpc node and relationship
+    if @data.vpc_id
+      opts = {
+        parent_node: 'AWS_VPC',
+        parent_name: @data.vpc_id,
+        parent_asset_type: 'vpc',
+        service: 'EC2',
+        child_node: node,
+        child_name: @name,
+        relationship: 'MEMBER_OF'
+      }
+
+      q.push(_merge_query(opts))
+    end
+
+    # security_groups and relationship
+    @data.groups.each do |sg|
+      opts = {
+        parent_node: 'AWS_SECURITY_GROUP',
+        parent_name: sg.group_id,
+        parent_asset_type: 'security_group',
+        service: 'EC2',
+        child_node: node,
+        child_name: @name,
+        relationship: 'IN_GROUP'
+      }
+
+      q.push(_merge_query(opts))
+    end
+
+    q
   end
 
   def _subnet
-    %(
-      MERGE (s:AWS_SUBNET { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('s')}
-      ON MATCH SET #{_base_attrs('s')}
-    )
+    q = []
+
+    q.push(_build_query('AWS_SUBNET'))
   end
 
   def _address
-    %(
-      MERGE (ip:AWS_EIP_ADDRESS { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('ip')}
-      ON MATCH SET #{_base_attrs('ip')}
-    )
+    q = []
+
+    q.push(_build_query('AWS_EIP_ADDRESS'))
   end
 
   def _nat_gateway
-    %(
-      MERGE (gw:AWS_NAT_GATEWAY { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('gw')}
-      ON MATCH SET #{_base_attrs('gw')}
-    )
+    q = []
+
+    q.push(_build_query('AWS_NAT_GATEWAY'))
   end
 
   def _route_table
-    %(
-      MERGE (rt:AWS_ROUTE_TABLE { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('rt')}
-      ON MATCH SET #{_base_attrs('rt')}
-    )
+    q = []
+
+    q.push(_build_query('AWS_ROUTE_TABLE'))
   end
 
   def _image
-    %(
-      MERGE (i:AWS_IMAGE { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('i')}
-      ON MATCH SET #{_base_attrs('i')}
-    )
+    q = []
+
+    q.push(_build_query('AWS_IMAGE'))
   end
 
   def _snapshot
-    %(
-      MERGE (ss:AWS_SNAPSHOT { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('ss')}
-      ON MATCH SET #{_base_attrs('ss')}
-    )
+    q = []
+
+    q.push(_build_query('AWS_SNAPSHOT'))
   end
 
   def _flow_log
-    %(
-      MERGE (fl:AWS_FLOW_LOG { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('fl')}
-      ON MATCH SET #{_base_attrs('fl')}
-    )
+    q = []
+
+    q.push(_build_query('AWS_FLOW_LOG'))
   end
 
   def _volume
-    %(
-      MERGE (vo:AWS_VOLUME { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('vo')}
-      ON MATCH SET #{_base_attrs('vo')}
-    )
+    q = []
+
+    q.push(_build_query('AWS_VOLUME'))
   end
 
   def _vpn_gateway
-    %(
-      MERGE (vgw:AWS_VPN_GATEWAY { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('vgw')}
-      ON MATCH SET #{_base_attrs('vgw')}
-    )
+    q = []
+
+    q.push(_build_query('AWS_VPN_GATEWAY'))
   end
 
   def _vpc_peering_connection
-    %(
-      MERGE (pcx:AWS_PEERING_CONNECTION { name: '#{@name}' })
-      ON CREATE SET #{_base_attrs('pcx')}
-      ON MATCH SET #{_base_attrs('pcx')}
-    )
+    q = []
+
+    q.push(_build_query('AWS_PEERING_CONNECTION'))
   end
 end
