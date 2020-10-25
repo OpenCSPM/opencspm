@@ -3,8 +3,13 @@
 # require 'redisgraph'
 # require 'awesome_print'
 require 'rg/aws_graph_db_loader.rb'
-require 'rg/loaders.rb'
+require 'rg/aws_loader.rb'
 
+#
+# Test RedisGraph Loader for AWS Recon assets
+#
+# Usage: bundle exec rails graph:load
+#
 class Rg
   DEBUG_LOG_FILE = 'tmp/redisgraph.log'.freeze
   # TYPES = %w[
@@ -29,6 +34,7 @@ class Rg
     security_group
     network_interface
     subnet
+    cluster
   ].freeze
 
   def initialize
@@ -56,7 +62,6 @@ class Rg
 
     puts "\nLoading all RedisGraph nodes..."
 
-    # read recon .json
     time_start = _time
 
     #
@@ -65,21 +70,33 @@ class Rg
     IO.foreach(Rails.root.join('tmp', 'recon.json')) do |line|
       json = JSON.parse(line, object_class: OpenStruct)
 
-      # binding.pry
+      # Instantiate a Loader instance for each service type
+      begin
+        aws_loader = Object.const_get("AWSLoader::#{json.service}")
 
-      if json.service.downcase == 'ec2' && TYPES.include?(json.asset_type)
-        # if json.service.downcase == 'ec2'
+        #
+        # DEBUG: include/exclude types for testing
+        unless TYPES.include?(json.asset_type)
+          # puts "Excluding #{json.service} loader defined for asset type: #{json.asset_type}"
+          next
+        end
 
-        # TODO: AWSLoader::EC2::Instance
-        # TODO: AWSLoader::EC2::Vpc
-        # TODO: AWSLoader::EC2::SecurityGroup
-        # TODO: AWSLoader::EC2::NetworkInterface
-        AwsEc2Loader.new(json).to_q&.each do |q|
-          # binding.pry
-          # puts q
+        loader = aws_loader.new(json)
+
+        #
+        # DEBUG: skip loader methods that aren't implemented yet
+        unless loader.respond_to?(json.asset_type)
+          puts "No #{json.service} loader defined for asset type: #{json.asset_type}"
+          next
+        end
+
+        # call loader method for the asset type
+        loader.send(json.asset_type)&.each do |q|
           query(q)
           c += 1
         end
+      rescue NameError
+        # puts "No loader defined for service: #{json.service}"
       end
     end
 

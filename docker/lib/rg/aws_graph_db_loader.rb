@@ -4,7 +4,9 @@
 #
 class AwsGraphDbLoader
   LOADER_TYPE = 'aws'.freeze
-  FILTERED_ATTRIBUTES = [:user_data].freeze
+  # FILTERED_ATTRIBUTES = [:user_data].freeze
+  # TODO: allow :name to be overwritten? (e.g. EKS cluster name)
+  FILTERED_ATTRIBUTES = %i[name user_data].freeze
 
   def initialize(json)
     @account = json.account
@@ -19,6 +21,9 @@ class AwsGraphDbLoader
 
   #
   # Cypher query to create/upsert a node
+  #
+  # e.g.  node = 'AWS_INSTANCE'
+  #       id = i-abc123def456 (or full ARN)
   #
   def _upsert(opts)
     o = OpenStruct.new(opts)
@@ -37,11 +42,11 @@ class AwsGraphDbLoader
   # and attach a relationship
   #
   # e.g.  parent_node == 'AWS_VPC',
-  #       parent_name == parent.arn,
+  #       parent_name == parent.arn, (could be a short resource id or a full ARN)
   #       parent_asset_type == 'instance',
   #       service == 'EC2',
   #       child_node == 'AWS_INSTANCE',
-  #       child_name == child.arn,
+  #       child_name == child.arn, (could be a short resource id or a full ARN)
   #       relationship == 'IS_MEMBER_OF'
   def _upsert_and_link(opts)
     o = OpenStruct.new(opts)
@@ -61,6 +66,15 @@ class AwsGraphDbLoader
       ON MATCH SET #{_merge_base_attrs(o.service, o.parent_asset_type, 'p')}
       MERGE (c)-[:#{o.relationship}]->(p)
     )
+  end
+
+  #
+  # Append node attributes
+  #
+  # e.g. EKS cluster_logging 'types' as comma separated string?
+  #
+  def _append(opts)
+    # TODO
   end
 
   #

@@ -1,38 +1,16 @@
 #
 # Load EC2 assets into RedisGraph
 #
-# Load all top-level resources first;
-# TODO: map a LIVES_IN/RUNS_IN relationship for each resource to the region
+# Each method returns an array of Cypher queries
 #
-class AwsEc2Loader < AwsGraphDbLoader
-  # generate Cypher query strings
-  # TODO: array of multiple queries?
-  def to_q
-    return _instance if @asset_type == 'instance'
-    return _vpc if @asset_type == 'vpc'
-    return _security_group if @asset_type == 'security_group'
-    return _network_interface if @asset_type == 'network_interface'
-    return _subnet if @asset_type == 'subnet'
-    return _address if @asset_type == 'eip_address'
-    return _nat_gateway if @asset_type == 'nat_gateway'
-    return _route_table if @asset_type == 'route_table'
-    return _image if @asset_type == 'image'
-    return _snapshot if @asset_type == 'snapshot'
-    return _flow_log if @asset_type == 'flow_log'
-    return _volume if @asset_type == 'volume'
-    return _vpn_gateway if @asset_type == 'vpn_gateway'
-    return _vpc_peering_connection if @asset_type == 'peering_connection'
-  end
-
-  private
-
+class AWSLoader::EC2 < AwsGraphDbLoader
   #
   # belongs_to: vpc
   # has_many: network_interfaces
   # has_many: security_groups,  through: network_interfaces
   # has_many: subnets,          through: network_interfaces
   #
-  def _instance
+  def instance
     node = 'AWS_INSTANCE'
     q = []
 
@@ -108,7 +86,7 @@ class AwsEc2Loader < AwsGraphDbLoader
   # has_many: network_interfaces
   # has_many: security_groups,    through: network_interfaces
   #
-  def _vpc
+  def vpc
     q = []
 
     # vpc node
@@ -119,7 +97,7 @@ class AwsEc2Loader < AwsGraphDbLoader
   # belongs_to: instance
   # belongs_to: vpc
   #
-  def _security_group
+  def security_group
     node = 'AWS_SECURITY_GROUP'
     q = []
 
@@ -148,7 +126,7 @@ class AwsEc2Loader < AwsGraphDbLoader
   # belongs_to: subnet
   # has_many: security_group
   #
-  def _network_interface
+  def network_interface
     node = 'AWS_NETWORK_INTERFACE'
     q = []
 
@@ -188,7 +166,7 @@ class AwsEc2Loader < AwsGraphDbLoader
     q
   end
 
-  def _subnet
+  def subnet
     node = 'AWS_SUBNET'
     q = []
 
@@ -214,63 +192,64 @@ class AwsEc2Loader < AwsGraphDbLoader
     q
   end
 
-  def _address
+  def address
     node = 'AWS_EIP_ADDRESS'
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
   end
 
-  def _nat_gateway
+  def nat_gateway
     node = 'AWS_NAT_GATEWAY'
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
   end
 
-  def _route_table
+  def route_table
     node = 'AWS_ROUTE_TABLE'
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
   end
 
-  def _image
+  def image
     node = 'AWS_IMAGE'
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
   end
 
-  def _snapshot
+  def snapshot
     node = 'AWS_SNAPSHOT'
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
   end
 
-  def _flow_log
+  def flow_log
     node = 'AWS_FLOW_LOG'
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
   end
 
-  def _volume
+  def volume
     node = 'AWS_VOLUME'
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
   end
 
-  def _vpn_gateway
+  def vpn_gateway
     node = 'AWS_VPN_GATEWAY'
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
   end
 
-  def _vpc_peering_connection
+  # vpc peering connection
+  def peering_connection
     node = 'AWS_PEERING_CONNECTION'
     q = []
 
