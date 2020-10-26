@@ -26,11 +26,24 @@ class AWSLoader::EKS < AwsGraphDbLoader
       q.push(_upsert_and_link(opts))
     end
 
+    # subnets and relationship
+    @data.resources_vpc_config&.subnet_ids&.each do |subnet_id|
+      opts = {
+        parent_node: 'AWS_SUBNET',
+        parent_name: subnet_id,
+        parent_asset_type: 'vpc',
+        service: 'EKS',
+        child_node: node,
+        child_name: @data.arn,
+        relationship: 'IN_SUBNET'
+      }
+
+      q.push(_upsert_and_link(opts))
+    end
+
     # TODO: nodegroups
 
     # TODO: nodes
-
-    # TODO: subnets
 
     # TODO: logging types
 

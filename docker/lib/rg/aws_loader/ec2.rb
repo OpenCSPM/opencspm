@@ -62,7 +62,7 @@ class AWSLoader::EC2 < AwsGraphDbLoader
       q.push(_upsert_and_link(opts))
     end
 
-    # subnets and relationship
+    # subnet and relationship
     if @data.subnet_id
       opts = {
         parent_node: 'AWS_SUBNET',

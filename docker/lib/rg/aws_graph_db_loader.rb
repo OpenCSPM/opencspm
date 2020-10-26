@@ -71,7 +71,7 @@ class AwsGraphDbLoader
   #
   # Append node attributes
   #
-  # e.g. EKS cluster_logging 'types' as comma separated string?
+  # e.g. EKS cluster_logging 'types' as comma separated string or just add more nodes?
   #
   def _append(opts)
     # TODO
@@ -109,6 +109,8 @@ class AwsGraphDbLoader
   # e.g. user_data and policy documents
   #
   def _map_attributes(key, struct = @data)
+    # binding.pry if @service == 'EKS' && @asset_type == 'cluster'
+
     # only map string values
     hash = struct.to_h.select { |_k, v| v.class == String }
 
