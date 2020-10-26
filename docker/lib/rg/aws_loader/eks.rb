@@ -16,8 +16,6 @@ class AWSLoader::EKS < AwsGraphDbLoader
       opts = {
         parent_node: 'AWS_VPC',
         parent_name: @data.resources_vpc_config.vpc_id,
-        parent_asset_type: 'vpc',
-        parent_service: 'EKS',
         child_node: node,
         child_name: @data.arn,
         relationship: 'MEMBER_OF_VPC'
@@ -31,8 +29,6 @@ class AWSLoader::EKS < AwsGraphDbLoader
       opts = {
         parent_node: 'AWS_SUBNET',
         parent_name: subnet_id,
-        parent_asset_type: 'vpc',
-        parent_service: 'EKS',
         child_node: node,
         child_name: @data.arn,
         relationship: 'IN_SUBNET'
@@ -51,8 +47,6 @@ class AWSLoader::EKS < AwsGraphDbLoader
         opts = {
           parent_node: 'AWS_EKS_CLUSTER_LOGGING_TYPE',
           parent_name: logging_type,
-          parent_asset_type: 'cluster',
-          parent_service: 'EKS',
           child_node: 'AWS_EKS_CLUSTER',
           child_name: @data.arn,
           relationship: 'HAS_LOGGING_TYPE',

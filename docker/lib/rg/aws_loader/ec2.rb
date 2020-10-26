@@ -22,8 +22,6 @@ class AWSLoader::EC2 < AwsGraphDbLoader
       opts = {
         parent_node: 'AWS_VPC',
         parent_name: @data.vpc_id,
-        parent_asset_type: 'vpc',
-        parent_service: 'EC2',
         child_node: node,
         child_name: @name,
         relationship: 'MEMBER_OF_VPC'
@@ -37,8 +35,6 @@ class AWSLoader::EC2 < AwsGraphDbLoader
       opts = {
         parent_node: 'AWS_NETWORK_INTERFACE',
         parent_name: ni.network_interface_id,
-        parent_asset_type: 'instance',
-        parent_service: 'EC2',
         child_node: node,
         child_name: @name,
         relationship: 'ATTACHED_TO_INSTANCE'
@@ -52,8 +48,6 @@ class AWSLoader::EC2 < AwsGraphDbLoader
       opts = {
         parent_node: 'AWS_SECURITY_GROUP',
         parent_name: sg.group_id,
-        parent_asset_type: 'instance',
-        parent_service: 'EC2',
         child_node: node,
         child_name: @name,
         relationship: 'IN_SECURITY_GROUP'
@@ -68,8 +62,6 @@ class AWSLoader::EC2 < AwsGraphDbLoader
         parent_node: 'AWS_SUBNET',
         # parent_name: "arn:aws:ec2:#{@region}:#{@account}:subnet/#{@data.subnet_id}",
         parent_name: @data.subnet_id,
-        parent_asset_type: 'instance',
-        parent_service: 'EC2',
         child_node: node,
         child_name: @name,
         relationship: 'IN_SUBNET'
@@ -109,8 +101,6 @@ class AWSLoader::EC2 < AwsGraphDbLoader
       opts = {
         parent_node: 'AWS_VPC',
         parent_name: @data.vpc_id,
-        parent_asset_type: 'vpc',
-        parent_service: 'EC2',
         child_node: node,
         child_name: @name,
         relationship: 'MEMBER_OF_VPC'
@@ -138,8 +128,6 @@ class AWSLoader::EC2 < AwsGraphDbLoader
       opts = {
         parent_node: 'AWS_VPC',
         parent_name: @data.vpc_id,
-        parent_asset_type: 'vpc',
-        parent_service: 'EC2',
         child_node: node,
         child_name: @name,
         relationship: 'MEMBER_OF_VPC'
@@ -153,8 +141,6 @@ class AWSLoader::EC2 < AwsGraphDbLoader
       opts = {
         parent_node: 'AWS_SECURITY_GROUP',
         parent_name: sg.group_id,
-        parent_asset_type: 'security_group',
-        parent_service: 'EC2',
         child_node: node,
         child_name: @name,
         relationship: 'IN_SECURITY_GROUP'
@@ -178,8 +164,6 @@ class AWSLoader::EC2 < AwsGraphDbLoader
       opts = {
         parent_node: 'AWS_VPC',
         parent_name: @data.vpc_id,
-        parent_asset_type: 'vpc',
-        parent_service: 'EC2',
         child_node: node,
         # child_name: @name,
         child_name: @data.subnet_id,

@@ -16,8 +16,6 @@ class AWSLoader::RDS < AwsGraphDbLoader
       opts = {
         parent_node: 'AWS_SECURITY_GROUP',
         parent_name: sg.vpc_security_group_id,
-        parent_asset_type: 'security_group',
-        parent_service: 'RDS',
         child_node: node,
         child_name: @name,
         relationship: 'IN_SECURITY_GROUP'
@@ -42,8 +40,6 @@ class AWSLoader::RDS < AwsGraphDbLoader
         parent_node: 'AWS_RDS_CLUSTER',
         parent_name: "arn:aws:rds:#{@region}:#{@account}:cluster:#{@data.db_cluster_identifier}",
         # parent_name: @data.db_cluster_identifier,
-        parent_asset_type: 'cluster',
-        parent_service: 'RDS',
         child_node: node,
         child_name: @name,
         relationship: 'MEMBER_OF_RDS_CLUSTER'
@@ -68,8 +64,6 @@ class AWSLoader::RDS < AwsGraphDbLoader
         parent_node: 'AWS_RDS_INSTANCE',
         parent_name: "arn:aws:rds:#{@region}:#{@account}:db:#{@data.db_instance_identifier}",
         # parent_name: @data.db_instance_identifier,
-        parent_asset_type: 'db_instance',
-        parent_service: 'RDS',
         child_node: node,
         child_name: @name,
         relationship: 'SNAPSHOT_OF_RDS_INSTANCE'

@@ -53,8 +53,6 @@ class AwsGraphDbLoader
 
     raise ApplicationError::GraphLoaderParamsMissing unless o.parent_node &&
                                                             o.parent_name &&
-                                                            o.parent_asset_type &&
-                                                            o.parent_service &&
                                                             o.child_node &&
                                                             o.child_name &&
                                                             o.relationship
@@ -112,8 +110,6 @@ class AwsGraphDbLoader
     else
       %(
         \t#{key}.region = '#{@region}',
-        \t#{key}.service_type = '#{opts.parent_service}',
-        \t#{key}.asset_type = '#{opts.parent_asset_type}',
         \t#{key}.loader_type = '#{LOADER_TYPE}'
       ).strip
     end
