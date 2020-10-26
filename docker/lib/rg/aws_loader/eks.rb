@@ -45,7 +45,13 @@ class AWSLoader::EKS < AwsGraphDbLoader
 
     # TODO: nodes
 
-    # TODO: logging types
+    # logging types
+    @data.logging&.cluster_logging&.each do |logging|
+      if logging.types
+        data = { logging_types: logging.types.join(', ') }
+        q.push(_append({node: node, id: @data.arn, data: data}))
+      end
+    end
 
     q
   end

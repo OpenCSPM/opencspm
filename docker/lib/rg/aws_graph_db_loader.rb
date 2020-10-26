@@ -74,7 +74,16 @@ class AwsGraphDbLoader
   # e.g. EKS cluster_logging 'types' as comma separated string or just add more nodes?
   #
   def _append(opts)
-    # TODO
+    o = OpenStruct.new(opts)
+
+    raise ApplicationError::GraphLoaderParamsMissing unless o.node &&
+                                                            o.id &&
+                                                            o.data
+
+    %(
+      MATCH (x:#{o.node} { name: '#{o.id}' })
+      SET #{_map_attributes('x', o.data)}
+    )
   end
 
   #
@@ -111,8 +120,8 @@ class AwsGraphDbLoader
   def _map_attributes(key, struct = @data)
     # binding.pry if @service == 'EKS' && @asset_type == 'cluster'
 
-    # only map string values
-    hash = struct.to_h.select { |_k, v| v.class == String }
+    # only map strings values
+    hash = struct.to_h.select { |_k, v| v.is_a?(String) }
 
     # filter out fields we don't want or that may have sketchy formatting
     hash.reject! { |x| FILTERED_ATTRIBUTES.include?(x) }
