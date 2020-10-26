@@ -17,10 +17,10 @@ class AWSLoader::EKS < AwsGraphDbLoader
         parent_node: 'AWS_VPC',
         parent_name: @data.resources_vpc_config.vpc_id,
         parent_asset_type: 'vpc',
-        service: 'EKS',
+        parent_service: 'EKS',
         child_node: node,
         child_name: @data.arn,
-        relationship: 'MEMBER_OF'
+        relationship: 'MEMBER_OF_VPC'
       }
 
       q.push(_upsert_and_link(opts))
@@ -32,7 +32,7 @@ class AWSLoader::EKS < AwsGraphDbLoader
         parent_node: 'AWS_SUBNET',
         parent_name: subnet_id,
         parent_asset_type: 'vpc',
-        service: 'EKS',
+        parent_service: 'EKS',
         child_node: node,
         child_name: @data.arn,
         relationship: 'IN_SUBNET'
@@ -47,9 +47,20 @@ class AWSLoader::EKS < AwsGraphDbLoader
 
     # logging types
     @data.logging&.cluster_logging&.each do |logging|
-      if logging.types
-        data = { logging_types: logging.types.join(', ') }
-        q.push(_append({node: node, id: @data.arn, data: data}))
+      logging.types.each do |logging_type|
+        opts = {
+          parent_node: 'AWS_EKS_CLUSTER_LOGGING_TYPE',
+          parent_name: logging_type,
+          parent_asset_type: 'cluster',
+          parent_service: 'EKS',
+          child_node: 'AWS_EKS_CLUSTER',
+          child_name: @data.arn,
+          relationship: 'HAS_LOGGING_TYPE',
+          relationship_attributes: { enabled: logging.enabled.to_s },
+          headless: true
+        }
+
+        q.push(_upsert_and_link(opts))
       end
     end
 

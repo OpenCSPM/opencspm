@@ -54,7 +54,7 @@ class AwsGraphDbLoader
     raise ApplicationError::GraphLoaderParamsMissing unless o.parent_node &&
                                                             o.parent_name &&
                                                             o.parent_asset_type &&
-                                                            o.service &&
+                                                            o.parent_service &&
                                                             o.child_node &&
                                                             o.child_name &&
                                                             o.relationship
@@ -62,9 +62,9 @@ class AwsGraphDbLoader
     %(
       MATCH (c:#{o.child_node} { name: '#{o.child_name}' })
       MERGE (p:#{o.parent_node} { name: '#{o.parent_name}' })
-      ON CREATE SET #{_merge_base_attrs(o.service, o.parent_asset_type, 'p')}
-      ON MATCH SET #{_merge_base_attrs(o.service, o.parent_asset_type, 'p')}
-      MERGE (c)-[:#{o.relationship}]->(p)
+      ON CREATE SET #{_merge_base_attrs(o, 'p')}
+      ON MATCH SET #{_merge_base_attrs(o, 'p')}
+      MERGE (c)-[:#{_relationship_attrs(o)}]->(p)
     )
   end
 
@@ -83,7 +83,7 @@ class AwsGraphDbLoader
     %(
       MATCH (x:#{o.node} { name: '#{o.id}' })
       SET #{_map_attributes('x', o.data)}
-    )
+    ).strip
   end
 
   #
@@ -104,13 +104,35 @@ class AwsGraphDbLoader
   #
   # Format the base attributes of the attached (parent) node
   #
-  def _merge_base_attrs(service, asset_type, key)
-    %(
-      \t#{key}.region = '#{@region}',
-      \t#{key}.service_type = '#{service}',
-      \t#{key}.asset_type = '#{asset_type}',
-      \t#{key}.loader_type = '#{LOADER_TYPE}'
-    ).strip
+  def _merge_base_attrs(opts, key)
+    if opts.headless
+      %(
+        \t#{key}.headless = 'true'
+      ).strip
+    else
+      %(
+        \t#{key}.region = '#{@region}',
+        \t#{key}.service_type = '#{opts.parent_service}',
+        \t#{key}.asset_type = '#{opts.parent_asset_type}',
+        \t#{key}.loader_type = '#{LOADER_TYPE}'
+      ).strip
+    end
+  end
+
+  #
+  # Format the relationship details - either with or without attributes
+  #
+  # @param opts Struct - OpenStruct
+  #
+  def _relationship_attrs(opts)
+    if opts.relationship_attributes
+
+      attrs = opts.relationship_attributes.map { |k, v| "#{k}: \"#{v}\"" }.join(', ')
+
+      "#{opts.relationship} {#{attrs}}"
+    else
+      opts.relationship
+    end
   end
 
   #

@@ -35,6 +35,10 @@ class Rg
     network_interface
     subnet
     cluster
+    db_cluster
+    db_instance
+    db_snapshot
+    db_engine_version
   ].freeze
 
   def initialize
@@ -47,7 +51,7 @@ class Rg
   def query(q)
     # _log(q)
     res = @r.query(q)
-    printf '.'
+    printf "\x1b[32m.\x1b[0m"
     # p res.stats if res
   end
 
@@ -92,6 +96,7 @@ class Rg
 
         # call loader method for the asset type
         loader.send(json.asset_type)&.each do |q|
+          # binding.pry if json.asset_type == 'db_cluster' && json.service == 'RDS'
           query(q)
           c += 1
         end
