@@ -18,7 +18,19 @@ class PackJob < ApplicationJob
         puts "Control: #{control_pack.id} - #{control.id}"
         res = Control.find_or_create_by(control_pack: control_pack.id, control_id: control.id)
         res.tags.destroy_all
-        control&.tags&.map { |t| res.tags << Tag.find_or_create_by(name: t) }
+
+        control&.tags&.map do |tag|
+          if tag.class == OpenStruct
+            tag.to_h.keys.each do |x|
+              tag.send(x).to_a.each do |t|
+                res.tags << Tag.find_or_create_by(name: t)
+              end
+            end
+          end
+
+          res.tags << Tag.find_or_create_by(name: tag) if tag.class == String
+        end
+
         res.update(
           guid: Digest::UUID.uuid_v5(Digest::UUID::OID_NAMESPACE, control_pack.id + control.id),
           control_pack: control_pack.id,
