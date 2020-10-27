@@ -12,34 +12,6 @@ require 'rg/aws_loader.rb'
 #
 class Rg
   DEBUG_LOG_FILE = 'tmp/redisgraph.log'.freeze
-  # TYPES = %w[
-  #   instance
-  #   vpc
-  #   security_group
-  #   network_interface
-  #   subnet
-  #   address
-  #   nat_gateway
-  #   route_table
-  #   image
-  #   snapshot
-  #   flow_log
-  #   volume
-  #   vpn_gateway
-  #   peering_connection
-  # ].freeze
-  TYPES = %w[
-    instance
-    vpc
-    security_group
-    network_interface
-    subnet
-    cluster
-    db_cluster
-    db_instance
-    db_snapshot
-    db_engine_version
-  ].freeze
 
   def initialize
     @r = RedisGraph.new('recon')
@@ -51,7 +23,7 @@ class Rg
   def query(q)
     # _log(q)
     res = @r.query(q)
-    printf "\x1b[32m.\x1b[0m"
+    # printf "\x1b[32m.\x1b[0m"
     # p res.stats if res
   end
 
@@ -77,17 +49,8 @@ class Rg
       # Instantiate a Loader instance for each service type
       begin
         aws_loader = Object.const_get("AWSLoader::#{json.service}")
-
-        #
-        # DEBUG: include/exclude types for testing
-        unless TYPES.include?(json.asset_type)
-          # puts "Excluding #{json.service} loader defined for asset type: #{json.asset_type}"
-          next
-        end
-
         loader = aws_loader.new(json)
 
-        #
         # DEBUG: skip loader methods that aren't implemented yet
         unless loader.respond_to?(json.asset_type)
           puts "No #{json.service} loader defined for asset type: #{json.asset_type}"
@@ -101,7 +64,7 @@ class Rg
           c += 1
         end
       rescue NameError
-        # puts "No loader defined for service: #{json.service}"
+        puts "No loader defined for service: #{json.service}"
       end
     end
 

@@ -4,6 +4,8 @@
 # Each method returns an array of Cypher queries
 #
 class AWSLoader::EC2 < AwsGraphDbLoader
+  # TODO: add EC2 account attributes
+
   #
   # belongs_to: vpc
   # has_many: network_interfaces

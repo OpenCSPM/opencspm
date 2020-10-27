@@ -63,7 +63,7 @@ class AwsGraphDbLoader
       ON CREATE SET #{_merge_base_attrs(o, 'p')}
       ON MATCH SET #{_merge_base_attrs(o, 'p')}
       MERGE (c)-[:#{_relationship_attrs(o)}]->(p)
-    )
+    ).strip
   end
 
   #
@@ -123,7 +123,7 @@ class AwsGraphDbLoader
   def _relationship_attrs(opts)
     if opts.relationship_attributes
 
-      attrs = opts.relationship_attributes.map { |k, v| "#{k}: \"#{v}\"" }.join(', ')
+      attrs = opts.relationship_attributes.map { |k, v| %( #{k}: '#{_esc(v)}' )}.join(', ')
 
       "#{opts.relationship} {#{attrs}}"
     else
@@ -145,6 +145,11 @@ class AwsGraphDbLoader
     hash.reject! { |x| FILTERED_ATTRIBUTES.include?(x) }
 
     # return a formatted string
-    hash.map { |k, v| "#{key}.#{k} = '#{v}'"}.join(', ')
+    hash.map { |k, v| %( #{key}.#{k} = '#{_esc(v)}' )}.join(', ')
+  end
+
+  # TODO: refactor
+  def _esc(value)
+    value.gsub("'", '"')
   end
 end
