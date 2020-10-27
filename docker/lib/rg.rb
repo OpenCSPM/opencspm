@@ -23,7 +23,7 @@ class Rg
   def query(q)
     # _log(q)
     res = @r.query(q)
-    # printf "\x1b[32m.\x1b[0m"
+    printf "\x1b[32m.\x1b[0m"
     # p res.stats if res
   end
 
@@ -34,7 +34,9 @@ class Rg
   end
 
   def create_all
-    c = 0
+    # c = 0
+    query_stats = {}
+    missing_stats = {}
 
     puts "\nLoading all RedisGraph nodes..."
 
@@ -53,7 +55,7 @@ class Rg
 
         # DEBUG: skip loader methods that aren't implemented yet
         unless loader.respond_to?(json.asset_type)
-          puts "No #{json.service} loader defined for asset type: #{json.asset_type}"
+          # puts "No #{json.service} loader defined for asset type: #{json.asset_type}"
           next
         end
 
@@ -61,15 +63,22 @@ class Rg
         loader.send(json.asset_type)&.each do |q|
           # binding.pry if json.asset_type == 'db_cluster' && json.service == 'RDS'
           query(q)
-          c += 1
+          query_stats[json.service] = query_stats[json.service] ? query_stats[json.service] + 1 : 1
+
+          # print "\r#{query_stats.map { |k, v| "#{k}: #{v}" }}"
         end
       rescue NameError
-        puts "No loader defined for service: #{json.service}"
+        # puts "No loader defined for service: #{json.service}"
+        missing_stats[json.service] = missing_stats[json.service] ? missing_stats[json.service] + 1 : 1
       end
     end
 
-    puts "\nQueries: #{c}"
-    puts "Elapsed time: #{_time - time_start}"
+    puts "\nResources: #{query_stats.values.reduce(:+)}"
+    puts "\nQueries: (#{query_stats.keys.count}):"
+    p query_stats
+    puts "\nMissing services (#{missing_stats.keys.count}):"
+    p missing_stats
+    puts "\nElapsed time: #{_time - time_start}"
   end
 
   # DEBUG

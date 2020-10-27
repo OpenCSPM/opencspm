@@ -4,9 +4,12 @@
 #
 class AwsGraphDbLoader
   LOADER_TYPE = 'aws'.freeze
-  # FILTERED_ATTRIBUTES = [:user_data].freeze
+  # only map strings and boolean values
+  ACCEPTED_ATTRIBUTES = [TrueClass, FalseClass, String].freeze
   # TODO: allow :name to be overwritten? (e.g. EKS cluster name)
-  FILTERED_ATTRIBUTES = %i[name user_data].freeze
+  # FILTERED_ATTRIBUTES = [:user_data].freeze
+  # TODO: filter fields in the service import class instead of here
+  FILTERED_ATTRIBUTES = %i[name policy user_data].freeze
 
   def initialize(json)
     @account = json.account
@@ -123,7 +126,7 @@ class AwsGraphDbLoader
   def _relationship_attrs(opts)
     if opts.relationship_attributes
 
-      attrs = opts.relationship_attributes.map { |k, v| %( #{k}: '#{_esc(v)}' )}.join(', ')
+      attrs = opts.relationship_attributes.map { |k, v| %( #{k}: '#{_esc(v.to_s)}' )}.join(', ')
 
       "#{opts.relationship} {#{attrs}}"
     else
@@ -138,14 +141,16 @@ class AwsGraphDbLoader
   def _map_attributes(key, struct = @data)
     # binding.pry if @service == 'EKS' && @asset_type == 'cluster'
 
-    # only map strings values
-    hash = struct.to_h.select { |_k, v| v.is_a?(String) }
+    # only map strings and boolean values
+    # hash = struct.to_h.select { |_k, v| v.is_a?(String) }
+    hash = struct.to_h.select { |_k, v| ACCEPTED_ATTRIBUTES.include?(v.class) }
 
     # filter out fields we don't want or that may have sketchy formatting
-    hash.reject! { |x| FILTERED_ATTRIBUTES.include?(x) }
+    # TODO: filter fields in the service import class instead of here?
+    hash.reject! { |k| FILTERED_ATTRIBUTES.include?(k.to_s.underscore.to_sym) }
 
     # return a formatted string
-    hash.map { |k, v| %( #{key}.#{k} = '#{_esc(v)}' )}.join(', ')
+    hash.map { |k, v| %( #{key}.#{k.to_s.underscore} = '#{_esc(v.to_s)}' )}.join(', ')
   end
 
   # TODO: refactor

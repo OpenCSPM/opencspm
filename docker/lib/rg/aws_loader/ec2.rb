@@ -13,7 +13,7 @@ class AWSLoader::EC2 < AwsGraphDbLoader
   # has_many: subnets,          through: network_interfaces
   #
   def instance
-    node = 'AWS_INSTANCE'
+    node = 'AWS_EC2_INSTANCE'
     q = []
 
     # instance node
@@ -178,7 +178,7 @@ class AWSLoader::EC2 < AwsGraphDbLoader
     q
   end
 
-  def address
+  def eip_address
     node = 'AWS_EIP_ADDRESS'
     q = []
 
