@@ -3,6 +3,12 @@
 #
 # Each method returns an array of Cypher queries
 #
+# Example query:
+#   MATCH (i:AWS_EC2_INSTANCE)
+#   OPTIONAL MATCH (i:AWS_EC2_INSTANCE)-[:MEMBER_OF_VPC]-(v:AWS_VPC)
+#   OPTIONAL MATCH (e:AWS_EKS_CLUSTER)-[:MEMBER_OF_VPC]-(v:AWS_VPC)
+#   RETURN i,v,e
+#
 class AWSLoader::EC2 < AwsGraphDbLoader
   def account
     node = 'AWS_EC2_ACCOUNT'
