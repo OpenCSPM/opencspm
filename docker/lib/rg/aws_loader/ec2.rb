@@ -4,7 +4,13 @@
 # Each method returns an array of Cypher queries
 #
 class AWSLoader::EC2 < AwsGraphDbLoader
-  # TODO: add EC2 account attributes
+  def account
+    node = 'AWS_EC2_ACCOUNT'
+    q = []
+
+    # account node
+    q.push(_upsert({ node: node, id: @name }))
+  end
 
   #
   # belongs_to: vpc

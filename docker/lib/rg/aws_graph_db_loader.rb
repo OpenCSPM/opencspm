@@ -1,11 +1,24 @@
 #
 # Generic wrapper for loading AWS assets into RedisGragh
 #
+# Query types:
+#     1) upsert: create a new node, maps all top level @data attributes.
+#        (e.g. EC2_INSTANCE). Optionally pass an attribute hash with
+#        .data to create a new node and map arbitrary top level attributes.
+#        (e.g. IAM_MFA_DEVICE).
+#     2) upsert_and_link: create a node with no @data attributes, also
+#        create a relationship to another node. This assumes a separate
+#        `upsert` will populate the rest of the @data fields. (e.g. EC2_INSTANCE
+#        ->VPC. Optionally pass .relationship_attributes as a hash to
+#        add attributes to the relationship (e.g. EKS_CLUSTER_LOGGING_TYPE).
+#        Optionally add .headless = `true` to create a node with no region/type/service
+#        fields (e.g. EKS_CLUSTER_LOGGING_TYPE)
+#     3) append: add arbitrary fields to an existing node. (e.g. ER_REPOSITORY)
 #
 class AwsGraphDbLoader
   LOADER_TYPE = 'aws'.freeze
   # only map strings and boolean values
-  ACCEPTED_ATTRIBUTES = [TrueClass, FalseClass, String].freeze
+  ACCEPTED_ATTRIBUTES = [Integer, TrueClass, FalseClass, String].freeze
   # TODO: allow :name to be overwritten? (e.g. EKS cluster name)
   # FILTERED_ATTRIBUTES = [:user_data].freeze
   # TODO: filter fields in the service import class instead of here
@@ -27,6 +40,7 @@ class AwsGraphDbLoader
   #
   # e.g.  node = 'AWS_INSTANCE'
   #       id = i-abc123def456 (or full ARN)
+  #       data == OpenStruct, optional data hash from a custom (nested) node
   #
   def _upsert(opts)
     o = OpenStruct.new(opts)
@@ -35,8 +49,8 @@ class AwsGraphDbLoader
 
     %(
       MERGE (n:#{o.node} { name: '#{o.id}' })
-      ON CREATE SET #{_base_attrs('n')}
-      ON MATCH SET #{_base_attrs('n')}
+      ON CREATE SET #{_base_attrs(o, 'n')}
+      ON MATCH SET #{_base_attrs(o, 'n')}
     )
   end
 
@@ -46,8 +60,6 @@ class AwsGraphDbLoader
   #
   # e.g.  parent_node == 'AWS_VPC',
   #       parent_name == parent.arn, (could be a short resource id or a full ARN)
-  #       parent_asset_type == 'instance',
-  #       service == 'EC2',
   #       child_node == 'AWS_INSTANCE',
   #       child_name == child.arn, (could be a short resource id or a full ARN)
   #       relationship == 'IS_MEMBER_OF'
@@ -92,13 +104,16 @@ class AwsGraphDbLoader
   #
   # @param key String - arbitrary Cypher node ref
   #
-  def _base_attrs(key)
+  def _base_attrs(opts, key)
+    # opts.data indicates we are adding a custom node (nested in a top-level resource)
+    struct = opts.data || @data
+
     %(
       \t#{key}.region = '#{@region}',
       \t#{key}.service_type = '#{@service}',
       \t#{key}.asset_type = '#{@asset_type}',
       \t#{key}.loader_type = '#{LOADER_TYPE}',
-      \t#{_map_attributes(key, @data)}
+      \t#{_map_attributes(key, struct)}
     ).strip
   end
 

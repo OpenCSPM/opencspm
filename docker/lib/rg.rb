@@ -55,7 +55,7 @@ class Rg
 
         # DEBUG: skip loader methods that aren't implemented yet
         unless loader.respond_to?(json.asset_type)
-          # puts "No #{json.service} loader defined for asset type: #{json.asset_type}"
+          puts "No #{json.service} loader defined for asset type: #{json.asset_type}"
           next
         end
 
@@ -73,8 +73,8 @@ class Rg
       end
     end
 
-    puts "\nResources: #{query_stats.values.reduce(:+)}"
-    puts "\nQueries: (#{query_stats.keys.count}):"
+    puts "\nQueries: #{query_stats.values.reduce(:+)}"
+    puts "\nServices: (#{query_stats.keys.count}):"
     p query_stats.sort_by { |_k, v| -v }.each { |k, v| puts "#{k}: \x1b[32m#{v}\x1b[0m\n" }
     puts "\nMissing services (#{missing_stats.keys.count}):"
     p missing_stats
