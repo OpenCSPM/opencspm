@@ -75,7 +75,7 @@ class Rg
 
     puts "\nResources: #{query_stats.values.reduce(:+)}"
     puts "\nQueries: (#{query_stats.keys.count}):"
-    p query_stats
+    p query_stats.sort_by { |_k, v| -v }.each { |k, v| puts "#{k}: \x1b[32m#{v}\x1b[0m\n" }
     puts "\nMissing services (#{missing_stats.keys.count}):"
     p missing_stats
     puts "\nElapsed time: #{_time - time_start}"
