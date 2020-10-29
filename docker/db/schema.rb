@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_10_29_173417) do
+ActiveRecord::Schema.define(version: 2020_10_29_205700) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -34,7 +34,6 @@ ActiveRecord::Schema.define(version: 2020_10_29_173417) do
     t.string "control_id"
     t.string "title"
     t.text "description"
-    t.string "platform"
     t.integer "impact"
     t.string "validation"
     t.string "remediation"
@@ -47,7 +46,6 @@ ActiveRecord::Schema.define(version: 2020_10_29_173417) do
     t.index ["control_id"], name: "index_controls_on_control_id"
     t.index ["control_pack"], name: "index_controls_on_control_pack"
     t.index ["guid"], name: "index_controls_on_guid"
-    t.index ["platform"], name: "index_controls_on_platform"
     t.index ["title"], name: "index_controls_on_title"
   end
 
@@ -134,6 +132,7 @@ ActiveRecord::Schema.define(version: 2020_10_29_173417) do
   create_table "taggings", force: :cascade do |t|
     t.bigint "tag_id", null: false
     t.bigint "control_id", null: false
+    t.boolean "primary", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
     t.index ["control_id"], name: "index_taggings_on_control_id"

@@ -4,14 +4,9 @@ class ControlsSerializer
              :guid,
              :control_id,
              :title,
-             :description,
-             :platform,
+             :tag_map,
              :impact,
              :status,
              :resources_failed,
              :resources_total
-
-  attribute :tags do |control|
-    control.tags.map(&:name)
-  end
 end

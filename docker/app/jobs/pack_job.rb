@@ -21,14 +21,20 @@ class PackJob < ApplicationJob
 
         control&.tags&.map do |tag|
           if tag.class == OpenStruct
-            tag.to_h.keys.each do |x|
-              tag.send(x).to_a.each do |t|
+            tag.to_h.keys.each do |k|
+              # top level of a nested tag set
+              Tagging.create(control: res, tag: Tag.find_or_create_by(name: k), primary: true)
+
+              tag.send(k).to_a.each do |t|
                 res.tags << Tag.find_or_create_by(name: t)
               end
             end
           end
 
-          res.tags << Tag.find_or_create_by(name: tag) if tag.class == String
+          # standalone tag
+          if tag.class == String
+            Tagging.create(control: res, tag: Tag.find_or_create_by(name: tag), primary: true)
+          end
         end
 
         res.update(

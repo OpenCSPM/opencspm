@@ -4,7 +4,11 @@ class ControlsController < ApplicationController
 
   # GET /controls
   def index
-    @controls = Control.all.includes(:tags)
+    @controls = Control.joins(taggings: :tag)
+                       .select('controls.*')
+                       .select('array_agg(tags.name) AS tag_map')
+                       .where('taggings.primary = true')
+                       .group('controls.id')
 
     render json: ControlsSerializer.new(@controls)
   end

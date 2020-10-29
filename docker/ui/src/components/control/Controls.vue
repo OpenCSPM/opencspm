@@ -37,8 +37,8 @@
         if (this.filters.search && this.filters.search.length > 1) {
           let results = controls.filter(c => {
             // TODO: search on title OR description
-            // let term = c.title.toLowerCase() + c.description.toLowerCase()
-            let term = c.title.toLowerCase()
+            let term = c.title.toLowerCase() + c.control_id.toLowerCase()
+            // let term = c.title.toLowerCase()
             return term.indexOf(this.filters.search.toLowerCase()) !== -1
           })
 
@@ -173,8 +173,7 @@
        */
       updateQueryTags() {
         this.selectedTags = this.$route.query.tags ?
-          this.$route.query.tags.split(',').map(x => x.toLowerCase()) :
-          []
+          this.$route.query.tags.split(',').map(x => x.toLowerCase()) : []
       }
     },
     mounted() {

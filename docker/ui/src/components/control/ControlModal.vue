@@ -15,10 +15,8 @@
            aria-labelledby="modal-headline">
         <div class="px-2 py-2 flex justify-between">
           <div>
-            <div class="inline-flex items-center pl-1 pr-2 mb-3 bg-indigo-100 rounded-full">
-              <span
-                    class="px-2 py-px mr-2 text-xs font-bold text-blue-100 uppercase bg-blue-700 rounded-full">{{ data.platform }}</span>
-              <span class="mr-1 text-sm leading-loose text-blue-800">{{ data.control_id }}</span>
+            <div class="inline-flex items-center pl-1 pr-2 mb-3 bg-indigo-100 rounded-md">
+              <span class="mx-1 text-sm leading-loose text-blue-800">{{ data.control_id }}</span>
             </div>
           </div>
           <div class="mr-1">
@@ -45,9 +43,15 @@
             </div>
           </div>
         </div>
-        <div class="mx-2 pb-4">
-          <Tag v-for="(tag, idx) in data.tags"
-               :key=idx>{{ tag }}</Tag>
+        <div v-if="data.tags"
+             class="mx-2 pb-4">
+          <Tag v-for="(tag, idx) in data.tags.filter(x => x.primary ).sort((a,b) => a.tag.localeCompare(b.tag) )"
+               :key=idx>{{ tag.tag }}</Tag>
+        </div>
+        <div v-if="data.tags"
+             class="mx-2 pb-4">
+          <Tag v-for="(tag, idx) in data.tags.filter(x => !x.primary).sort((a,b) => a.tag.localeCompare(b.tag))"
+               :key=idx>{{ tag.tag }}</Tag>
         </div>
         <div class="px-2 py-2">
           <h3 class="text-lg leading-6 font-medium text-gray-800">
@@ -57,6 +61,36 @@
             <div class="pr-6">
               <p>
                 {{ data.description }}
+              </p>
+            </div>
+          </div>
+          <h3 class="mt-4 text-lg leading-6 font-medium text-gray-800">
+            Remediation
+          </h3>
+          <div class="flex justify-between mt-2 w-full text-sm leading-5 text-gray-500">
+            <div class="pr-6">
+              <p>
+                {{ data.remediation }}
+              </p>
+            </div>
+          </div>
+          <h3 class="mt-4 text-lg leading-6 font-medium text-gray-800">
+            Validation
+          </h3>
+          <div class="flex justify-between mt-2 w-full text-sm leading-5 text-gray-500">
+            <div class="pr-6">
+              <p>
+                {{ data.validation }}
+              </p>
+            </div>
+          </div>
+          <h3 class="mt-4 text-lg leading-6 font-medium text-gray-800">
+            References
+          </h3>
+          <div class="flex justify-between mt-2 w-full text-sm leading-5 text-gray-500">
+            <div class="pr-6">
+              <p>
+                {{ data.refs }}
               </p>
             </div>
           </div>
@@ -99,6 +133,7 @@
 
       this.$http.get(url)
         .then(res => {
+          this.data = res.data.data.attributes
           this.resources = res.data.data.attributes.resources
         })
     },

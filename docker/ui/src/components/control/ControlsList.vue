@@ -44,7 +44,7 @@
                         {{ control.control_id }}
                       </span>
                       <div class="invisible group-hover:visible">
-                        <Tag v-for="(tag, idx) in control.tags"
+                        <Tag v-for="(tag, idx) in control.tag_map"
                              :key="idx"
                              :tag="tag"
                              action="add"
