@@ -44,7 +44,6 @@ class PackJob < ApplicationJob
           title: control.title,
           description: control.description,
           impact: control.impact,
-          platform: control.platform,
           validation: control.validation,
           remediation: control.remediation,
           refs: control.refs
