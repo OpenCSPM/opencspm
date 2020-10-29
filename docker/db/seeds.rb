@@ -25,16 +25,16 @@ unless demo_user
 end
 
 # Data sources (Loaders)
-#sources = JSON.parse(YAML.load(File.read('load_config/config.yaml')).to_json)
-#
-#sources['accounts'].each do |ds|
-#  res = Source.find_or_create_by(name: ds['name'])
-#  puts "Source: #{ds['name']}"
-#  res.update(
-#    name: ds['name'],
-#    datasources: ds['datasources']
-#  )
-#end
+sources = JSON.parse(YAML.load(File.read('load_config/config.yaml')).to_json)
+
+sources['buckets'].each do |ds|
+  res = Source.find_or_create_by(name: ds)
+  puts "Source: #{ds}"
+end
+sources['local_dirs'].each do |ds|
+  res = Source.find_or_create_by(name: ds)
+  puts "Source: #{ds}"
+end
 
 # Profiles
 profiles = YAML.load(File.read('db/sample_profiles.yml'))

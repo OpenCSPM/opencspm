@@ -45,7 +45,7 @@
             </div>
           </div>
           <!-- Repo meta info -->
-          <div class="hidden sm:flex flex-col flex-shrink-0 items-end space-y-3">
+          <div class="flex-col flex-shrink-0 items-end space-y-3">
             <div class="flex items-center space-x-4">
               <div class="relative flex justify-end items-center">
                 <button @click="toggle"
@@ -95,9 +95,6 @@
                 </transition>
               </div>
             </div>
-            <p class="flex text-gray-500 text-sm leading-5 space-x-2">
-              <span>Last updated {{ ds.updated_at | moment }}</span>
-            </p>
           </div>
         </div>
       </li>
