@@ -12,13 +12,14 @@ class AWSLoader::S3 < AwsGraphDbLoader
     q.push(_upsert({ node: node, id: @name }))
 
     # owner
-    if @data&.acl&.owner
+    if @data
       opts = {
         node: node,
         id: @name,
         data: {
-          owner_display_name: @data.acl.owner.display_name,
-          owner_id: @data.acl.owner.id
+          owner_display_name: @data&.acl&.owner&.display_name,
+          owner_id: @data&.acl&.owner&.id,
+          is_public: !!@data&.public&.is_public
         }
       }
 

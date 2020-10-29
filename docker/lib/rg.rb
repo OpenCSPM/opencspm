@@ -14,7 +14,8 @@ class Rg
   DEBUG_LOG_FILE = 'tmp/redisgraph.log'.freeze
 
   def initialize
-    @r = RedisGraph.new('recon')
+    # @r = RedisGraph.new('recon')
+    @r = RedisGraph.new('opencspm')
   end
 
   #
