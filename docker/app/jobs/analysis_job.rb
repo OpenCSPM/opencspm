@@ -4,6 +4,7 @@ require 'rspec/core'
 require 'rspec/core/formatters/base_formatter'
 require_relative 'spec/formatters/custom_formatter'
 require_relative 'spec/support/db_helper'
+require_relative 'spec/support/redisgraph_helper'
 require 'json'
 
 class AnalysisJob < ApplicationJob

@@ -5,5 +5,5 @@ db:
 buckets:
   - gs://darkbit-collection-us-cspm
 #  - s3://my-other-bucket-here
-#local_dirs:
-#  - /app/data/demo
+local_dirs:
+  - /app/data/demo

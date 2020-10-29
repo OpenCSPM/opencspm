@@ -4,7 +4,7 @@ class ControlSerializer
              :tags
 
   attribute :resources do |control|
-    control.results.last.issues.includes(:resource).map { |issue| { status: control.status, name: issue.resource.name } }
+    control.results.last.issues.includes(:resource).map { |issue| { status: issue.status, name: issue.resource.name } }
   end
 
   attribute :tags do |control|
