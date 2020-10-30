@@ -23,24 +23,24 @@ describe('Smoke Test', () => {
     cy.url().should('include', '/profiles')
     cy.contains('K8s Visibility').click()
     cy.contains('Send to campaign')
-    cy.contains('Control (5)')
+    cy.contains(/^Control \(\d*\)/)
     cy.url().should('include', '/controls')
-  })
-
-  it('can see all controls and create a campaign', () => {
-    cy.contains('Controls').click()
-    cy.url().should('include', '/controls')
-    cy.contains('Control (5)')
-    cy.contains('Send to campaign').click()
-    cy.contains('Send 5 controls to campaign').click()
-    cy.contains('New Campaign')
-    cy.url().should('include', '/campaigns')
   })
 
   it('can see current data sources', () => {
     cy.contains('Sources').click()
     cy.url().should('include', '/sources')
     cy.contains('Inventory Sources')
+  })
+
+  it('can see all controls and create a campaign', () => {
+    cy.contains('Controls').click()
+    cy.url().should('include', '/controls')
+    cy.contains(/^Control \(\d*\)/)
+    cy.contains('Send to campaign').click()
+    cy.contains(/Send \d* controls to campaign+/).click()
+    cy.contains('New Campaign')
+    cy.url().should('include', '/campaigns')
   })
 
   it('can see admin details', () => {
