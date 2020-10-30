@@ -42,9 +42,16 @@ class FileLoader
     puts "Loading #{file_name}"
     IO.foreach(file_name) do |line|
       asset_json = parse_json_line(line)
-      next unless validate_schema(asset_json)
 
-      AssetRouter.new(asset_json, @import_id, @db)
+      # TEMP DEBUG - AWS only
+      if (%w[account service region resource] - asset_json.keys).empty?
+        AssetRouter.new(asset_json, @import_id, @db)
+      end
+
+      # skip validation for AWS Recon JSON
+      # if (%w[account service region resource] - asset_json.keys).empty? || validate_schema(asset_json)
+      #   AssetRouter.new(asset_json, @import_id, @db)
+      # end
     end
     puts ''
     puts "Done loading #{file_name}"

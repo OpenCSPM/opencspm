@@ -1,12 +1,18 @@
 # frozen-string-literal: true
 
 require 'loader/asset/asset_loader'
+require 'loader/asset/graph_db_loader'
+require 'loader/asset/loaders/aws_loader'
 require 'loader/asset/loaders/gcp_loader'
 require 'loader/asset/loaders/gcp_iam_loader'
 require 'loader/asset/loaders/gcp_iam_roles_loader'
 require 'loader/asset/loaders/k8s_loader'
 
-Dir['./app/jobs/lib/loader/asset/loaders/gcp_loader/*.rb'].each { |file| require file }
+#
+# Require all individual service loaders
+#
+Dir[File.join(__dir__, 'loaders', 'aws_loader', '*.rb')].each { |file| require file }
+Dir[File.join(__dir__, 'loaders', 'gcp_loader', '*.rb')].each { |file| require file }
 
 # Comment
 class AssetRouter
@@ -18,8 +24,13 @@ class AssetRouter
   end
 
   def route
+    # Load an AWS resource
+    return aws_load if (%w[account service region resource] - @asset.keys).empty?
+
     # Skip instance templates with an asset name that includes zones
-    return if @asset['asset_type'] == 'compute.googleapis.com/InstanceTemplate' && @asset['name'] =~ %r{/zones/}
+    if @asset['asset_type'] == 'compute.googleapis.com/InstanceTemplate' && @asset['name'] =~ %r{/zones/}
+      return
+    end
 
     # Parse GCP assets (have ancestors block)
     return gcp_load unless @asset['ancestors'].nil?
@@ -33,12 +44,16 @@ class AssetRouter
 
   private
 
+  def aws_load
+    AWSLoader::ResourceLoader.new(@asset, @db, @import_id)
+  end
+
   def gcp_load
     # GCP CAI K8s resources are incomplete
     return if @asset['asset_type'].start_with?('k8s.io')
 
     # TODO: Remove
-    #return if @asset['asset_type'] == 'compute.googleapis.com/SslCertificate'
+    # return if @asset['asset_type'] == 'compute.googleapis.com/SslCertificate'
 
     if @asset['iam_policy'].nil?
       # GCP CAI Resource

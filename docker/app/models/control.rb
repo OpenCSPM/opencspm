@@ -6,6 +6,7 @@ class Control < ApplicationRecord
   has_many :issues, through: :results
   has_many :resources, -> { distinct }, through: :results
 
+  # create a custom json hash with mapped tags including primary status
   scope :with_mapped_tags, lambda {
                              joins(taggings: :tag)
                                .select('controls.*')

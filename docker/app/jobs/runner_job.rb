@@ -39,6 +39,10 @@ class RunnerJob < ApplicationJob
       return
     end
 
+    # TEMP DEBUG
+    # job.complete!
+    # return
+
     results = JSON.parse(File.read(RESULTS_FILE), object_class: OpenStruct)
 
     # controls = Control.all

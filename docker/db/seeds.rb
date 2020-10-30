@@ -27,11 +27,12 @@ end
 # Data sources (Loaders)
 sources = JSON.parse(YAML.load(File.read('load_config/config.yaml')).to_json)
 
-sources['buckets'].each do |ds|
+sources['buckets']&.each do |ds|
   res = Source.find_or_create_by(name: ds)
   puts "Source: #{ds}"
 end
-sources['local_dirs'].each do |ds|
+
+sources['local_dirs']&.each do |ds|
   res = Source.find_or_create_by(name: ds)
   puts "Source: #{ds}"
 end
