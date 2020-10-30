@@ -129,7 +129,7 @@
             ...new Set(
               res.data.data
               .map(x => x.attributes.tag_map.map(x => x.tag))
-              .flat().slice(0, 20)
+              .flat()
             )
           ]
         })
