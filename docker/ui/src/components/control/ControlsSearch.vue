@@ -56,7 +56,7 @@
             <div class="px-6">
               <div class="py-6 flex items-center justify-between border-t border-cool-gray-200">
                 <div class="flex space-x-4">
-                  <SelectPlatform @update-platform-filter="updatePlatformFilter" />
+                  <SelectStatus @update-platform-filter="updatePlatformFilter" />
                   <SelectImpact @update-impact-filter="updateImpactFilter" />
                   <SelectTags :availableTags="availableTags"
                               :selectedTags="selectedTags"
@@ -76,7 +76,7 @@
 
 <script>
   import CampaignDropdown from '../campaign/CampaignDropdown'
-  import SelectPlatform from './ControlsSearchSelectPlatform'
+  import SelectStatus from './ControlsSearchSelectStatus'
   import SelectImpact from './ControlsSearchSelectImpact'
   import SelectTags from './ControlsSearchSelectTags'
 
@@ -84,7 +84,7 @@
     props: ['filters', 'availableTags', 'queryTags', 'selectedTags', 'controls'],
     components: {
       CampaignDropdown,
-      SelectPlatform,
+      SelectStatus,
       SelectImpact,
       SelectTags
     },

@@ -94,9 +94,10 @@
 
         if (this.selectedTags.length > 0) {
           return controls.filter(c => {
+            console.log('CCCC', c.tag_map)
             return this.filters.tag_mode === 'any' ?
-              this.selectedTags.some(t => c.tags.includes(t)) :
-              this.selectedTags.every(t => c.tags.includes(t))
+              this.selectedTags.some(t => c.tag_map.map(m => m.tag).includes(t)) :
+              this.selectedTags.every(t => c.tag_map.map(m => m.tag).includes(t))
           })
         } else {
           return controls
@@ -128,9 +129,8 @@
           this.availableTags = [
             ...new Set(
               res.data.data
-              .map(x => x.attributes)
-              .map(x => x.tags)
-              .flat()
+              .map(x => x.attributes.tag_map.map(x => x.tag))
+              .flat().slice(0, 20)
             )
           ]
         })

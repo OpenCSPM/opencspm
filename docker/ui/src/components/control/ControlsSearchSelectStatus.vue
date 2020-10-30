@@ -10,7 +10,7 @@
   <div class="space-y-1">
     <label id="listbox-label"
            class="block text-sm leading-5 font-medium text-gray-700">
-      Platform
+      Status
     </label>
     <div class="relative">
       <span class="inline-block w-48 rounded-md shadow-sm">
@@ -104,24 +104,12 @@
             value: 'any'
           },
           {
-            name: 'Google Cloud',
-            value: 'gcp'
+            name: 'Passing',
+            value: 'passed'
           },
           {
-            name: 'AWS',
-            value: 'aws'
-          },
-          {
-            name: 'GKE',
-            value: 'gke'
-          },
-          {
-            name: 'EKS',
-            value: 'eks'
-          },
-          {
-            name: 'Kubernetes',
-            value: 'k8s'
+            name: 'Failing',
+            value: 'failed'
           },
         ],
         selectedPlatform: 0,

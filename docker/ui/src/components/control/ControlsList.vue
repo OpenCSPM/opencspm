@@ -44,13 +44,13 @@
                         {{ control.control_id }}
                       </span>
                       <div class="invisible group-hover:visible">
-                        <Tag v-for="(tag, idx) in control.tag_map"
+                        <Tag v-for="(tag, idx) in control.tag_map.filter(t => t.primary)"
                              :key="idx"
-                             :tag="tag"
+                             :tag="tag.tag"
                              action="add"
                              class="cursor-pointer"
                              @add-tag="addTag">
-                          {{ tag }}
+                          {{ tag.tag }}
                         </Tag>
                       </div>
                     </div>

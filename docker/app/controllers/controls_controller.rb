@@ -6,8 +6,7 @@ class ControlsController < ApplicationController
   def index
     @controls = Control.joins(taggings: :tag)
                        .select('controls.*')
-                       .select('array_agg(tags.name) AS tag_map')
-                       .where('taggings.primary = true')
+                       .select("json_agg(json_build_object('tag', tags.name, 'primary', taggings.primary)) AS tag_map")
                        .group('controls.id')
 
     render json: ControlsSerializer.new(@controls)
