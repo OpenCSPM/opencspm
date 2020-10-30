@@ -6,6 +6,13 @@ class Control < ApplicationRecord
   has_many :issues, through: :results
   has_many :resources, -> { distinct }, through: :results
 
+  scope :with_mapped_tags, lambda {
+                             joins(taggings: :tag)
+                               .select('controls.*')
+                               .select('json_agg(json_build_object(\'tag\', tags.name, \'primary\', taggings.primary)) AS tag_map')
+                               .group('controls.id')
+                           }
+
   enum status: { failed: -1, unknown: 0, passed: 1 }
 
   #

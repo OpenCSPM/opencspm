@@ -7,19 +7,19 @@ class Campaign < ApplicationRecord
   #
   def controls
     search_filter = filters['search'] ? ['%', filters['search'], '%'].join : nil
-    platform_filter = filters['platform'] != 'any' ? filters['platform'] : nil
+    status_filter = filters['status'] != 'any' ? filters['status'] : nil
     impact_filter = ActiveRecord::Base.connection.type_cast(impact_range(filters['impact']))
     tags_filter = filters['tags']
     must_have_all_tags = !tags_filter.empty? && filters['tag_mode'] == 'all'
 
-    controls = Control.includes(:tags)
+    controls = Control.with_mapped_tags
 
     # filters MUST have an Impact Range
     controls = controls.where('impact <@ ?::int4range', impact_filter)
     # filters MAY have a Search filter
     controls = controls.where('title ILIKE ?', search_filter) if search_filter
-    # filters MAY have a Platform filter
-    controls = controls.where('platform ILIKE ?', platform_filter) if platform_filter
+    # filters MAY have a Status filter
+    controls = controls.where(status: status_filter) if status_filter
     # filters MAY have a Tags filter
     controls = controls.where(tags: { name: tags_filter }) if tags_filter && !tags_filter.empty?
     # filters MAY have "all" tags flag set
@@ -34,7 +34,7 @@ class Campaign < ApplicationRecord
   end
 
   def update_control_count
-    self.control_count = controls.count
+    self.control_count = controls.length
   end
 
   private
@@ -59,7 +59,7 @@ class Campaign < ApplicationRecord
 
   def valid_terms; end
 
-  def valid_platforms; end
+  def valid_statuses; end
 
   def valid_impacts; end
 
