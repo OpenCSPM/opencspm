@@ -5,7 +5,7 @@
                     :controls="filteredControls"
                     :filters="filters"
                     @update-search-filter="updateSearchFilter"
-                    @update-platform-filter="updatePlatformFilter"
+                    @update-status-filter="updateStatusFilter"
                     @update-impact-filter="updateImpactFilter"
                     @add-tag="addTag"
                     @remove-tag="removeTag"
@@ -48,17 +48,17 @@
         }
       },
       /**
-       * Return controls that match the selected Platform type
+       * Return controls that match the selected Status
        *
        * @return {Array} filtered controls
        */
-      applyPlatformFilter() {
+      applyStatusFilter() {
         let controls = this.applySearchFilter()
-        let platform = this.filters.platform
+        let status = this.filters.status
 
-        if (platform !== 'any') {
+        if (status !== 'any') {
           return controls.filter(c => {
-            return c.platform === platform
+            return c.status === status
           })
         } else {
           return controls
@@ -70,7 +70,7 @@
        * @return {Array} filtered controls
        */
       applyImpactFilter() {
-        let controls = this.applyPlatformFilter()
+        let controls = this.applyStatusFilter()
         let impact = this.filters.impact
 
         if (impact !== 'any') {
@@ -154,10 +154,10 @@
         this.applyFilters()
       },
       /**
-       * Handle Platform filter update event
+       * Handle Status filter update event
        */
-      updatePlatformFilter(f) {
-        this.filters.platform = f
+      updateStatusFilter(f) {
+        this.filters.status = f
         this.applyFilters()
       },
       /**
@@ -194,7 +194,7 @@
         selectedTags: [],
         filters: {
           search: null,
-          platform: 'any',
+          status: 'any',
           impact: 'any',
           tags: [],
           tag_mode: 'any'

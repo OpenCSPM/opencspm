@@ -21,9 +21,13 @@
                 aria-expanded="true"
                 aria-labelledby="listbox-label"
                 class="cursor-default relative w-full rounded-md border border-gray-300 bg-white pl-3 pr-10 py-2 text-left focus:outline-none focus:shadow-outline-blue focus:border-blue-300 transition ease-in-out duration-150 sm:text-sm sm:leading-5">
-          <span class="block truncate">
-            {{ platforms[selectedPlatform].name }}
-          </span>
+          <div class="flex items-center space-x-3">
+            <span class="flex-shrink-0 inline-block h-2 w-2 rounded-full"
+                  :class="`${statuses[selectedStatus].color}`"></span>
+            <span class="block truncate">
+              {{ statuses[selectedStatus].name }}
+            </span>
+          </div>
           <span class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
             <svg class="h-5 w-5 text-gray-400"
                  viewBox="0 0 20 20"
@@ -47,19 +51,23 @@
             aria-labelledby="listbox-label"
             aria-activedescendant="listbox-item-3">
           <li class="text-gray-900 hover:bg-gray-100 cursor-default select-none relative py-2 pl-3 pr-9"
-              v-for="(platform, idx) in platforms"
+              v-for="(status, idx) in statuses"
               :key="idx"
               :id="`listbox-option-${idx}`"
-              @click="selectedPlatform = idx">
-            <span v-if="idx !== selectedPlatform"
-                  class="font-normal block truncate">
-              {{ platform.name }}
-            </span>
-            <span v-if="idx === selectedPlatform"
-                  class="font-semibold block truncate">
-              {{ platform.name }}
-            </span>
-            <span v-if="idx === selectedPlatform"
+              @click="selectedStatus = idx">
+            <div class="flex items-center space-x-3">
+              <span class="flex-shrink-0 inline-block h-2 w-2 rounded-full"
+                    :class="`${status.color}`"></span>
+              <span v-if="idx !== selectedStatus"
+                    class="font-normal block truncate">
+                {{ status.name }}
+              </span>
+              <span v-if="idx === selectedStatus"
+                    class="font-semibold block truncate">
+                {{ status.name }}
+              </span>
+            </div>
+            <span v-if="idx === selectedStatus"
                   class="text-indigo-600 absolute inset-y-0 right-0 flex items-center pr-4">
               <!-- Heroicon name: check -->
               <svg class="h-5 w-5"
@@ -92,27 +100,30 @@
       }
     },
     watch: {
-      selectedPlatform() {
-        this.$emit('update-platform-filter', this.platforms[this.selectedPlatform].value)
+      selectedStatus() {
+        this.$emit('update-status-filter', this.statuses[this.selectedStatus].value)
         this.isOpen = false
       }
     },
     data() {
       return {
-        platforms: [{
+        statuses: [{
             name: 'Any',
-            value: 'any'
+            value: 'any',
+            color: 'bg-gray-300'
           },
           {
             name: 'Passing',
-            value: 'passed'
+            value: 'passed',
+            color: 'bg-green-400'
           },
           {
             name: 'Failing',
-            value: 'failed'
+            value: 'failed',
+            color: 'bg-red-400'
           },
         ],
-        selectedPlatform: 0,
+        selectedStatus: 0,
         isOpen: false
       }
     }

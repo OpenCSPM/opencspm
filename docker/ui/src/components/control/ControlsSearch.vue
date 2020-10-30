@@ -56,7 +56,7 @@
             <div class="px-6">
               <div class="py-6 flex items-center justify-between border-t border-cool-gray-200">
                 <div class="flex space-x-4">
-                  <SelectStatus @update-platform-filter="updatePlatformFilter" />
+                  <SelectStatus @update-status-filter="updateStatusFilter" />
                   <SelectImpact @update-impact-filter="updateImpactFilter" />
                   <SelectTags :availableTags="availableTags"
                               :selectedTags="selectedTags"
@@ -98,8 +98,8 @@
       toggleTagMode() {
         this.$emit('toggle-tag-mode')
       },
-      updatePlatformFilter(f) {
-        this.$emit('update-platform-filter', f)
+      updateStatusFilter(f) {
+        this.$emit('update-status-filter', f)
       },
       updateImpactFilter(f) {
         this.$emit('update-impact-filter', f)
