@@ -18,7 +18,8 @@ docker/log
 .bashrc
 
 # Cypress
-ui/cypress/videos/*
+docker/ui/cypress/videos/*
+docker/ui/cypress/screenshots/*
 
 # Rails 
 .local
