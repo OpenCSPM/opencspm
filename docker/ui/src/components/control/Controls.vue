@@ -94,7 +94,6 @@
 
         if (this.selectedTags.length > 0) {
           return controls.filter(c => {
-            console.log('CCCC', c.tag_map)
             return this.filters.tag_mode === 'any' ?
               this.selectedTags.some(t => c.tag_map.map(m => m.tag).includes(t)) :
               this.selectedTags.every(t => c.tag_map.map(m => m.tag).includes(t))
