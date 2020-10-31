@@ -47,7 +47,7 @@
       <div v-show="search.length > 0"
            class="z-10 mt-12 absolute w-80 rounded-md shadow-lg">
         <div v-if="filteredTags.length > 0"
-             class="rounded-md bg-white shadow-xs"
+             class="max-h-72 rounded-md bg-white shadow-xs overflow-y-scroll"
              role="menu"
              aria-orientation="vertical"
              aria-labelledby="options-menu">
@@ -112,7 +112,6 @@
        * Filter available tags based on search terms
        */
       filterTags() {
-        const MaxSearchResults = 100
         let tags = this.availableTags
 
         if (this.search && this.search.length > 0) {
@@ -121,7 +120,7 @@
             return term.indexOf(this.search.toLowerCase()) !== -1
           })
 
-          return results.slice(0, MaxSearchResults)
+          return results.sort()
         } else {
           return tags
         }
