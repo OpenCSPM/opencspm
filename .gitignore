@@ -30,6 +30,9 @@ capybara-*.html
 /spec/tmp
 *.orig
 
+# Ignore test data
+assets/test
+
 # Ignore all logfiles and tempfiles.
 /log/*
 /tmp/*

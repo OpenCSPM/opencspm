@@ -7,3 +7,4 @@ buckets:
 #  - s3://my-other-bucket-here
 local_dirs:
   - /app/data/demo
+  # - /app/data/test

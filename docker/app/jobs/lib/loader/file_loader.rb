@@ -44,14 +44,14 @@ class FileLoader
       asset_json = parse_json_line(line)
 
       # TEMP DEBUG - AWS only
-      if (%w[account service region resource] - asset_json.keys).empty?
-        AssetRouter.new(asset_json, @import_id, @db)
-      end
-
-      # skip validation for AWS Recon JSON
-      # if (%w[account service region resource] - asset_json.keys).empty? || validate_schema(asset_json)
+      # if (%w[account service region resource] - asset_json.keys).empty?
       #   AssetRouter.new(asset_json, @import_id, @db)
       # end
+
+      # skip validation for AWS Recon JSON
+      if (%w[account service region resource] - asset_json.keys).empty? || validate_schema(asset_json)
+        AssetRouter.new(asset_json, @import_id, @db)
+      end
     end
     puts ''
     puts "Done loading #{file_name}"

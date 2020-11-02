@@ -109,6 +109,7 @@ class GraphDbLoader
     struct = opts.data || @data
 
     %(
+      \t#{key}.account = '#{@account}',
       \t#{key}.region = '#{@region}',
       \t#{key}.service_type = '#{@service}',
       \t#{key}.asset_type = '#{@asset_type}',
@@ -127,6 +128,7 @@ class GraphDbLoader
       ).strip
     else
       %(
+        \t#{key}.account = '#{@account}',
         \t#{key}.region = '#{@region}',
         \t#{key}.loader_type = '#{@loader_type}'
       ).strip
@@ -141,7 +143,7 @@ class GraphDbLoader
   def _relationship_attrs(opts)
     if opts.relationship_attributes
 
-      attrs = opts.relationship_attributes.map { |k, v| %( #{k}: '#{_esc(v.to_s)}' )}.join(', ')
+      attrs = opts.relationship_attributes.map { |k, v| %( #{k}: '#{_esc(v.to_s)}' ) }.join(', ')
 
       "#{opts.relationship} {#{attrs}}"
     else
