@@ -4,7 +4,7 @@ db:
   port: 6379
 buckets:
   - gs://darkbit-collection-us-cspm
-#  - s3://my-other-bucket-here
+  # - s3://my-other-bucket-here
 local_dirs:
   - /app/data/demo
   # - /app/data/test

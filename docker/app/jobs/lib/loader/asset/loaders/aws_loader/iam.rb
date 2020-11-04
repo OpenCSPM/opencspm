@@ -33,6 +33,7 @@ class AWSLoader::IAM < GraphDbLoader
     end
 
     # TODO: map ssh_keys
+    # TODO: map user_policy_list (attached inline policies)
     # TODO: map attached_managed_policies
     q
   end
