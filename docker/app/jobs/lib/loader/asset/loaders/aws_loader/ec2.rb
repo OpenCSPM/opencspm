@@ -230,6 +230,30 @@ class AWSLoader::EC2 < GraphDbLoader
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
+
+    # vpc/subnet/network-interface node and relationship
+    if @data.resource_id
+      resource_node_type = if @data.resource_id.starts_with?('eni-')
+                             'AWS_NETWORK_INTERFACE'
+                           elsif @data.resource_id.starts_with?('vpc-')
+                             'AWS_VPC'
+                           elsif @data.resource_id.starts_with?('subnet-')
+                             'AWS_SUBNET'
+                           end
+
+      opts = {
+        parent_node: resource_node_type,
+        parent_name: @data.resource_id,
+        child_node: node,
+        child_name: @name,
+        relationship: 'HAS_FLOW_LOG',
+        relationship_attributes: { status: @data.flow_log_status }
+      }
+
+      q.push(_upsert_and_link(opts)) if resource_node_type
+    end
+
+    q
   end
 
   def volume
