@@ -123,4 +123,23 @@ class AWSLoader::IAM < GraphDbLoader
 
     q
   end
+
+  def credential_report
+    node = 'AWS_IAM_USER'
+    q = []
+
+    @data&.content&.each do |user|
+      id = user.delete_field('arn')
+
+      opts = {
+        node: node,
+        id: id,
+        data: user
+      }
+
+      q.push(_append(opts))
+    end
+
+    q
+  end
 end
