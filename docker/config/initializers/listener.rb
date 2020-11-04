@@ -16,7 +16,7 @@ if File.directory?(LISTEN_DIR) && Socket.gethostname == CORE_CONTAINER
   end
 
   # non blocking
-  listener.start
+  # listener.start
 
   puts "=> [listener] listening for changes to #{LISTEN_DIR}"
 end

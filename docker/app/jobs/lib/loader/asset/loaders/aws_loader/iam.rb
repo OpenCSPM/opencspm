@@ -70,6 +70,18 @@ class AWSLoader::IAM < GraphDbLoader
     q
   end
 
+  def managed_policy
+    node = 'AWS_IAM_MANAGED_POLICY'
+    q = []
+
+    # policy node
+    q.push(_upsert({ node: node, id: @name }))
+
+    # TODO: map to account (to support multiple accounts)
+    # TODO: parse policy document
+    q
+  end
+
   def account_summary
     node = 'AWS_IAM_ACCOUNT_SUMMARY'
     q = []
@@ -97,8 +109,8 @@ class AWSLoader::IAM < GraphDbLoader
   #
   # MFA_DEVICE relationship is created backwards because
   # the root user is not enumerated by the IAM API. The only
-  # way to know if the root user has an MFA token is to map
-  # the user from the MFA device.
+  # way to know if the root user has a virtual MFA token is
+  # to map the user from the MFA device.
   #
   def virtual_mfa_device
     node = 'AWS_IAM_MFA_DEVICE'
