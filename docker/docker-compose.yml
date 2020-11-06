@@ -1,15 +1,6 @@
 version: '3'
 
 x-app: &app
-  build:
-    context: .dockerdev
-    dockerfile: Dockerfile
-    args:
-      RUBY_VERSION: '2.6.6'
-      PG_MAJOR: '13'
-      NODE_MAJOR: '12'
-      YARN_VERSION: '1.22.5'
-      BUNDLER_VERSION: '2.0.2'
   environment: &env
     NODE_ENV: ${NODE_ENV:-production}
     RAILS_ENV: ${RAILS_ENV:-production}
