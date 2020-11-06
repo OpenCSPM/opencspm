@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe ControlsController, type: :routing do
+RSpec.describe Api::ControlsController, type: :routing do
   describe 'routing' do
     it 'routes to #index' do
       expect(get: '/controls').to route_to('controls#index')

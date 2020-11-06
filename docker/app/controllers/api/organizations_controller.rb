@@ -1,4 +1,4 @@
-class OrganizationsController < ApplicationController
+class Api::OrganizationsController < ApplicationController
   before_action :set_organization, only: %i[show update destroy]
 
   # GET /organizations

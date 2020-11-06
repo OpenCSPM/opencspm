@@ -1,4 +1,4 @@
-class CampaignResultsController < ApplicationController
+class Api::CampaignResultsController < ApplicationController
   before_action :set_campaign, only: %i[index]
 
   # GET /campaign/1/results

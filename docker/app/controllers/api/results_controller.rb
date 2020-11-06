@@ -1,4 +1,4 @@
-class ResultsController < ApplicationController
+class Api::ResultsController < ApplicationController
   # GET /results
   def index
     @issue_count = Profile.active.sum(:issue_count)

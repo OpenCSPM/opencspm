@@ -1,4 +1,4 @@
-class CampaignsController < ApplicationController
+class Api::CampaignsController < ApplicationController
   before_action :set_campaign, only: %i[show update destroy]
 
   # GET /campaigns
@@ -23,7 +23,7 @@ class CampaignsController < ApplicationController
     @campaign.name = 'New Campaign'
     @campaign.organization_id = user.organization.id
 
-    render json: @campaign, status: :created, location: @campaign if @campaign.save!
+    render json: @campaign, status: :created if @campaign.save!
   end
 
   # PATCH/PUT /campaigns/1

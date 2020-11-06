@@ -1,4 +1,4 @@
-class SourcesController < ApplicationController
+class Api::SourcesController < ApplicationController
   before_action :set_source, only: %i[show update destroy]
 
   # GET /sources

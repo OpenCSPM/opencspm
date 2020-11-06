@@ -1,4 +1,4 @@
-class ControlsController < ApplicationController
+class Api::ControlsController < ApplicationController
   before_action :set_control, only: %i[show destroy]
   before_action :set_campaign, only: %i[destroy]
 

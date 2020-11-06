@@ -1,7 +1,7 @@
 #
 # Validates whether or not there is there a valid session
 #
-class SessionsController < ApplicationController
+class Api::SessionsController < ApplicationController
   skip_before_action :authenticate_user!
   skip_forgery_protection only: :destroy
 
