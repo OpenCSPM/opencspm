@@ -17,7 +17,8 @@ docker/log
 .psqlrc
 .bashrc
 
-# Cypress
+# UI
+docker/ui/dist/*
 docker/ui/cypress/videos/*
 docker/ui/cypress/screenshots/*
 
@@ -26,6 +27,7 @@ docker/ui/cypress/screenshots/*
 *.rbc
 capybara-*.html
 /public/system
+public/*
 /coverage/
 /spec/tmp
 *.orig
