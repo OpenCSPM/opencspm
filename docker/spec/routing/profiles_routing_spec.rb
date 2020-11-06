@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe ProfilesController, type: :routing do
+RSpec.describe Api::ProfilesController, type: :routing do
   describe 'routing' do
     it 'routes to #index' do
       expect(get: '/profiles').to route_to('profiles#index')

@@ -8,7 +8,7 @@ Vue.config.productionTip = false
 // api url
 // customize for self-hosted environment
 const API_BASE_URL =
-  process.env.NODE_ENV === 'production' ? 'http://localhost:5000' : 'http://localhost:5000'
+  process.env.NODE_ENV === 'production' ? 'http://localhost:5000/api' : 'http://localhost:5000/api'
 
 // base url for oauth links
 // customize for self-hosted environment

@@ -19,15 +19,16 @@ Rails.application.routes.draw do
   # ---------------
   # Resource routes
   # ---------------
-  resources :sessions, only: %i[create index show destroy]
-  resources :organizations
-  resources :campaigns do
-    resources :results, only: %i[index], to: 'campaign_results#index'
+  namespace :api do
+    resources :sessions, only: %i[create index show destroy]
+    resources :organizations
+    resources :campaigns do
+      resources :results, only: %i[index], to: 'campaign_results#index'
+    end
+    resources :profiles, only: %i[index show]
+    resources :controls, only: %i[index show]
+    resources :sources, only: %i[index show update]
+    resources :jobs, only: %i[index]
+    resources :users
   end
-  resources :profiles, only: %i[index show]
-  resources :controls, only: %i[index show]
-  resources :sources, only: %i[index show update]
-  # resources :results, only: %i[index]
-  resources :jobs, only: %i[index]
-  resources :users
 end

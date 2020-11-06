@@ -59,10 +59,9 @@ services:
       - '5000:5000'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:5000/healthz']
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 60
-      start_period: 10s
   ui:
     <<: *backend
     hostname: ui
