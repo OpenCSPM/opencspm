@@ -110,9 +110,6 @@
               .controls
               .data.map(x => x.attributes)
           })
-          .catch(e => {
-            console.info(e)
-          })
       },
       loadResults() {
         let id = this.$route.params.campaign_id

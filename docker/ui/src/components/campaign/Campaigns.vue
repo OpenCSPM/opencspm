@@ -118,9 +118,6 @@
           .then(resp => {
             this.campaigns = resp.data.data.map(x => x.attributes)
           })
-          .catch(e => {
-            console.log(e)
-          })
       },
       hideCampaignTip: function() {
         localStorage.show_tip_campaigns = false

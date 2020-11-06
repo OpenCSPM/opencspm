@@ -1,0 +1,41 @@
+# dot files
+.DS_Store
+.bash_history
+.bashrc
+.bundle
+.cache
+.dockerdev/Dockerfile*
+.dockerignore
+.env
+.init
+.irb_history
+.irbrc
+.local
+.rubocop.yml
+.ruby-gemset
+.ruby-version
+.solargraph.yml
+.viminfo
+.yarn
+.yarnrc
+
+# build artifacts
+Gemfile.lock
+build.sh
+docker-*
+
+# core
+readme.md
+controls
+data
+load_config
+load_dir
+log
+tmp
+
+# frontend
+ui/.init
+ui/yarn.lock
+ui/node_modules
+ui/cypress
+ui/cypress.json

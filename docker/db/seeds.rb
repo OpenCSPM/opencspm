@@ -47,9 +47,4 @@ profiles.each do |p|
 end
 
 # Import Controls from Control Packs
-PackJob.new.perform
-
-#
-# On first run, execute a full load/analysis job
-#
-RunnerJob.new.perform unless Issue.count > 0
+PackJob.perform_later
