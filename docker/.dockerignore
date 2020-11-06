@@ -31,6 +31,7 @@ data
 load_config
 load_dir
 log
+public/*
 tmp
 
 # frontend
