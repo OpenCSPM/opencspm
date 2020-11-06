@@ -124,9 +124,6 @@
               this.$emit('login-error')
             }
           })
-          .catch(err => {
-            console.info(err)
-          })
       }
     }
   }

@@ -37,9 +37,6 @@
           this.profiles = res.data.data.map(x => x.attributes).sort((a, b) => a.controls
             .length > b.controls.length ? -1 : 1)
         })
-        .catch(err => {
-          console.info(err)
-        })
     },
     data() {
       return {

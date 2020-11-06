@@ -109,7 +109,6 @@
         this.filteredControls = this.applyTagsFilter()
       },
       addTag(t) {
-        console.log('adding tag', t)
         if (!this.selectedTags.includes(t)) {
           this.selectedTags.push(t)
         }
