@@ -6,10 +6,12 @@ import axios from 'axios'
 Vue.config.productionTip = false
 
 // api url
+// customize for self-hosted environment
 const API_BASE_URL =
-  process.env.NODE_ENV === 'production' ? 'https://api.opencspm.org' : 'http://localhost:5000'
+  process.env.NODE_ENV === 'production' ? 'http://localhost:5000' : 'http://localhost:5000'
 
 // base url for oauth links
+// customize for self-hosted environment
 Vue.prototype.BASE_URL =
   process.env.NODE_ENV === 'production' ? 'https://auth.opencspm.org' : 'http://localhost:5000'
 

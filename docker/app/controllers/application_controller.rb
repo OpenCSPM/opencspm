@@ -72,7 +72,7 @@ class ApplicationController < ActionController::API
     cookies['_opencspm_token'] = {
       value: form_authenticity_token,
       domain: Rails.application.config.cookie_domain,
-      secure: Rails.env.production?
+      secure: Rails.application.config.secure_csrf_token
     }
   end
 end

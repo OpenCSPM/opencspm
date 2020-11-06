@@ -3,7 +3,7 @@ version: '3'
 x-app: &app
   build:
     context: .dockerdev
-    dockerfile: Dockerfile
+    dockerfile: Dockerfile.development
     args:
       RUBY_VERSION: '2.6.6'
       PG_MAJOR: '13'
@@ -11,11 +11,9 @@ x-app: &app
       YARN_VERSION: '1.22.5'
       BUNDLER_VERSION: '2.0.2'
   environment: &env
-    NODE_ENV: ${NODE_ENV:-production}
-    RAILS_ENV: ${RAILS_ENV:-production}
-    RAILS_SERVE_STATIC_FILES: 1
-    RAILS_LOG_TO_STDOUT: 1
-  image: gcr.io/opencspm/engine:0.1.3
+    NODE_ENV: ${NODE_ENV:-development}
+    RAILS_ENV: ${RAILS_ENV:-development}
+  image: gcr.io/opencspm/engine:0.1.3-dev
   tmpfs:
     - /tmp
 
@@ -24,13 +22,16 @@ x-backend: &backend
   stdin_open: true
   tty: true
   volumes:
-    - core:/app
+    - .:/app:cached
     - ../assets:/app/data
     - ../config:/app/load_config
     - ../load_dir:/app/load_dir
     - ../../opencspm-controls:/app/controls/:ro
     - .dockerdev/.psqlrc:/app/.psqlrc:ro
     - .dockerdev/.bashrc:/app/.bashrc:ro
+    - gems:/gems
+    - rails_cache:/app/tmp/cache
+    - node_modules:/app/ui/node_modules
     - ~/.config/gcloud/opencspm-loader.json:/tmp/keys/credentials.json:ro
   environment:
     <<: *env
@@ -58,9 +59,19 @@ services:
       - '5000:5000'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:5000/healthz']
-      interval: 5s
+      interval: 10s
       timeout: 5s
       retries: 60
+      start_period: 10s
+  ui:
+    <<: *backend
+    hostname: ui
+    working_dir: /app/ui
+    command: ./init.sh
+    ports:
+      - '8000:8080'
+    depends_on:
+      - core
 
   worker:
     <<: *backend
@@ -80,6 +91,7 @@ services:
     volumes:
       - .dockerdev/.psqlrc:/root/.psqlrc:ro
       - postgres:/var/lib/postgresql/data
+      - ./log:/root/log:cached
     environment:
       PSQL_HISTFILE: /root/log/.psql_history
       POSTGRES_PASSWORD: postgres
@@ -102,7 +114,22 @@ services:
       timeout: 3s
       retries: 30
 
+  redis_ui:
+    image: docker.io/redislabs/redisinsight:latest
+    hostname: redis_ui
+    ports:
+      - '8001:8001'
+    depends_on:
+      - redis
+
+  shell:
+    <<: *backend
+    command: /bin/bash
+    hostname: shell
+
 volumes:
-  core:
+  gems:
   postgres:
   redis:
+  node_modules:
+  rails_cache:
