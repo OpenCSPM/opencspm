@@ -106,7 +106,7 @@ services:
     volumes:
       - redis:/data
     ports:
-      - 6379
+      - '6379:6379'
     healthcheck:
       test: redis-cli ping
       interval: 1s
