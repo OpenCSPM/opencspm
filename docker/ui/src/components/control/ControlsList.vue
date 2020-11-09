@@ -44,7 +44,7 @@
                         {{ control.control_id }}
                       </span>
                       <div class="invisible group-hover:visible">
-                        <Tag v-for="(tag, idx) in control.tag_map.filter(t => t.primary)"
+                        <Tag v-for="(tag, idx) in control.tag_map.filter(t => t.primary).sort((a,b) => a.tag.length - b.tag.length).slice(0,10)"
                              :key="idx"
                              :tag="tag.tag"
                              action="add"

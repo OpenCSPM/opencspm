@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed z-10 inset-0 overflow-y-auto">
+  <div class="control-modal fixed z-10 inset-0">
     <div
          class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
       <div class="fixed inset-0 transition-opacity"
@@ -7,9 +7,7 @@
         <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
       </div>
 
-      <!-- This element is to trick the browser into centering the modal contents. -->
-      <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>&#8203;
-      <div class="inline-block bg-white rounded-lg px-2 pt-5 pb-4 mt-48 mb-8 align-top max-w-3xl w-full p-6 text-left overflow-hidden shadow-xl transform transition-all"
+      <div class="inline-block max-h-4xl bg-white rounded-lg px-2 pt-5 pb-4 mt-10 mb-8 align-top max-w-3xl w-full p-6 text-left overflow-hidden overflow-y-scroll shadow-xl transform transition-all"
            role="dialog"
            aria-modal="true"
            aria-labelledby="modal-headline">
@@ -48,10 +46,26 @@
           <Tag v-for="(tag, idx) in data.tags.filter(x => x.primary ).sort((a,b) => a.tag.localeCompare(b.tag) )"
                :key=idx>{{ tag.tag }}</Tag>
         </div>
-        <div v-if="data.tags"
+        <div v-if="data.tags && data.tags.filter(x => !x.primary).length > 0"
              class="mx-2 pb-4">
-          <Tag v-for="(tag, idx) in data.tags.filter(x => !x.primary).sort((a,b) => a.tag.localeCompare(b.tag))"
-               :key=idx>{{ tag.tag }}</Tag>
+          <div class="mt-4">
+            <div class="flex items-center space-x-4">
+              <h3 @click="toggleSecondaryTags"
+                  class="cursor-pointer">Secondary Tags
+              </h3>
+              <svg class="h-4 w-4 text-gray-500"
+                   viewBox="0 0 20 20"
+                   fill="currentColor">
+                <path fill-rule="evenodd"
+                      d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
+                      clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div v-if="showSecondaryTags">
+              <Tag v-for="(tag, idx) in data.tags.filter(x => !x.primary).sort((a,b) => a.tag.localeCompare(b.tag))"
+                   :key=idx>{{ tag.tag }}</Tag>
+            </div>
+          </div>
         </div>
         <div class="px-2 py-2">
           <h3 class="text-lg leading-6 font-medium text-gray-800">
@@ -59,9 +73,7 @@
           </h3>
           <div class="flex justify-between mt-2 w-full text-sm leading-5 text-gray-500">
             <div class="pr-6">
-              <p>
-                {{ data.description }}
-              </p>
+              <p v-html="markdown(data.description)"></p>
             </div>
           </div>
           <h3 class="mt-4 text-lg leading-6 font-medium text-gray-800">
@@ -69,9 +81,7 @@
           </h3>
           <div class="flex justify-between mt-2 w-full text-sm leading-5 text-gray-500">
             <div class="pr-6">
-              <p>
-                {{ data.remediation }}
-              </p>
+              <p v-html="markdown(data.remediation)"></p>
             </div>
           </div>
           <h3 class="mt-4 text-lg leading-6 font-medium text-gray-800">
@@ -79,19 +89,32 @@
           </h3>
           <div class="flex justify-between mt-2 w-full text-sm leading-5 text-gray-500">
             <div class="pr-6">
-              <p>
-                {{ data.validation }}
-              </p>
+              <p v-html="markdown(data.validation)"></p>
             </div>
           </div>
-          <h3 class="mt-4 text-lg leading-6 font-medium text-gray-800">
-            References
-          </h3>
-          <div class="flex justify-between mt-2 w-full text-sm leading-5 text-gray-500">
-            <div class="pr-6">
-              <p>
-                {{ data.refs }}
-              </p>
+          <div v-if="data.refs && data.refs.length > 0">
+            <h3 class="mt-4 text-lg leading-6 font-medium text-gray-800">
+              References
+            </h3>
+            <div class="mt-2 w-full text-sm leading-5 text-gray-500">
+              <div v-for="(ref,idx) in data.refs"
+                   :key="idx">
+                <div class="flex items-center space-x-2">
+                  <svg class="h-4 w-4 text-indigo-500"
+                       viewBox="0 0 20 20"
+                       fill="currentColor">
+                    <path
+                          d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                    <path
+                          d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                  </svg>
+                  <span class="mt-0.5">
+                    <a :href="ref.table.url"
+                       target="_blank"
+                       rel="noopener noreferrer">{{ ref.table.text }}</a>
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
           <div class="pt-5 pb-2 text-sm text-gray-600">
@@ -121,6 +144,7 @@
 </template>
 
 <script>
+  import marked from 'marked'
   import Tag from '../shared/Tag'
 
   export default {
@@ -128,17 +152,31 @@
     components: {
       Tag,
     },
+    methods: {
+      toggleSecondaryTags() {
+        this.showSecondaryTags = !this.showSecondaryTags
+      },
+      markdown(content) {
+        if (content && content.length > 0) {
+          return marked(content)
+        } else {
+          return ''
+        }
+      },
+    },
     mounted() {
       let url = `/controls/${this.control.id}`
 
       this.$http.get(url)
         .then(res => {
           this.data = res.data.data.attributes
-          this.resources = res.data.data.attributes.resources
+          this.resources = res.data.data.attributes.resources.sort((a, b) => a.status
+            .localeCompare(b.status))
         })
     },
     data() {
       return {
+        showSecondaryTags: false,
         data: this.control,
         resources: []
       }
