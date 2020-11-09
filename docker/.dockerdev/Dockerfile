@@ -74,30 +74,39 @@ RUN groupadd -r app && \
     useradd -r -g app -d /app -s /bin/bash app
 
 # Create directory for app code
-RUN mkdir -p /app/log /app/tmp /data /gems && \
+RUN mkdir -p /app/ui /app/log /app/tmp /data /gems && \
     chown -R app:app /app && \
     chown -R app:app /data && \
     chown -R app:app /gems
 
+# Install gems early to cache this layer
+COPY Gemfile /tmp/
+WORKDIR /tmp
+RUN bundle install --without development test
+
+# Install JavaScript packages early to cache this layer
+COPY ui/package.json /tmp/
+RUN yarn
+
 # Copy application files
 COPY . /app/
+
+# Build frontend HTML/JS dist files
+WORKDIR /app/ui
+RUN mv /tmp/yarn.lock /tmp/node_modules /app/ui/
+RUN yarn && yarn build
+
+# Install gems and compiled frontend HTML/JS
+WORKDIR /app
+RUN bundle install
+RUN mv ui/dist/* public/
+RUN ln -s index.html 404.html && mv 404.html public/
+
+# Clean up
+RUN rm -rf /app/ui /tmp/Gemfile* /tmp/package.json 
 
 # Make sure everything is owned by the app user
 RUN chown -R app:app /app
 
-# Run everything from here down as the app user
+# Run as the app user
 USER app
-
-# Install gems
-WORKDIR /app
-RUN bundle install --without development test
-
-# Install Javascript packages
-WORKDIR /app/ui
-RUN yarn && yarn build
-
-# Install compiled frontend JS and clean up UI source
-WORKDIR /app
-RUN mv ui/dist/* public/
-RUN rm -rf ui
-RUN ln -s index.html 404.html && mv 404.html public/
