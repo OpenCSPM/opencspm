@@ -99,7 +99,7 @@
           this.$router.push({
             name: 'campaign',
             params: {
-              campaign_id: res.data.id
+              campaign_id: res.data.data.id
             }
           })
         })

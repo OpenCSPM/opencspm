@@ -15,7 +15,7 @@
   tags:
     - kubernetes
 - name: AWS Well Architected (Security)
-  platform: 
+  platform: AWS
   author: Darkbit
   tags:
     - aws-wa-security
@@ -61,7 +61,7 @@
     - fedramp-moderate
     - fedramp-low
 - name: Cybersecurity Maturity Model Certification (CMMC)
-  platform: 
+  platform: Any
   author: Darkbit
   tags:
     - cmmc-level1
