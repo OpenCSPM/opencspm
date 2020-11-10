@@ -8,6 +8,8 @@ Open Cloud Security Posture Management, OpenCSPM, is an open-source platform for
 * Red Teams wanting to create targeted scenarios specific to their environment with the highest impact and benefit to their Blue Team.
 * Any organization looking to establish a baseline of security issues, prioritize them by risk, and track them to closure over time.
 
+![OpenCSPM S3 Bucket Search](site/img/opencspm-s3-search.gif)
+
 ## What does OpenCSPM do?
 
 When deployed inside your environment, it can:
