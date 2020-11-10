@@ -74,7 +74,7 @@ RUN groupadd -r app && \
     useradd -r -g app -d /app -s /bin/bash app
 
 # Create directory for app code
-RUN mkdir -p /app/ui /app/log /app/tmp /data /gems && \
+RUN mkdir -p /app/ui /app/load_dir /app/log /app/tmp /data /gems && \
     chown -R app:app /app && \
     chown -R app:app /data && \
     chown -R app:app /gems
