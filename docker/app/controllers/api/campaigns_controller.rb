@@ -23,7 +23,7 @@ class Api::CampaignsController < ApplicationController
     @campaign.name = 'New Campaign'
     @campaign.organization_id = user.organization.id
 
-    render json: @campaign, status: :created if @campaign.save!
+    render json: CampaignSerializer.new(@campaign), status: :created if @campaign.save!
   end
 
   # PATCH/PUT /campaigns/1

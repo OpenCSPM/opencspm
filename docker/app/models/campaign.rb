@@ -12,6 +12,7 @@ class Campaign < ApplicationRecord
     tags_filter = filters['tags']
     must_have_all_tags = !tags_filter.empty? && filters['tag_mode'] == 'all'
 
+    # controls = Control.with_mapped_tags
     controls = Control.with_mapped_tags
 
     # filters MUST have an Impact Range
@@ -23,13 +24,18 @@ class Campaign < ApplicationRecord
     # filters MAY have a Tags filter
     controls = controls.where(tags: { name: tags_filter }) if tags_filter && !tags_filter.empty?
     # filters MAY have "all" tags flag set
-    must_have_all_tags ? controls.select { |c| c.tags.map(&:name).sort == tags_filter.sort } : controls
+    if must_have_all_tags
+      controls = controls.having('json_agg(tags.name)::jsonb @> ?::jsonb', tags_filter.to_s)
+    end
+
+    controls
   end
 
   #
   # Return all Results for the Controls that match this Campaign's filters
   #
   def results
+    # TODO: refactor to a JOIN controls
     Result.where(control_id: controls.pluck(:id))
   end
 
