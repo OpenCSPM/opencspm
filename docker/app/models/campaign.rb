@@ -36,6 +36,7 @@ class Campaign < ApplicationRecord
   #
   def results
     # TODO: refactor to a JOIN controls
+    # TODO: limit results to last 90 days
     Result.where(control_id: controls.pluck(:id))
   end
 
