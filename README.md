@@ -33,6 +33,8 @@ OpenCSPM has several key components that work together:
 
 Ready to get going?  Follow the [instructions for getting started](site/getting_started.md)
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/Wp-3MSskT6g" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ## Support and Community
 
 OpenCSPM is undergoing active development and community assistance is available via the [OpenCSPM Slack Channel](https://opencspm.slack.com/).  If you have found an issue, please file it using a GitHub [issue](https://github.com/opencspm/opencspm/issues/new).
