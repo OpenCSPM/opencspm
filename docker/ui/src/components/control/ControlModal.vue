@@ -48,17 +48,24 @@
         </div>
         <div v-if="data.tags && data.tags.filter(x => !x.primary).length > 0"
              class="mx-2 pb-4">
-          <div class="mt-4">
-            <div class="flex items-center space-x-4">
-              <h3 @click="toggleSecondaryTags"
-                  class="cursor-pointer">Secondary Tags
+          <div @click="toggleSecondaryTags"
+               class="mt-4 cursor-pointer">
+            <div class="flex items-center space-x-3">
+              <h3>Secondary Tags
               </h3>
-              <svg class="h-4 w-4 text-gray-500"
+              <svg class="h-4 w-4 text-indigo-400"
                    viewBox="0 0 20 20"
                    fill="currentColor">
                 <path fill-rule="evenodd"
                       d="M17.707 9.293a1 1 0 010 1.414l-7 7a1 1 0 01-1.414 0l-7-7A.997.997 0 012 10V5a3 3 0 013-3h5c.256 0 .512.098.707.293l7 7zM5 6a1 1 0 100-2 1 1 0 000 2z"
                       clip-rule="evenodd" />
+              </svg>
+              <svg v-if="!showSecondaryTags"
+                   class="h-4 w-4 text-indigo-500"
+                   viewBox="0 0 20 20"
+                   fill="currentColor">
+                <path
+                      d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z" />
               </svg>
             </div>
             <div v-if="showSecondaryTags">

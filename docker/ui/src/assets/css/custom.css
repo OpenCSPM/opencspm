@@ -42,3 +42,12 @@
   color: #42389d;
   border-radius: 0.25rem;
 }
+
+.control-modal ul {
+  margin-left: 0.5rem;
+}
+
+.control-modal li {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
