@@ -13,7 +13,7 @@ x-app: &app
   environment: &env
     NODE_ENV: ${NODE_ENV:-development}
     RAILS_ENV: ${RAILS_ENV:-development}
-  image: gcr.io/opencspm/engine:0.1.6-dev
+  image: gcr.io/opencspm/engine:0.1.7-dev
   tmpfs:
     - /tmp
 
