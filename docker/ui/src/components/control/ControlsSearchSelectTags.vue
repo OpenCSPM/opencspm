@@ -136,6 +136,7 @@
     },
     data() {
       return {
+        timeout: null,
         search: '',
         filteredTags: [],
       }

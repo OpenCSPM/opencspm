@@ -2,6 +2,7 @@ class ControlSerializer
   include FastJsonapi::ObjectSerializer
   attributes :id,
              :guid,
+             :control_pack,
              :control_id,
              :title,
              :description,
@@ -13,7 +14,11 @@ class ControlSerializer
              :resources
 
   attribute :resources do |control|
-    control.results.last.issues.includes(:resource).map { |issue| { status: issue.status, name: issue.resource.name } }
+    if control.results.empty?
+      []
+    else
+      control.results.last.issues.includes(:resource).map { |issue| { status: issue.status, name: issue.resource.name } }
+    end
   end
 
   attribute :tags do |control|
