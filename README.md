@@ -33,7 +33,7 @@ OpenCSPM has several key components that work together:
 
 Ready to get going?  Follow the [instructions for getting started](site/getting_started.md)
 
-<iframe width="560" height="315" src="https://www.youtube.com/embed/Wp-3MSskT6g" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+[![OpenCSPM Quickstart](site/img/opencspm-quickstart-keyframe.png)](https://www.youtube.com/watch?v=Wp-3MSskT6g "OpenCSPM Quickstart")
 
 ## Support and Community
 
