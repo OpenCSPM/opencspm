@@ -28,7 +28,8 @@
                   <div class="space-y-4">
                     <div class="mt-1 flex-shrink-0 w-2.5 h-2.5 rounded-full"
                          :class="{
-                        'bg-red-400': control.status !== 'passed',
+                        'bg-gray-200': control.status === 'unknown',
+                        'bg-red-400': control.status === 'failed',
                         'bg-green-400': control.status === 'passed'
                       }"></div>
                   </div>
