@@ -161,11 +161,10 @@ opencspm
 
 ### Creating a Custom Control Pack
 
-The recommended way to begin writing is to modify an existing control pack.  Consider forking [https://github.com/OpenCSPM/opencspm-darkbit-community-controls](https://github.com/OpenCSPM/opencspm-darkbit-community-controls) and modifying the `config.yaml` and `controls_spec.rb` as needed.
+The recommended way to begin writing custom controls is to modify an existing control pack.  Consider forking [https://github.com/OpenCSPM/opencspm-darkbit-community-controls](https://github.com/OpenCSPM/opencspm-darkbit-community-controls) and modifying the `config.yaml` and `controls_spec.rb` as needed.
 
 Notes:
 
-* In `config.yaml`, the `id:` and `controls > id:` fields must be globally unique across all control packs.  The convention is for the top level `id:` to be the [Kebab case](https://en.wikipedia.org/wiki/Letter_case#Special_case_styles) format of the repository name, and the control IDs to be `<company>-<groupingname>-<numberidentifier>`.  e.g. `darkbit-aws-42`.
+* In `config.yaml`, the `id:` and `controls > id:` fields must be globally unique across all control packs.  The convention is for the top level `id:` to be the [Kebab case](https://en.wikipedia.org/wiki/Letter_case#Special_case_styles) format of the repository name, and the control IDs to be `<orgname>-<groupingname>-<numberidentifier>`.  e.g. `darkbit-aws-42`.
 * Tags have two levels.  The top level is meant for a higher order grouping like a compliance framework, and the nested level is meant for listing out all the applicable tags.  Tags are arbitrary strings, but the convention is to list multiple tags that represent the various levels of a compliance requirement.  For example, the top level tag `nist-csf` is meant to indicate that this control has one or more associations with the NIST Cybersecurity Framework.  As subtags, `nist-csf-pr`, `nist-csf-pr.ac` and `nist-csf.pr.ac-1` indicate that this control is in the `Protect` Function, the `Identity Management and Access Control` Category of the `Protect` Function, and that it maps to the specific ID `1` in that Category.  This allows for tag-based grouping in the UI at any level of depth and specificity.
-
-Currently, the responsibility is on the user for ensuring the contents of the control pack repos stay in sync with the upstream git repo where they are hosted.
+* Currently, the responsibility is on the user for ensuring the contents of the control pack repos stay in sync with the upstream git repo where they are hosted.
