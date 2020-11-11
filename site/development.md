@@ -149,8 +149,8 @@ OpenCSPM supports the addition and modification of the control metadata and cont
 ```console
 opencspm-controls
 '- opencspm-darkbit-community-controls
-'- opencspm-controls/your-custom-control-repo-here
-'- opencspm-controls/another-custom-control-repo-here
+'- your-custom-control-repo-here
+'- another-custom-control-repo-here
 opencspm
 ```
 
