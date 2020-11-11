@@ -108,6 +108,10 @@ When you see the `RunnerJob` completed, the controls and sample data has been lo
 
 * Web UI: [http://localhost:5000](http://localhost:5000)
 
+#### Collecting Live Data
+
+Refer to [data collection](site/data_collection.md) for obtaining data from your own environment.
+
 #### Shut Down
 
 To stop the containers, hit `Ctrl-c`.  If you ran `docker-compose up -d` to daemonize the containers in the background, run `docker-compose down` from inside the `opencspm-demo/opencspm/docker` directory.  This will stop the containers but leave the volumes intact so that a `docker-compose up` performed later picks up where you left off.
