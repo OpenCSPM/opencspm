@@ -147,7 +147,7 @@
 2. Assign `roles/cloudasset.viewer` or `roles.cloudasset.owner` to your identity at the organization or folder level
 3. In the `opencspm/assets` directory, there is a `demo` directory.  Create a directory named `custom` next to it.
 4. Obtain the current organization number via `gcloud organizations list`
-5. In the `collection/scripts` directory, run `cai-export.sh -o myorgnumber -b my-cai-storage-bucket -l path/to/opencspm/assets/custom`.  Replace `Use `-f folderid` instead of `-o myorgnumber` if the CAI is only to be retrieved for a given folder and below.
+5. In the `collection/scripts` directory, run `cai-export.sh -o myorgnumber -b my-cai-storage-bucket -l path/to/opencspm/assets/custom`.  Use `-f folderid` instead of `-o myorgnumber` if the CAI is only to be retrieved for a given folder and below.
 6. Modify `opencspm/config/config.yaml` to refer to `/app/data/custom` instead of `/app/data/demo`.  e.g.
   ```yaml
   ---
