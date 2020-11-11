@@ -147,11 +147,11 @@ $ docker-compose up
 OpenCSPM supports the addition and modification of the control metadata and control check logic.  Groups of related controls are distributed as git repositories, and they are expected to be kept as subdirectories of the `opencspm-controls` directory.  For example:
 
 ```console
-opencspm-controls
-'- opencspm-darkbit-community-controls
-'- your-custom-control-repo-here
-'- another-custom-control-repo-here
-opencspm
+|- opencspm-controls
+|  |- opencspm-darkbit-community-controls
+|  |- your-custom-control-repo-here
+|  '- another-custom-control-repo-here
+'- opencspm
 ```
 
 ### Control Pack Required Files
