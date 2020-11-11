@@ -110,7 +110,7 @@ When you see the `RunnerJob` completed, the controls and sample data has been lo
 
 #### Collecting Live Data
 
-Refer to [data collection](site/data_collection.md) for obtaining data from your own environment.
+Refer to [data collection](data_collection.md) for obtaining data from your own environment.
 
 #### Shut Down
 
