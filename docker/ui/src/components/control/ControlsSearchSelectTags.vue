@@ -92,7 +92,7 @@
   import Tag from '../shared/Tag'
 
   export default {
-    props: ['availableTags', 'selectedTags', 'tagMode'],
+    props: ['availableTags', 'selectedTags', 'tagSearchDropdown', 'tagMode'],
     components: {
       Tag
     },
@@ -127,6 +127,16 @@
       }
     },
     watch: {
+      /**
+       * When tagSearchDropdown is triggered with a new value from a 
+       * parent component, the search string will be deleted, causing 
+       * the dropdown to close. This acts as an 'auto-close' on the 
+       * dropdown, which would otherwise stay open to facilitate 
+       * selecting multiple tags.
+       */
+      tagSearchDropdown() {
+        this.search = ''
+      },
       search() {
         this.filteredTags = this.filterTags()
       }

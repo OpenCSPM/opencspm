@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div @click="$emit('close-tag-search-dropdown')">
     <div class="sm:block">
       <div class="align-middle inline-block min-w-full border-b border-gray-200">
         <table class="min-w-full">

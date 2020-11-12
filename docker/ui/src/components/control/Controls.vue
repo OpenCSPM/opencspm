@@ -2,8 +2,10 @@
   <div>
     <ControlsSearch :availableTags="availableTags"
                     :selectedTags="selectedTags"
+                    :tagSearchDropdown="tagSearchDropdown"
                     :controls="filteredControls"
                     :filters="filters"
+                    @close-tag-search-dropdown="closeTagSearchDropdown"
                     @update-search-filter="updateSearchFilter"
                     @update-status-filter="updateStatusFilter"
                     @update-impact-filter="updateImpactFilter"
@@ -12,6 +14,7 @@
                     @toggle-tag-mode="toggleTagMode" />
     <ControlsList v-if="filteredControls"
                   :controls="filteredControls"
+                  @close-tag-search-dropdown="closeTagSearchDropdown"
                   @add-tag="addTag" />
   </div>
 </template>
@@ -172,6 +175,12 @@
       updateQueryTags() {
         this.selectedTags = this.$route.query.tags ?
           this.$route.query.tags.split(',').map(x => x.toLowerCase()) : []
+      },
+      /**
+       * Trigger an update to close the tag search dropdown
+       */
+      closeTagSearchDropdown() {
+        this.tagSearchDropdown = Date.now()
       }
     },
     mounted() {
@@ -191,6 +200,7 @@
       return {
         availableTags: [],
         selectedTags: [],
+        tagSearchDropdown: Date.now(),
         filters: {
           search: null,
           status: 'any',
