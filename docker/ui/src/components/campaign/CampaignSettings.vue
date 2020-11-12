@@ -52,6 +52,69 @@
                       </div>
                     </div>
                     <div class="space-y-4 pt-4 pb-6">
+                      <div class="text-sm leading-5">
+                        <label for="description"
+                               class="block text-sm font-medium leading-5 text-gray-900">
+                          Notifications
+                        </label>
+
+                        <div class="mt-1">
+                          <fieldset>
+                            <div class="mt-4">
+                              <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                  <input id="notifications-slack"
+                                         type="checkbox"
+                                         disabled
+                                         class="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out">
+                                </div>
+                                <div class="ml-3 text-sm leading-5">
+                                  <label for="notifications-slack"
+                                         class="font-medium text-gray-700">Slack</label>
+                                  <p class="text-gray-500">Get notified in a Slack channel when this
+                                    campaign has more failed controls.</p>
+                                </div>
+                              </div>
+                              <div class="mt-4">
+                                <div class="flex items-start">
+                                  <div class="flex items-center h-5">
+                                    <input id="notifications-other"
+                                           type="checkbox"
+                                           disabled
+                                           class="form-checkbox h-4 w-4 text-indigo-600 transition duration-150 ease-in-out">
+                                  </div>
+                                  <div class="ml-3 text-sm leading-5">
+                                    <label for="notifications-other"
+                                           class="font-medium text-gray-700">Other</label>
+                                    <p class="text-gray-500">Get notified on other channels when
+                                      this campaign has more failed controls. See options below.</p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </fieldset>
+                          <div class="mt-4">
+                            <a href="https://github.com/OpenCSPM/opencspm/issues/11"
+                               target="_blank">
+                              <button type="button"
+                                      class="inline-flex justify-center py-2 px-4 border border-transparent text-sm leading-5 font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-500 focus:outline-none focus:border-indigo-700 focus:shadow-outline-indigo active:bg-indigo-700 transition duration-150 ease-in-out">
+                                Vote: Notification Options Poll
+                                <svg class="ml-3 h-4 w-4"
+                                     xmlns="http://www.w3.org/2000/svg"
+                                     viewBox="0 0 20 20"
+                                     fill="currentColor">
+                                  <path
+                                        d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
+                                  <path
+                                        d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+                                </svg>
+                              </button>
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="space-y-4 pt-4 pb-6">
                       <div class="flex text-sm leading-5">
                         <a href="#"
                            class="group space-x-2 inline-flex items-center text-gray-500 hover:text-gray-900 transition ease-in-out duration-150">
