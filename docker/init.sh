@@ -15,8 +15,9 @@ if [[ -f ${FILE} ]]; then
   ${RUN}
 else
   echo ${MSG}
-  ${CMD} && touch ${FILE}
-  ${SETUP}
+  # install will fail on production image, which is ok as gems are already installed
+  ${CMD}
+  touch ${FILE} && ${SETUP}
   ${RUN}
 fi
 
