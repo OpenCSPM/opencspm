@@ -18,7 +18,6 @@ x-backend: &backend
     - core:/app
     - ../assets:/app/data
     - ../config:/app/load_config
-    - ../load_dir:/app/load_dir
     - ../../opencspm-controls:/app/controls/:ro
     - .dockerdev/.psqlrc:/app/.psqlrc:ro
     - .dockerdev/.bashrc:/app/.bashrc:ro
