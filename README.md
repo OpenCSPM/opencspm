@@ -39,11 +39,11 @@ Ready to get going?  Follow the [instructions for getting started](site/getting_
 
 ## Support and Community
 
-OpenCSPM is undergoing active development and community assistance is available via the [OpenCSPM Slack Channel](https://join.slack.com/t/opencspm/shared_invite/zt-j5zsp2mr-Z_lMoYosTXev4lWN8Q~~mA).  If you have found an issue, please file it using a GitHub [issue](https://github.com/opencspm/opencspm/issues/new).
+OpenCSPM is undergoing active development and community assistance is available via the [OpenCSPM Slack Channel](https://join.slack.com/t/opencspm/shared_invite/zt-j5zsp2mr-Z_lMoYosTXev4lWN8Q~~mA).  If you have found an issue, please file it using a GitHub [issue](https://github.com/opencspm/opencspm/issues/new/choose).
 
 ## Contributing
 
-We invite you to submit requests for new features and bug reports using a Github [issue](https://github.com/opencspm/opencspm/issues/new). If you would like to contribute to OpenCSPM, please review our [development guide](site/development.md).
+We invite you to submit requests for new features and bug reports using a Github [issue](https://github.com/opencspm/opencspm/issues/new/choose). If you would like to contribute to OpenCSPM, please review our [development guide](site/development.md).
 
 ## Creators
 
