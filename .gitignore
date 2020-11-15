@@ -81,4 +81,4 @@ yarn-debug.log*
 docker/.local/*
 
 # tmp load files
-load_dir/*.json
+docker/load_dir/*.json
