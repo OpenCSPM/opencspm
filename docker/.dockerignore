@@ -29,7 +29,7 @@ readme.md
 controls
 data
 load_config
-load_dir
+load_dir/*.json
 log
 public/*
 tmp
