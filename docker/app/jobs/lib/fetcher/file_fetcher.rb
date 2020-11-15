@@ -31,7 +31,7 @@ class FileFetcher
   # and place them in to be loaded/parsed
   def clean_load_dir
     puts "Cleaning #{@load_dir}"
-    FileUtils.rm_rf(@load_dir)
+    FileUtils.rm_rf(Dir.glob("#{@load_dir}/*.json"))
   end
 
   # Pull buckets to load_dir
