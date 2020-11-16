@@ -82,3 +82,4 @@ docker/.local/*
 
 # tmp load files
 docker/load_dir/*.json
+docker/load_dir/tmp-*
