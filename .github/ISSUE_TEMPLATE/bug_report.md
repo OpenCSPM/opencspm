@@ -24,8 +24,8 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Docker information (please complete the following information):**
- - Output of `docker version`
- - Output of `docker-compose version`
+ - Output of full `docker version` (not `docker -v`)
+ - Output of full `docker-compose version` (not `docker-compose -v`)
 
 **Cloud provider (if applicable):**
   - e.g. AWS/GCP/Azure
