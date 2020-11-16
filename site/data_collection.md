@@ -12,107 +12,14 @@
 #### Requirements
 
 * [Ability to run AWS-Recon](https://github.com/darkbitio/aws-recon#usage)
-* The required IAM Roles are:
-  * `arn:aws:iam::aws:policy/SecurityAudit`
-  * `arn:aws:iam::aws:policy/job-function/ViewOnlyAccess`
+* AWS Recon needs the IAM Role:
+  * `arn:aws:iam::aws:policy/ReadOnlyAccess`
   * Plus the following permissions:
-    * `acm:DescribeCertificate`
-    * `apigateway:GET`
-    * `athena:GetWorkGroup`
-    * `codebuild:BatchGetProjects`
-    * `codepipeline:GetPipeline`
-    * `cloudtrail:List*`
-    * `ec2:GetEbsEncryptionByDefault`
-    * `ecr:Describe*`
-    * `ecr:List*`
-    * `eks:Describe*`
-    * `eks:List*`
-    * `elasticfilesystem:DescribeMountTargetSecurityGroups`
-    * `elasticfilesystem:DescribeMountTargets`
-    * `elasticmapreduce:DescribeCluster`
-    * `elasticmapreduce:DescribeSecurityConfiguration`
-    * `events:DescribeRule`
-    * `fms:ListComplianceStatus`
-    * `fms:ListPolicies`
-    * `guardduty:ListDetectors`
-    * `guardduty:ListFindings`
-    * `guardduty:ListIPSets`
-    * `guardduty:ListInvitations`
-    * `guardduty:ListMembers`
-    * `guardduty:ListThreatIntelSets`
-    * `kafka:ListTagsForResource`
-    * `kafka:ListClusters`
-    * `kafka:DescribeCluster`
-    * `kafka:DescribeClusterOperation`
-    * `kafka:DescribeConfiguration`
-    * `kafka:DescribeConfigurationRevision`
-    * `kafka:GetBootstrapBrokers`
-    * `kafka:ListConfigurations`
-    * `kafka:ListClusterOperations`
-    * `kafka:ListNodes`
-    * `iam:GenerateCredentialReport`
-    * `iam:GenerateServiceLastAccessedDetails`
-    * `inspector:DescribeAssessmentRuns`
-    * `inspector:DescribeAssessmentTargets`
-    * `inspector:DescribeAssessmentTemplates`
-    * `inspector:DescribeCrossAccountAccessRole`
-    * `inspector:DescribeFindings`
-    * `inspector:DescribeResourceGroups`
-    * `inspector:DescribeRulesPackages`
-    * `iot:DescribeAuthorizer`
-    * `iot:DescribeCACertificate`
-    * `iot:DescribeCertificate`
-    * `iot:DescribeDefaultAuthorizer`
-    * `iot:GetPolicy`
-    * `iot:GetPolicyVersion`
-    * `kms:GetKeyRotationStatus`
-    * `lambda:GetFunctionConfiguration`
-    * `lightsail:GetInstances`
-    * `lightsail:GetLoadBalancers`
-    * `opsworks:DescribeStacks`
-    * `organizations:Describe*`
-    * `organizations:List*`
-    * `servicequotas:Get*`
-    * `servicequotas:List*`
-    * `ses:DescribeActiveReceiptRuleSet`
-    * `ses:ListCustomVerificationEmailTemplates`
-    * `ses:GetCustomVerificationEmailTemplate`
-    * `ses:GetSendStatistics`
-    * `ses:GetSendQuota`
-    * `ses:DescribeConfigurationSet`
-    * `ses:ListReceiptFilters`
-    * `ses:GetIdentityMailFromDomainAttributes`
-    * `ses:GetIdentityNotificationAttributes`
-    * `ses:DescribeReceiptRule`
-    * `ses:DescribeActiveReceiptRuleSet`
-    * `ses:GetAccountSendingEnabled`
-    * `ses:ListConfigurationSets`
-    * `ses:DescribeReceiptRuleSet`
-    * `ses:ListReceiptRuleSets`
-    * `shield:DescribeAttack`
-    * `shield:DescribeProtection`
-    * `shield:DescribeSubscription`
-    * `sso:DescribePermissionsPolicies`
-    * `sso:ListApplicationInstanceCertificates`
-    * `sso:ListApplicationInstances`
-    * `sso:ListApplicationTemplates`
-    * `sso:ListApplications`
-    * `sso:ListDirectoryAssociations`
-    * `sso:ListPermissionSets`
-    * `sso:ListProfileAssociations`
-    * `sso:ListProfiles`
-    * `support:DescribeTrustedAdvisorCheckResult`
-    * `support:DescribeTrustedAdvisorChecks`
-    * `waf:GetWebACL`
-    * `waf:ListWebACLs`
-    * `wafv2:GetWebACL`
-    * `wafv2:ListWebACLs`
-    * `wafv2:ListResourcesForWebACL`
-    * `xray:GetEncryptionConfig`
+    * `support:DescribeTrustedAdvisor*`
 
 #### Collection
 
-1. Follow the usage steps at [https://github.com/darkbitio/aws-recon#usage](https://github.com/darkbitio/aws-recon#usage) to obtain an AWS Recon inventory file.  The instructions will lead to the generation of a file named `output.json`.
+1. Follow the usage steps at [https://github.com/darkbitio/aws-recon#usage](https://github.com/darkbitio/aws-recon#usage) to obtain an AWS Recon inventory file. Be sure to use the custom formatter and output to newline delimited JSON (NDJSON). Note the [OpenCSPM example](https://github.com/darkbitio/aws-recon#example-command-line-options).  The instructions will lead to the generation of a file named `output.json`.
 2. In the `opencspm/assets` directory, there is a `demo` directory.  Create a directory named `custom` next to it.
 3. Copy the `output.json` into `opencspm/assets/custom/output.json`.
 4. Create a `manifest.txt` file next to the `output.json` file inside the `custom` directory.  Run `echo "output.json" > manifest.txt` to populate the first line of the `manifest.txt` with `output.json`.  The loader uses the `manifest.txt` file to know which file names to import.
