@@ -4,7 +4,7 @@ on:
   push:
     branches: build
     paths:
-      - 'docker/.dockerdev/version'
+      - 'docker/docker-compose.yml'
 
 jobs:
   docker-build:
@@ -41,7 +41,8 @@ jobs:
           username: _json_key
           password: ${{ secrets.GCR_JSON_KEY }}
       - name: Set version tag
-        run: echo "VERSION_TAG=$(cat ./docker/.dockerdev/version)" >> $GITHUB_ENV
+        run: |
+          echo "VERSION_TAG=$(grep 'image: gcr.io/opencspm/engine' docker/docker-compose.yml | awk -F\: '{print $3}')" >> $GITHUB_ENV
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
@@ -55,4 +56,3 @@ jobs:
             971395506693.dkr.ecr.us-east-1.amazonaws.com/opencspm/engine:latest
             gcr.io/opencspm/engine:${{ env.VERSION_TAG  }}
             gcr.io/opencspm/engine:latest
-
