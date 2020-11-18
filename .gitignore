@@ -33,7 +33,8 @@ public/*
 *.orig
 
 # Ignore test data
-assets/test
+assets/test/*
+assets/custom/*
 
 # Ignore all logfiles and tempfiles.
 /log/*
