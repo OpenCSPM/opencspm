@@ -84,7 +84,7 @@ services:
         condition: service_healthy
 
   db:
-    image: gcr.io/opencspm/postgres:13.0
+    image: gcr.io/opencspm/postgres:13.1
     hostname: db
     volumes:
       - .dockerdev/.psqlrc:/root/.psqlrc:ro
