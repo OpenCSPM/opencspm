@@ -5,6 +5,7 @@ on:
     branches: build
     paths:
       - 'docker/docker-compose.yml'
+      - 'docker/.dockerdev/Dockerfile'
 
 jobs:
   docker-build:

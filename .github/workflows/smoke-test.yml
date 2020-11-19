@@ -1,0 +1,20 @@
+name: smoke-test
+
+on:
+  push:
+    branches: main
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Docker Compose Up
+        run: |
+          docker-compose up
+      - name: Smoke Test (10 min)
+        run: |
+          timeout 600 bash -c 'while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' localhost:5000/statusz)" != "200" ]]; do sleep 5; done' || false

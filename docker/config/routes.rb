@@ -5,9 +5,10 @@ Rails.application.routes.draw do
   mount Sidekiq::Web => '/sidekiq'
 
   # ---------------
-  # Health check route
+  # Health check and smoke test routes
   # ---------------
   get 'healthz', to: 'healthcheck#index', as: 'health_check'
+  get 'statusz', to: 'healthcheck#show', as: 'status_check'
 
   # ---------------
   # Auth routes
