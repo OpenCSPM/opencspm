@@ -5,6 +5,7 @@ docker/log
 .init
 .viminfo
 .bash_history
+*.swp
 
 # Ruby / RMV
 .ruby-version
