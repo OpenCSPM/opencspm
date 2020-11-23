@@ -31,8 +31,57 @@ class K8S_POD < K8sLoader
       container_statuses = asset.dig('resource', 'data', 'status').delete('containerStatuses')
     end
 
-    #binding.pry
     k8s_resource_upsert(@asset, @asset_type, @asset_label, @asset_name)
+
+    # Create K8S_CONTAINERVOLUME
+    unless pod_volumes.nil?
+      pod_volumes.each do |vol|
+        volume_name = vol['name'] || 'unnamed'
+        volume_name = "#{@asset_name}/podvolume/#{volume_name}"
+        vol.delete('name')
+        # TODO: Parse ConfigMap and Secret relationships
+        supporting_relationship_with_attrs("K8S_POD", @asset_name, "K8S_PODVOLUME", volume_name, "k8s.io/PodVolume", vol, "k8s", "HAS_K8SPODVOLUME", {}, "left")
+      end
+    end
+
+    unless containers.nil?
+      containers.each do |container|
+        if container.dig('command')
+          container['command'] = container.dig('command').join " "
+        end
+        container_image = "unknown"
+        if container.dig('image')
+          container_image = container.delete('image')
+        end
+        # TODO Init Containers
+        # TODO:Join liveness/readiness command
+        # TODO Parse ENV Vars
+        # Create K8S_CONTAINER 
+        container_name = "#{@asset_name}/container/#{container['name']}"
+        supporting_relationship_with_attrs("K8S_POD", @asset_name, "K8S_CONTAINER", container_name, "k8s.io/PodContainer", container, "k8s", "HAS_K8SCONTAINER", {}, "left")
+
+        # Create K8S_CONTAINERVOLUMEMOUNT
+        container_volume_mounts = []
+        if container.dig('volumeMounts')
+          container_volume_mounts = container.delete('volumeMounts')
+          unless container_volume_mounts.nil?
+            container_volume_mounts.each do |vol|
+              volume_name = vol['name'] || 'unnamed'
+              vol.delete('name')
+
+              pod_volume_name = "#{@asset_name}/podvolume/#{volume_name}"
+              volume_mount_name = "#{container_name}/volumemount/#{volume_name}"
+              supporting_relationship_with_attrs("K8S_PODVOLUME", pod_volume_name, "K8S_CONTAINER", container_name, "k8s.io/Container", container, "k8s", "HAS_K8SCONTAINERVOLUMEMOUNT", vol, "left")
+            end
+          end
+        end
+ 
+        # Create OCI_CONTAINERIMAGE 
+        unless container_image.nil?
+          supporting_relationship_with_attrs("K8S_CONTAINER", container_name, "OCI_CONTAINERIMAGE", container_image, "oci/ContainerImage", {}, "k8s", "HAS_OCICONTAINERIMAGE", {}, "left")
+        end
+      end
+    end
 
     # Maps the k8s.io/Pod to a K8S_NODE
     if @asset_name.match(/^container.googleapis.com/)
@@ -44,6 +93,7 @@ class K8S_POD < K8sLoader
       end
     end
 
+    # Pod tolerations
     unless pod_tolerations.nil?
       pod_tolerations.each do |tol|
         toleration_name = tol['key'] || 'Unnamed'
@@ -52,6 +102,7 @@ class K8S_POD < K8sLoader
       end
     end
 
+    # Pod conditions
     unless pod_conditions.nil?
       pod_conditions.each do |pc|
         pc_name = pc['type'] || 'Unnamed'
