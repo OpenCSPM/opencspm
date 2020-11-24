@@ -34,10 +34,8 @@ x-backend: &backend
     MALLOC_ARENA_MAX: 2
     GOOGLE_APPLICATION_CREDENTIALS: /tmp/keys/credentials.json
   depends_on:
-    db:
-      condition: service_healthy
-    redis:
-      condition: service_healthy
+    - db
+    - redis
 
 services:
   core:
@@ -50,19 +48,21 @@ services:
       test: ['CMD', 'curl', '-f', 'http://localhost:5000/healthz']
       interval: 5s
       timeout: 5s
-      retries: 60
+      retries: 11
 
   worker:
     <<: *backend
     hostname: worker
     command: bundle exec sidekiq -C config/sidekiq.yml
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'pgrep', '-x', 'bundle']
+      interval: 10s
+      retries: 3
     depends_on:
-      core:
-        condition: service_healthy
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
+      - core
+      - db
+      - redis
 
   db:
     image: gcr.io/opencspm/postgres:13.1
@@ -86,9 +86,10 @@ services:
       - redis:/data
     ports:
       - 6379
+    restart: unless-stopped
     healthcheck:
       test: redis-cli ping
-      interval: 1s
+      interval: 2s
       timeout: 3s
       retries: 30
 
