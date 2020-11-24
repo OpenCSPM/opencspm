@@ -1,4 +1,4 @@
-![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/opencspm/opencspm/smoke-test/main)
+[![GitHub Workflow Status (branch)](https://img.shields.io/github/workflow/status/opencspm/opencspm/smoke-test/main)](https://github.com/OpenCSPM/opencspm/actions?query=branch%3Amain)
 
 # ![OpenCSPM Logo](site/img/opencspm-logo.png)OpenCSPM
 Open Cloud Security Posture Management, OpenCSPM, is an open-source platform for gaining deeper insight into your cloud configuration and metadata to help understand and reduce risk over time.
