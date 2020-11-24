@@ -100,7 +100,13 @@ class K8sLoader < AssetLoader
   end
 
   # Generic helper to upsert and attach a relationship for a resource
-  def supporting_relationship(match_label, match_name, merge_label, merge_name, asset_type, loader_type, relationship)
+  def supporting_relationship(match_label, match_name, merge_label, merge_name, asset_type, loader_type, relationship, direction = "right")
+    if direction == "left"
+      relationship_string = " MERGE (n)<-[:#{relationship}]-(a)"
+    else
+      # right/default
+      relationship_string = " MERGE (n)-[:#{relationship}]->(a)"
+    end
     q = """
       MATCH (a:#{match_label} { name: \"#{match_name}\" })
       MERGE (n:#{merge_label} { name: \"#{merge_name}\" })
@@ -110,7 +116,7 @@ class K8sLoader < AssetLoader
       ON MATCH SET  n.asset_type = \"#{asset_type}\",
                     n.last_updated = #{@import_id},
                     n.loader_type = \"#{loader_type}\"
-      MERGE (n)-[:#{relationship}]->(a)
+      #{relationship_string}
     """
     graphquery(q)
   end

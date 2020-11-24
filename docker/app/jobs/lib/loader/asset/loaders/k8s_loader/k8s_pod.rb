@@ -5,7 +5,6 @@ class K8S_POD < K8sLoader
   end
 
   def load
-
     pod_tolerations = []
     if asset.dig('resource','data','spec','tolerations')
       pod_tolerations = asset.dig('resource', 'data', 'spec').delete('tolerations')
@@ -56,6 +55,7 @@ class K8S_POD < K8sLoader
         # TODO Init Containers
         # TODO:Join liveness/readiness command
         # TODO Parse ENV Vars
+        # TODO ServiceAccount Name
         # Create K8S_CONTAINER 
         container_name = "#{@asset_name}/container/#{container['name']}"
         supporting_relationship_with_attrs("K8S_POD", @asset_name, "K8S_CONTAINER", container_name, "k8s.io/PodContainer", container, "k8s", "HAS_K8SCONTAINER", {}, "left")
@@ -89,7 +89,7 @@ class K8S_POD < K8sLoader
       spec_node_name = @asset.dig('resource', 'data', 'spec', 'nodeName')
       node_name = "#{cluster}/api/v1/nodes/#{spec_node_name}"
       unless cluster.nil? && spec_node_name.nil? && node_name.nil?
-        supporting_relationship("K8S_POD", @asset_name, "K8S_NODE", node_name, "k8s.io/Node", "k8s", "ON_NODE")
+        supporting_relationship("K8S_POD", @asset_name, "K8S_NODE", node_name, "k8s.io/Node", "k8s", "ON_NODE", "right")
       end
     end
 

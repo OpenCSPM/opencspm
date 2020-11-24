@@ -24,7 +24,7 @@ class K8S_NODE < K8sLoader
       instance_name = @asset.dig('resource', 'data', 'metadata', 'name')
       unless instance_name.nil? && project_id.nil? && zone.nil?
         gce_instance_name = "compute.googleapis.com/projects/#{project_id}/zones/#{zone}/instances/#{instance_name}"
-        supporting_relationship("K8S_NODE", @asset_name, "GCP_COMPUTE_INSTANCE", gce_instance_name, "compute.googleapis.com/Instance", "gcp", "HAS_K8SNODE")
+        supporting_relationship("K8S_NODE", @asset_name, "GCP_COMPUTE_INSTANCE", gce_instance_name, "compute.googleapis.com/Instance", "gcp", "HAS_K8SNODE", "right")
       end
     end
 
