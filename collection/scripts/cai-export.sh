@@ -2,16 +2,36 @@
 
 set -ueo pipefail
 
-command -v gcloud >/dev/null 2>&1 || { echo "I require gcloud but it's not installed.  Aborting." >&2; exit 1; }
-command -v gsutil >/dev/null 2>&1 || { echo "I require gsutil but it's not installed.  Aborting." >&2; exit 1; }
+command -v gcloud >/dev/null 2>&1 || { echo "gcloud is not in the current path or is not installed.  Aborting." >&2; exit 1; }
+command -v gsutil >/dev/null 2>&1 || { echo "gsutil is not in the current path or is not installed.  Aborting." >&2; exit 1; }
 
-die() { echo "$*" >&2; exit 2; }
 needs_arg() { if [ -z "$OPTARG" ]; then die "No arg for --$OPT option"; fi; }
 
 function usage {
+  echo ""
   echo "Usage:"
+  echo ""
+  echo "# Export from an entire org to a GCS bucket"
+  echo "./cai-export.sh -o 1234567890 -b gs://mybucketname"
+  echo ""
+  echo "# Export at a folder and below to a GCS bucket"
+  echo "./cai-export.sh -f 0987654321 -b gs://mybucketname"
+  echo ""
+  echo "Filtering for certain projects:"
+  echo ""
+  echo "To include only resources from a list of projects that"
+  echo "are beneath the org or folder id, create a file called"
+  echo "projectnumbers.txt in the same folder as cai-export.sh"
+  echo "and insert the project NUMBER (not project name or id)"
+  echo "one per line. Use 'gcloud projects list' to determine"
+  echo "the correct number(s). e.g."
+  echo ""
+  echo "$ cat projectnumbers.txt"
+  echo "489234872394"
+  echo "839539393848"
+  echo ""
 }
-# Defaults
+
 orgid=''
 folderid=''
 bucketpath=''
@@ -28,28 +48,28 @@ while getopts o:f:p:t:b:l:-: OPT; do
     f | folderid )          needs_arg; folderid="$OPTARG" ;;
     b | bucketpath )        needs_arg; bucketpath="$OPTARG" ;;
     l | localpath )         needs_arg; localpath="$OPTARG" ;;
-    ??* )                   die "Illegal option --$OPT" ;;  # bad long option
-    ? )                     exit 2 ;;  # bad short option (error reported via getopts)
+    ??* )                   usage ;;
+    ? )                     exit 2 ;;
   esac
 done
-shift $((OPTIND-1)) # remove parsed options and args from $@ list
+shift $((OPTIND-1))
 
 TARGET_EXPORT_RESOURCE=''
 TARGET_PROJECT_ID=''
 validate_export_location() {
-  if [ -z "${1}" ] && [ -z "${2}" ] && [ -z "${3}" ]; then
-    echo "ERROR: Organization ID, Folder ID, or Project ID not set"
+  if [ -z "${1}" ] && [ -z "${2}" ]; then
+    echo "ERROR: Organization ID or Folder ID not set"
     usage
     exit 1
   fi
   if [ ! -z "${1}" ]; then
     TARGET_EXPORT_RESOURCE="--organization=${1}"
     return 0
-  fi 
+  fi
   if [ ! -z "${2}" ]; then
     TARGET_EXPORT_RESOURCE="--folder=${2}"
     return 0
-  fi 
+  fi
 }
 
 
@@ -69,8 +89,7 @@ validate_paths() {
 validate_approach() {
   read -p "Export ${TARGET_EXPORT_RESOURCE} to ${bucketpath}/*.json using the CAI API in project ${TARGET_PROJECT_ID}? (y/n):" -n 1 -r
 
-  #read -p "Are you sure? " -n 1 -r
-  echo    # (optional) move to a new line
+  echo
   if [[ $REPLY =~ ^[Yy]$ ]]
   then
     return 0
@@ -95,7 +114,7 @@ wait_for_cai() {
        echo "All files present."
        break
      fi
-     n=$((n+1)) 
+     n=$((n+1))
      sleep 10
   done
 }
@@ -103,9 +122,30 @@ copy_cai_locally() {
   echo "Copying CAI Exports to ${localpath}/"
   gsutil cp "${bucketpath}/${EXPORTTIME}-*.json" "$localpath"
   cat /dev/null > "$localpath/manifest.txt"
-  for TYPE in resource iam_policy org_policy access_policy; do
+  for TYPE in resource iam-policy org-policy access-policy; do
     echo "${EXPORTTIME}-${TYPE}.json" >> "$localpath/manifest.txt"
   done
+}
+
+filter_cai() {
+  PROJECT_NUMBERS_FILE="projectnumbers.txt"
+  if [ -f "${PROJECT_NUMBERS_FILE}" ]; then
+    command -v jq >/dev/null 2>&1 || { echo "jq is not in the current path or is not installed.  Unable to filter results." >&2; exit 1; }
+    for TYPE in resource iam-policy org-policy access-policy; do
+      echo "Filtering: ${EXPORTTIME}-${TYPE}.json"
+      # Start with a clean file
+      cat /dev/null > "${EXPORTTIME}-${TYPE}-filtered.json"
+      # maintain all objects in folders or orgs (aka "not in projects")
+      cat "${EXPORTTIME}-${TYPE}.json" | jq -c 'select(.ancestors[0] | contains ("projects/") | not)' > "${EXPORTTIME}-${TYPE}-filtered.json"
+      # Filter for only the project numbers listed in projectids.txt
+      while IFS= read -r line; do
+        echo "Extracting resources from project number: $line to ${EXPORTTIME}-${TYPE}-filtered.json"
+        cat "${EXPORTTIME}-${TYPE}.json" | jq -c --arg PROJECTNUMBER "projects/${line}" 'select(.ancestors[0] | contains ($PROJECTNUMBER))' >> "${EXPORTTIME}-${TYPE}-filtered.json"
+      done < "${PROJECT_NUMBERS_FILE}"
+    done
+  else
+    echo "Skipping filtering for project numbers as: ${PROJECT_NUMBERS_FILE} does not exist"
+  fi
 }
 
 validate_export_location "$orgid" "$folderid"
@@ -117,3 +157,4 @@ EXPORTTIME="$(date +%s)"
 collect_cai
 wait_for_cai
 copy_cai_locally
+filter_cai
