@@ -39,7 +39,11 @@ class AssetLoader
 
   def prepare_properties(asset)
     # rubocop:disable Layout/LineLength
-    asset.flatten_with_path.tap { |hs| hs.delete('name') }.tap { |hs| hs.delete('asset_type') }.map { |h| "a.#{h[0]} = \"#{h[1]}\"" }.join ', '
+    asset.flatten_with_path.tap { |hs| hs.delete('name') }.tap { |hs| hs.delete('asset_type') }.map { |h| "a.#{h[0]} = \"#{h[1].to_s.gsub(/\"/, '\\"').gsub(/\n/,'\n')}\"" }.join ', '
     # rubocop:enable Layout/LineLength
+  end
+
+  def prepare_relationship_properties(properties_hash)
+    properties_hash.map { |h| "#{h[0]}: \"#{h[1]}\"" }.join ', '
   end
 end

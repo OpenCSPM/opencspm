@@ -5,6 +5,7 @@ docker/log
 .init
 .viminfo
 .bash_history
+*.swp
 
 # Ruby / RMV
 .ruby-version
@@ -33,7 +34,8 @@ public/*
 *.orig
 
 # Ignore test data
-assets/test
+assets/test/*
+assets/custom/*
 
 # Ignore all logfiles and tempfiles.
 /log/*
@@ -82,3 +84,4 @@ docker/.local/*
 
 # tmp load files
 docker/load_dir/*.json
+docker/load_dir/tmp-*
