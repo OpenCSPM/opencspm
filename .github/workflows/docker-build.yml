@@ -1,0 +1,47 @@
+name: docker-build
+
+on:
+  push:
+    branches: build
+
+jobs:
+  docker-build:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+      - name: Login to GCR
+        uses: docker/login-action@v1
+        with:
+          registry: gcr.io
+          username: _json_key
+          password: ${{ secrets.GCR_JSON_KEY }}
+      - name: Set version tag
+        run: |
+          echo "VERSION_TAG=$(grep 'image: gcr.io/opencspm/engine' docker/docker-compose.yml | awk -F\: '{print $3}')" >> $GITHUB_ENV
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: ./docker
+          file: ./docker/.dockerdev/Dockerfile
+          push: true
+          tags: |
+            971395506693.dkr.ecr.us-east-1.amazonaws.com/opencspm/engine:${{ env.VERSION_TAG  }}
+            971395506693.dkr.ecr.us-east-1.amazonaws.com/opencspm/engine:latest
+            gcr.io/opencspm/engine:${{ env.VERSION_TAG  }}
+            gcr.io/opencspm/engine:latest
