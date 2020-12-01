@@ -21,6 +21,7 @@ class HealthcheckController < ApplicationController
     ]
 
     status = statuses.all? { |s| s > 0 }
+
     response_code = status ? :ok : :service_unavailable
 
     render plain: response_code.to_s, status: response_code
