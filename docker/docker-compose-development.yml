@@ -43,6 +43,7 @@ x-backend: &backend
     EDITOR: vi
     MALLOC_ARENA_MAX: 2
     GOOGLE_APPLICATION_CREDENTIALS: /tmp/keys/credentials.json
+    DEBUGGER: 'false'
   depends_on:
     - db
     - redis
@@ -52,7 +53,9 @@ services:
     <<: *backend
     hostname: core
     command: ./init.sh
+    restart: unless-stopped
     ports:
+      - '4444:4444'
       - '5000:5000'
     healthcheck:
       test: ['CMD', 'curl', '-f', 'http://localhost:5000/healthz']
