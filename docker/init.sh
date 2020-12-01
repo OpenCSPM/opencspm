@@ -1,23 +1,35 @@
 #!/bin/bash
 #
-# Run `bundle install` once on first run
+# In development, run `bundle install` once and run debugger.
+#
+# In prod, cleanup pids and run server.
 #
 
 FILE=".init"
-MSG="[bundle] First run detected, installing..."
-CMD="bundle install"
+INSTALL="bundle install"
 SETUP="bundle exec rails db:setup"
 CLEANUP="rm -f /app/tmp/pids/server.pid"
 RUN="bundle exec rails server -p 5000 -b 0.0.0.0"
+DEBUG="bundle exec rdebug-ide --debug --host 0.0.0.0 --port 4444 -- bin/rails server -p 5000 -b 0.0.0.0"
+
+if [ $DEBUGGER == "true" ]; then
+  echo "[bundle] Setting up debugger..."
+  RUN=${DEBUG}
+fi
 
 if [[ -f ${FILE} ]]; then
   ${CLEANUP}
   ${RUN}
 else
-  echo ${MSG}
-  # install will fail on production image, which is ok as gems are already installed
-  ${CMD}
+
+  # bundle install in development
+  if [ $RAILS_ENV == "development" ]; then
+    echo "[bundle] First run detected, installing..."
+    ${INSTALL}
+  fi
+
+  # 
   touch ${FILE} && ${SETUP}
+
   ${RUN}
 fi
-
