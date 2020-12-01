@@ -20,7 +20,10 @@ class GCP_COMPUTE_INSTANCETEMPLATE < GCPLoader
     end
     network_tags = []
     if asset.dig('resource','data','properties','tags')
-      network_tags = asset.dig('resource','data','properties').delete('tags')
+      tags = asset.dig('resource','data','properties').delete('tags')
+      if tags.dig('items')
+        network_tags = tags.dig('items')
+      end
     end
 
     # cleanup
@@ -176,7 +179,6 @@ class GCP_COMPUTE_INSTANCETEMPLATE < GCPLoader
       end
     end
 
-    network_tags = network_tags['items']
     network_tags.each do |network_tag|
       query = """
         MATCH (i:#{@asset_label} { name: \"#{@asset_name}\" })
