@@ -6,11 +6,16 @@ class GCP_DNS_MANAGEDZONE < GCPLoader
 
   def load
     # grab/delete name_servers array
-    name_servers = asset.dig('resource', 'data').delete('nameServers')
+    name_servers = []
+    if asset.dig('resource', 'data', 'nameServers')
+      name_servers = asset.dig('resource', 'data').delete('nameServers')
+    end
     # grab/delete visible private networks
-    visible_to_networks = asset.dig('resource', 'data', 'privateVisibilityConfig').delete('networks')
+    visible_to_networks = []
+    if asset.dig('resource', 'data', 'privateVisibilityConfig', 'networks')
+      visible_to_networks = asset.dig('resource', 'data', 'privateVisibilityConfig').delete('networks')
+    end 
     # cleanup
-    asset.dig('resource', 'data').delete('privateVisibilityConfig')
     asset.delete('ancestors')
 
     # prep for updating or creating
