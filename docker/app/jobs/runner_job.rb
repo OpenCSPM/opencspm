@@ -6,7 +6,13 @@ class RunnerJob < ApplicationJob
   RESULTS_FILE = '/tmp/results'.freeze
   TYPE = :run
 
-  def perform(*_args)
+  def perform
+    # Don't run again if a Job is still running
+    if Job.running.find_by(kind: TYPE)
+      logger.info('Runner job already running, not starting again...')
+      return
+    end
+
     # Shared GUID
     guid = Digest::UUID.uuid_v5(Digest::UUID::OID_NAMESPACE, Time.now.utc.to_s)
 

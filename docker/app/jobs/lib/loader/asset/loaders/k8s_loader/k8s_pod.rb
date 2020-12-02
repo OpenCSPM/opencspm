@@ -89,7 +89,7 @@ class K8S_POD < K8sLoader
       spec_node_name = @asset.dig('resource', 'data', 'spec', 'nodeName')
       node_name = "#{cluster}/api/v1/nodes/#{spec_node_name}"
       unless cluster.nil? && spec_node_name.nil? && node_name.nil?
-        supporting_relationship("K8S_POD", @asset_name, "K8S_NODE", node_name, "k8s.io/Node", "k8s", "ON_NODE", "right")
+        supporting_relationship("K8S_POD", @asset_name, "K8S_NODE", node_name, "k8s.io/Node", "k8s", "ON_NODE", "left")
       end
     end
 

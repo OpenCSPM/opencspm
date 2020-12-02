@@ -31,16 +31,39 @@
 }
 
 /* Markdown code blocks */
-.control-modal code {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  padding-top: 0.125rem;
-  padding-bottom: 0.125rem;
+.validation-details p {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.control-modal code,
+.control-modal pre {
   font-size: 0.75rem;
-  line-height: 1rem;
-  background-color: #f4f5f7;
-  color: #42389d;
   border-radius: 0.25rem;
+}
+
+.control-modal code {
+  padding-left: 0.25rem;
+  padding-right: 0.25rem;
+  padding-top: 0.15rem;
+  padding-bottom: 0.15rem;
+  --bg-opacity: 0.9;
+  background-color: rgba(37, 47, 63, var(--bg-opacity));
+  --text-opacity: 1;
+  color: rgba(210, 214, 220, var(--text-opacity));
+}
+
+.control-modal pre,
+.control-modal pre code {
+  padding: 0.25rem;
+  --bg-opacity: 1;
+  background-color: rgba(37, 47, 63, var(--bg-opacity));
+  --text-opacity: 1;
+  color: rgba(141, 162, 251, var(--text-opacity));
+}
+
+.control-modal pre code {
+  margin-left: -0.25rem;
 }
 
 .control-modal ul {

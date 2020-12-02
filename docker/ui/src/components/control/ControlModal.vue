@@ -94,8 +94,8 @@
           <h3 class="mt-4 text-lg leading-6 font-medium text-gray-800">
             Validation
           </h3>
-          <div class="flex justify-between mt-2 w-full text-sm leading-5 text-gray-500">
-            <div class="pr-6">
+          <div class="flex justify-between w-full text-sm leading-5 text-gray-500">
+            <div class="flex validation-details">
               <p v-html="markdown(data.validation)"></p>
             </div>
           </div>
