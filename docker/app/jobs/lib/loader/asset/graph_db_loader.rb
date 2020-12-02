@@ -74,11 +74,11 @@ class GraphDbLoader
                                                             o.relationship
 
     %(
-      MATCH (c:#{o.child_node} { name: '#{o.child_name}' })
-      MERGE (p:#{o.parent_node} { name: '#{o.parent_name}' })
-      ON CREATE SET #{_merge_base_attrs(o, 'p')}
-      ON MATCH SET #{_merge_base_attrs(o, 'p')}
-      MERGE (c)-[:#{_relationship_attrs(o)}]->(p)
+      MATCH (p:#{o.parent_node} { name: '#{o.parent_name}' })
+      MERGE (c:#{o.child_node} { name: '#{o.child_name}' })
+      ON CREATE SET #{_merge_base_attrs(o, 'c')}
+      ON MATCH SET #{_merge_base_attrs(o, 'c')}
+      MERGE (p)-[:#{_relationship_attrs(o)}]->(c)
     ).strip
   end
 

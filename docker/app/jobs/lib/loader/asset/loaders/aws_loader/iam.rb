@@ -21,10 +21,10 @@ class AWSLoader::IAM < GraphDbLoader
                      }))
 
       opts = {
-        parent_node: 'AWS_IAM_USER',
-        parent_name: @name,
-        child_node: 'AWS_IAM_MFA_DEVICE',
-        child_name: mfa.serial_number,
+        parent_node: 'AWS_IAM_MFA_DEVICE',
+        parent_name: mfa.serial_number,
+        child_node: 'AWS_IAM_USER',
+        child_name: @name,
         relationship: 'HAS_MFA_DEVICE',
         relationship_attributes: { virtual_mfa_token: false }
       }
@@ -123,10 +123,10 @@ class AWSLoader::IAM < GraphDbLoader
     # user node and relationship
     if @data.user
       opts = {
-        parent_node: 'AWS_IAM_USER',
-        parent_name: @data.user.arn,
-        child_node: node,
-        child_name: @name,
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_IAM_USER',
+        child_name: @data.user.arn,
         relationship: 'HAS_MFA_DEVICE',
         relationship_attributes: { virtual_mfa_token: true }
       }
