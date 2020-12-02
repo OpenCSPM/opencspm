@@ -65,6 +65,27 @@ class PostLoader
         end
       end
     end
+
+    ## GCE Instance Relationship to Instance Group
+    query = """
+      MATCH (i:GCP_COMPUTE_INSTANCE)
+      RETURN i.name as instance_name
+    """
+    instance_names = @db.query(query).resultset
+    if instance_names.is_a?(Array) && !instance_names.empty? && instance_names.first.length > 0
+      instance_names.each do |instance_name|
+        instance_name = instance_name.first
+        instance_group_name = instance_to_instance_group_name(instance_name)
+        query = """
+          MATCH (i:GCP_COMPUTE_INSTANCE { name: \"#{instance_name}\" })
+          MATCH (g:GCP_COMPUTE_INSTANCEGROUP { name: \"#{instance_group_name}\" })
+          MERGE (i)<-[:HAS_INSTANCE]-(g)
+        """
+        print '.'
+        @db.query(query)
+      end
+    end
+
     puts ""
   end
 
@@ -105,5 +126,9 @@ class PostLoader
     """
     @db.query(query)
     puts ""
+  end
+
+  def instance_to_instance_group_name(instance_name)
+    "#{instance_name.gsub(/\/instances\//, '/instanceGroups/').split('-')[0..-2].join('-')}-grp"
   end
 end
