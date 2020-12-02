@@ -121,6 +121,7 @@ services:
     hostname: redis_ui
     ports:
       - '8001:8001'
+    restart: unless-stopped
     depends_on:
       - redis
 
