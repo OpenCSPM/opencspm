@@ -209,27 +209,7 @@ class GCP_COMPUTE_INSTANCE < GCPLoader
     """
     graphquery(query)
 
-    # Relationship to Instance Group
-    instance_group_name = instance_to_instance_group_name(@asset_name)
-    query = """
-      MATCH (i:GCP_COMPUTE_INSTANCEGROUP { name: \"#{instance_group_name}\" })
-      RETURN i.name as name
-    """
-    resultset = graphquery(query).resultset
-    if resultset.is_a?(Array) && !resultset.empty?&& resultset.first.length > 0
-      query = """
-        MATCH (i:#{@asset_label} { name: \"#{@asset_name}\" })
-        MERGE (g:GCP_COMPUTE_INSTANCEGROUP { name: \"#{instance_group_name}\" })
-        ON CREATE SET g.asset_type = \"compute.googleapis.com/InstanceGroup\",
-                      g.last_updated = #{@import_id},
-                      g.loader_type = \"gcp\"
-        ON MATCH SET  g.asset_type = \"compute.googleapis.com/InstanceGroup\",
-                      g.last_updated = #{@import_id},
-                      g.loader_type = \"gcp\"
-        MERGE (i)<-[:HAS_INSTANCE]-(g)
-      """
-      graphquery(query)
-    end
+    # Relationship to Instance Group is in post_loader
 
     query = """
       MATCH (i:#{@asset_label} { name: \"#{@asset_name}\" })
@@ -243,11 +223,5 @@ class GCP_COMPUTE_INSTANCE < GCPLoader
       MERGE (i)-[:IN_ZONE]->(z)
     """
     graphquery(query)
-  end
-
-  private
-
-  def instance_to_instance_group_name(instance_name)
-    "#{instance_name.gsub(/\/instances\//, '/instanceGroups/').split('-')[0..-2].join('-')}-grp"
   end
 end
