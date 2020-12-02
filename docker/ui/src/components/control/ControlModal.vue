@@ -95,8 +95,9 @@
             Validation
           </h3>
           <div class="flex justify-between w-full text-sm leading-5 text-gray-500">
-            <div class="flex validation-details">
-              <p v-html="markdown(data.validation)"></p>
+            <div class="flex min-w-full validation-details">
+              <p class="min-w-full"
+                 v-html="markdown(data.validation)"></p>
             </div>
           </div>
           <div v-if="data.refs && data.refs.length > 0">

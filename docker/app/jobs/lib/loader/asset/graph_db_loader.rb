@@ -31,6 +31,7 @@ class GraphDbLoader
     @name = json.name
     @data = json.resource.data
     @loader_type = type
+    @last_updated = json.import_id
   end
 
   private
@@ -114,6 +115,7 @@ class GraphDbLoader
       \t#{key}.service_type = '#{@service}',
       \t#{key}.asset_type = '#{@asset_type}',
       \t#{key}.loader_type = '#{@loader_type}',
+      \t#{key}.last_updated = #{@last_updated},
       \t#{_map_attributes(key, struct)}
     ).strip
   end
@@ -130,7 +132,8 @@ class GraphDbLoader
       %(
         \t#{key}.account = '#{@account}',
         \t#{key}.region = '#{@region}',
-        \t#{key}.loader_type = '#{@loader_type}'
+        \t#{key}.loader_type = '#{@loader_type}',
+        \t#{key}.last_updated = #{@last_updated}
       ).strip
     end
   end
@@ -143,9 +146,11 @@ class GraphDbLoader
   def _relationship_attrs(opts)
     if opts.relationship_attributes
 
-      attrs = opts.relationship_attributes.map { |k, v| %( #{k}: '#{_esc(v.to_s)}' ) }.join(', ')
+      attrs = opts
+              .relationship_attributes
+              .map { |k, v| %( #{k}: '#{_esc(v.to_s)}' ) }.join(', ')
 
-      "#{opts.relationship} {#{attrs}}"
+      "#{opts.relationship} {#{attrs}, last_updated: #{@last_updated}}"
     else
       opts.relationship
     end
@@ -167,7 +172,7 @@ class GraphDbLoader
     hash.reject! { |k| FILTERED_ATTRIBUTES.include?(k.to_s.underscore.to_sym) }
 
     # return a formatted string
-    hash.map { |k, v| %( #{key}.#{k.to_s.underscore} = '#{_esc(v.to_s)}' )}.join(', ')
+    hash.map { |k, v| %( #{key}.#{k.to_s.underscore} = '#{_esc(v.to_s)}' ) }.join(', ')
   end
 
   # TODO: refactor

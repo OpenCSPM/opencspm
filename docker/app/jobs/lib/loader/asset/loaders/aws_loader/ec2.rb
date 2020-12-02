@@ -122,6 +122,52 @@ class AWSLoader::EC2 < GraphDbLoader
 
       q.push(_upsert_and_link(opts))
     end
+
+    # ingress rules
+    @data.ip_permissions.each do |ingress|
+      ingress.ip_ranges.each_with_index do |ip_range, i|
+        opts = {
+          parent_node: 'SG_INGRESS_RULE',
+          parent_name: "#{@name}-#{ingress.ip_protocol}-#{ingress.to_port}-#{i}",
+          child_node: node,
+          child_name: @name,
+          relationship: 'HAS_INGRESS_RULE',
+          relationship_attributes: {
+            cidr_ip: ip_range.cidr_ip,
+            ip_protocol: ingress.ip_protocol,
+            to_port: ingress.to_port,
+            from_port: ingress.from_port,
+            direction: 'ingress'
+          }
+        }
+
+        q.push(_upsert_and_link(opts))
+      end
+    end
+
+    # egress rules
+    @data.ip_permissions_egress.each do |egress|
+      egress.ip_ranges.each_with_index do |ip_range, i|
+        opts = {
+          parent_node: 'SG_EGRESS_RULE',
+          parent_name: "#{@name}-#{egress.ip_protocol}-#{egress.to_port}-#{i}",
+          child_node: node,
+          child_name: @name,
+          relationship: 'HAS_EGRESS_RULE',
+          relationship_attributes: {
+            cidr_ip: ip_range.cidr_ip,
+            ip_protocol: egress.ip_protocol,
+            to_port: egress.to_port,
+            from_port: egress.from_port,
+            direction: 'egress'
+          }
+        }
+
+        q.push(_upsert_and_link(opts))
+      end
+    end
+
+    q
   end
 
   #
