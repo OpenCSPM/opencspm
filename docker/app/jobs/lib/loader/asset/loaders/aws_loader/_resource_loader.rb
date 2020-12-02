@@ -12,6 +12,9 @@ class AWSLoader::ResourceLoader
     # re-parse as JSON to get recursive OpenStruct's
     json = JSON.parse(@asset.to_json, object_class: OpenStruct)
 
+    # set import_id
+    json.import_id = @import_id
+
     # Instantiate a Loader instance for each service type
     begin
       svc = "::AWSLoader::#{json.service}"
