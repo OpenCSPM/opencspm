@@ -85,7 +85,6 @@ class PostLoader
         @db.query(query)
       end
     end
-
     puts ""
   end
 
