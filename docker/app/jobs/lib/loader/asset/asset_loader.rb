@@ -21,7 +21,18 @@ class AssetLoader
 
   def graphquery(query, _params = {})
     print '.'
-    @db.query(query)
+    begin 
+      @db.query(query)
+    rescue RedisGraph::QueryError => e
+      print "Query failure. Check /tmp/failedqueries.txt"
+      open('/tmp/failedqueries.txt', 'a') do |f|
+        f.puts "QueryError: #{e}"
+        f.puts "\n"
+        f.puts query
+        f.puts "\n"
+        f.puts "\n"
+      end
+    end
   end
 
   def fetch_current_properties_as_null(asset_label, asset_name)
@@ -34,16 +45,16 @@ class AssetLoader
 
     return '' if current_properties == ''
 
-    current_properties + ', '
+    current_properties + ",\n"
   end
 
   def prepare_properties(asset)
     # rubocop:disable Layout/LineLength
-    asset.flatten_with_path.tap { |hs| hs.delete('name') }.tap { |hs| hs.delete('asset_type') }.map { |h| "a.#{h[0]} = \"#{h[1].to_s.gsub(/\"/, '\\"').gsub(/\n/,'\n')}\"" }.join ', '
+    asset.flatten_with_path.tap { |hs| hs.delete('name') }.tap { |hs| hs.delete('asset_type') }.first(500).map { |h| "a.#{h[0]} = \"#{h[1].to_s.slice(0..1000).gsub(/\"/, '\\"').gsub(/\n/,'\n')}\"" }.join ",\n"
     # rubocop:enable Layout/LineLength
   end
 
   def prepare_relationship_properties(properties_hash)
-    properties_hash.map { |h| "#{h[0]}: \"#{h[1]}\"" }.join ', '
+    properties_hash.map { |h| "#{h[0]}: \"#{h[1]}\"" }.join ",\n"
   end
 end
