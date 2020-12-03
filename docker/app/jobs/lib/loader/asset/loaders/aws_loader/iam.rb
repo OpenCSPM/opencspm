@@ -20,16 +20,60 @@ class AWSLoader::IAM < GraphDbLoader
                        data: mfa
                      }))
 
+      # mfa_device -> user
       opts = {
         parent_node: 'AWS_IAM_MFA_DEVICE',
         parent_name: mfa.serial_number,
-        child_node: 'AWS_IAM_USER',
+        child_node: node,
         child_name: @name,
         relationship: 'HAS_MFA_DEVICE',
         relationship_attributes: { virtual_mfa_token: false }
       }
 
       q.push(_upsert_and_link(opts))
+    end
+
+    # inline policies
+    @data.user_policy_list.each do |policy|
+      # inline policy node
+      q.push(_upsert({
+                       node: 'AWS_IAM_POLICY',
+                       id: policy.policy_name,
+                       data: { inline: true }
+                     }))
+
+      # policy -> user
+      opts = {
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_IAM_POLICY',
+        child_name: policy.policy_name,
+        relationship: 'HAS_INLINE_POLICY',
+        relationship_attributes: { inline: true, managed: false }
+      }
+
+      q.push(_upsert_and_link(opts))
+
+      # policy statements
+      policy&.policy_document.Statement.each_with_index do |statement, i|
+        # inline policy statement node
+        q.push(_upsert({
+                         node: 'AWS_IAM_POLICY_STATEMENT',
+                         id: "#{policy.policy_name.downcase}-#{i}",
+                         data: statement
+                       }))
+
+        # statement -> policy
+        opts = {
+          parent_node: 'AWS_IAM_POLICY',
+          parent_name: policy.policy_name,
+          child_node: 'AWS_IAM_POLICY_STATEMENT',
+          child_name: "#{policy.policy_name.downcase}-#{i}",
+          relationship: 'HAS_STATEMENT'
+        }
+
+        q.push(_upsert_and_link(opts))
+      end
     end
 
     # TODO: map ssh_keys
