@@ -159,7 +159,7 @@ class GraphDbLoader
 
       "#{opts.relationship} {#{attrs}, last_updated: #{@last_updated}}"
     else
-      opts.relationship
+      "#{opts.relationship} {last_updated: #{@last_updated}}"
     end
   end
 
