@@ -35,10 +35,12 @@ class AWSLoader::IAM < GraphDbLoader
 
     # inline policies
     @data.user_policy_list.each do |policy|
+      policy_name = policy.policy_name
+
       # inline policy node
       q.push(_upsert({
                        node: 'AWS_IAM_POLICY',
-                       id: policy.policy_name,
+                       id: policy_name,
                        data: { inline: true }
                      }))
 
@@ -47,7 +49,7 @@ class AWSLoader::IAM < GraphDbLoader
         parent_node: node,
         parent_name: @name,
         child_node: 'AWS_IAM_POLICY',
-        child_name: policy.policy_name,
+        child_name: policy_name,
         relationship: 'HAS_INLINE_POLICY',
         relationship_attributes: { inline: true, managed: false }
       }
@@ -56,19 +58,21 @@ class AWSLoader::IAM < GraphDbLoader
 
       # policy statements
       policy&.policy_document.Statement.each_with_index do |statement, i|
+        statement_name = "#{policy_name.downcase}-#{i}"
+
         # inline policy statement node
         q.push(_upsert({
                          node: 'AWS_IAM_POLICY_STATEMENT',
-                         id: "#{policy.policy_name.downcase}-#{i}",
+                         id: statement_name,
                          data: statement
                        }))
 
         # statement -> policy
         opts = {
           parent_node: 'AWS_IAM_POLICY',
-          parent_name: policy.policy_name,
+          parent_name: policy_name,
           child_node: 'AWS_IAM_POLICY_STATEMENT',
-          child_name: "#{policy.policy_name.downcase}-#{i}",
+          child_name: statement_name,
           relationship: 'HAS_STATEMENT',
           relationship_attributes: {
             effect: statement.Effect,
