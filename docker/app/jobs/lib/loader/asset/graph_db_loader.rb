@@ -15,6 +15,13 @@
 #        fields (e.g. EKS_CLUSTER_LOGGING_TYPE)
 #     3) append: add arbitrary fields to an existing node. (e.g. ER_REPOSITORY)
 #
+# Relationships:
+#     When creating relationships, we are using the parent/child taxonomy
+#     even though the relationship between nodes is not necessarily that
+#     of a parent with a child decendent. The *parent* node is simply the
+#     node that is expected to exist before a *child* node can be linked to
+#     it via a relationship.
+#
 class GraphDbLoader
   # only map strings and boolean values
   ACCEPTED_ATTRIBUTES = [Integer, TrueClass, FalseClass, String].freeze
