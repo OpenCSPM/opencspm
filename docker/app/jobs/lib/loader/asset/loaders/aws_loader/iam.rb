@@ -69,7 +69,11 @@ class AWSLoader::IAM < GraphDbLoader
           parent_name: policy.policy_name,
           child_node: 'AWS_IAM_POLICY_STATEMENT',
           child_name: "#{policy.policy_name.downcase}-#{i}",
-          relationship: 'HAS_STATEMENT'
+          relationship: 'HAS_STATEMENT',
+          relationship_attributes: {
+            effect: statement.Effect,
+            resource: statement.Resource
+          }
         }
 
         q.push(_upsert_and_link(opts))
