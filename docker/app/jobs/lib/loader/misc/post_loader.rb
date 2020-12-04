@@ -18,11 +18,12 @@ class PostLoader
 
   def enrich_data
     puts 'Enriching data'
-    query %(
+    query = %(
       MATCH (np:GCP_CONTAINER_NODEPOOL)-[hsa:HAS_SERVICEACCOUNT]->(gi:GCP_IDENTITY)
       WHERE gi.name = 'serviceAccount:default'
       DETACH DELETE hsa RETURN np.name as name
     )
+
     container_nodepools = @db.query(query).resultset
     if container_nodepools.is_a?(Array) && !container_nodepools.empty? && container_nodepools.first.length > 0
       container_nodepools.each do |container_nodepool|
@@ -33,7 +34,7 @@ class PostLoader
         container_nodepool = container_nodepool.first
         # Get project name from instance_template path
         gcp_compute_project = container_nodepool.split('/').slice(0..2).join('/').gsub(/^container/, 'compute')
-        query %(
+        query = %(
           MATCH (np:GCP_CONTAINER_NODEPOOL { name: \"#{container_nodepool}\" })
           MATCH (gcp:GCP_COMPUTE_PROJECT { name: \"#{gcp_compute_project}\" })
           MATCH (gi:GCP_IDENTITY)
@@ -41,12 +42,13 @@ class PostLoader
           AND gi.member_name = gcp.resource_data_defaultServiceAccount
           MERGE (np)-[:HAS_SERVICEACCOUNT]->(gi)
         )
+
         print '.'
         @db.query(query)
       end
     end
 
-    query %(
+    query = %(
       MATCH (it:GCP_COMPUTE_INSTANCETEMPLATE)-[hsa:HAS_SERVICEACCOUNT]->(gi:GCP_IDENTITY)
       WHERE gi.name = 'serviceAccount:default'
       DETACH DELETE hsa RETURN it.name as name
@@ -61,7 +63,7 @@ class PostLoader
         instance_template = instance_template.first
         # Get project name from instance_template path
         gcp_compute_project = instance_template.split('/').slice(0..2).join('/')
-        query %(
+        query = %(
           MATCH (i:GCP_COMPUTE_INSTANCETEMPLATE { name: \"#{instance_template}\" })
           MATCH (gcp:GCP_COMPUTE_PROJECT { name: \"#{gcp_compute_project}\" })
           MATCH (gi:GCP_IDENTITY)
@@ -69,13 +71,14 @@ class PostLoader
           AND gi.member_name = gcp.resource_data_defaultServiceAccount
           MERGE (i)-[:HAS_SERVICEACCOUNT]->(gi)
         )
+
         print '.'
         @db.query(query)
       end
     end
 
     ## GCE Instance Relationship to Instance Group
-    query %(
+    query = %(
       MATCH (i:GCP_COMPUTE_INSTANCE)
       RETURN i.name as instance_name
     )
@@ -84,7 +87,7 @@ class PostLoader
       instance_names.each do |instance_name|
         instance_name = instance_name.first
         instance_group_name = instance_to_instance_group_name(instance_name)
-        query %(
+        query = %(
           MATCH (i:GCP_COMPUTE_INSTANCE { name: \"#{instance_name}\" })
           MATCH (g:GCP_COMPUTE_INSTANCEGROUP { name: \"#{instance_group_name}\" })
           MERGE (i)<-[:HAS_INSTANCE]-(g)
@@ -93,21 +96,25 @@ class PostLoader
         @db.query(query)
       end
     end
+
     puts ''
   end
 
   def install_indexes
-    puts 'Installing indexes'
-    query %(
+    puts 'Installing indexes...'
+    query = %(
       MATCH (a) RETURN DISTINCT labels(a) as label
     )
+
     labels = @db.query(query).resultset
+
     if labels.is_a?(Array) && !labels.empty? && labels.first.length > 0
       labels.each do |label|
         next unless label.is_a?(Array) && !label.empty? && label.first.length > 0
 
         label = label.first
-        query %(
+
+        query = %(
           CREATE INDEX ON :#{label}(name);
           CREATE INDEX ON :#{label}(account);
           CREATE INDEX ON :#{label}(region);
@@ -116,23 +123,25 @@ class PostLoader
           CREATE INDEX ON :#{label}(last_updated);
           CREATE INDEX ON :#{label}(loader_type);
         )
+
         print '.'
         @db.query(query)
       end
     end
+
     puts ''
   end
 
   def cleanup_data
     puts 'Cleaning up stale resources and relationships'
     print '.'
-    query %(
+    query = %(
       MATCH ()-[r]-() where r.last_updated <> #{@import_id} delete r
     )
     @db.query(query)
 
     print '.'
-    query %(
+    query = %(
       MATCH (n) where n.last_updated <> #{@import_id} detach delete n
     )
     @db.query(query)
