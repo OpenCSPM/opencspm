@@ -11,7 +11,7 @@ require 'loader/asset/loaders/k8s_loader'
 #
 # Require all individual service loaders
 #
-Dir[File.join(__dir__, 'loaders', 'aws_loader', '*.rb')].each { |file| require file }
+Dir[File.join(__dir__, 'loaders', 'aws_loader', '**', '*.rb')].each { |file| require file }
 Dir[File.join(__dir__, 'loaders', 'gcp_loader', '*.rb')].each { |file| require file }
 Dir[File.join(__dir__, 'loaders', 'k8s_loader', '*.rb')].each { |file| require file }
 
