@@ -23,7 +23,7 @@ class AWSLoader::ResourceLoader
 
       # DEBUG: skip loader methods that aren't implemented yet
       unless loader.respond_to?(json.asset_type)
-        puts "No #{json.service} loader defined for asset type: #{json.asset_type}"
+        puts "\nWarning: no #{json.service} loader defined for asset type: \x1b[35m#{json.asset_type}\x1b[0m"
         return
       end
 
@@ -32,7 +32,13 @@ class AWSLoader::ResourceLoader
         @db.query(q)
         printf "\x1b[32m.\x1b[0m"
       end
-    rescue NameError
+    rescue NameError => e
+      # Instances of ::GraphDbLoader will raise a NameError exception
+      # if the individual methods try to call a non-existent field
+      # returned from the AWS API. We don't want to swallow that
+      # exception, so re-raise it here.
+      raise e if e.receiver.nil?
+
       puts "No loader defined for service: #{json.service}"
     end
   end

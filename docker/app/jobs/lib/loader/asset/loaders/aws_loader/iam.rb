@@ -12,7 +12,7 @@ class AWSLoader::IAM < GraphDbLoader
     q.push(_upsert({ node: node, id: @name }))
 
     # mfa devices and relationship
-    @data.mfa_devices.each do |mfa|
+    @data&.mfa_devices&.each do |mfa|
       # mfa device node
       q.push(_upsert({
                        node: 'AWS_IAM_MFA_DEVICE',
@@ -34,7 +34,7 @@ class AWSLoader::IAM < GraphDbLoader
     end
 
     # inline policies
-    @data.user_policy_list.each do |policy|
+    @data&.user_policy_list&.each do |policy|
       policy_name = policy.policy_name
 
       # inline policy node
@@ -57,7 +57,7 @@ class AWSLoader::IAM < GraphDbLoader
       q.push(_upsert_and_link(opts))
 
       # policy statements
-      policy&.policy_document.Statement.each_with_index do |statement, i|
+      policy&.policy_document&.Statement&.each_with_index do |statement, i|
         statement_name = "#{policy_name.downcase}-#{i}"
 
         # inline policy statement node
@@ -74,18 +74,36 @@ class AWSLoader::IAM < GraphDbLoader
           child_node: 'AWS_IAM_POLICY_STATEMENT',
           child_name: statement_name,
           relationship: 'HAS_STATEMENT',
-          relationship_attributes: {
-            effect: statement.Effect,
-            resource: statement.Resource
-          }
+          relationship_attributes: { effect: statement.Effect, resource: statement.Resource }
         }
 
         q.push(_upsert_and_link(opts))
+
+        # statement actions
+        statement&.Action&.each do |action|
+          action_name = action
+
+          # inline policy statement node
+          q.push(_upsert({
+                           node: 'AWS_IAM_POLICY_ACTION',
+                           id: action_name
+                         }))
+
+          # action -> statement
+          opts = {
+            parent_node: 'AWS_IAM_POLICY_STATEMENT',
+            parent_name: statement_name,
+            child_node: 'AWS_IAM_POLICY_ACTION',
+            child_name: action_name,
+            relationship: 'HAS_ACTION'
+          }
+
+          q.push(_upsert_and_link(opts))
+        end
       end
     end
 
     # TODO: map ssh_keys
-    # TODO: map user_policy_list (attached inline policies)
     # TODO: map attached_managed_policies
     q
   end

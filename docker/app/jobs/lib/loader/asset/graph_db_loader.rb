@@ -116,6 +116,7 @@ class GraphDbLoader
     # opts.data indicates we are adding a custom node (nested in a top-level resource)
     struct = opts.data || @data
 
+    # last_updated must be an integer
     %(
       \t#{key}.account = '#{@account}',
       \t#{key}.region = '#{@region}',
@@ -136,6 +137,7 @@ class GraphDbLoader
         \t#{key}.headless = 'true'
       ).strip
     else
+      # last_updated must be an integer
       %(
         \t#{key}.account = '#{@account}',
         \t#{key}.region = '#{@region}',

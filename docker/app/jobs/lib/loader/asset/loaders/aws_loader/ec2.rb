@@ -129,7 +129,7 @@ class AWSLoader::EC2 < GraphDbLoader
         opts = {
           parent_node: node,
           parent_name: @name,
-          child_node: 'SG_INGRESS_RULE',
+          child_node: 'AWS_SECURITY_GROUP_INGRESS_RULE',
           child_name: "#{@name}-#{ingress.ip_protocol}-#{ingress.to_port}-#{i}",
           relationship: 'HAS_INGRESS_RULE',
           relationship_attributes: {
@@ -151,7 +151,7 @@ class AWSLoader::EC2 < GraphDbLoader
         opts = {
           parent_node: node,
           parent_name: @name,
-          child_node: 'SG_EGRESS_RULE',
+          child_node: 'AWS_SECURITY_GROUP_EGRESS_RULE',
           child_name: "#{@name}-#{egress.ip_protocol}-#{egress.to_port}-#{i}",
           relationship: 'HAS_EGRESS_RULE',
           relationship_attributes: {
