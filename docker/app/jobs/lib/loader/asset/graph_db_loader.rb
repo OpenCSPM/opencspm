@@ -15,6 +15,13 @@
 #        fields (e.g. EKS_CLUSTER_LOGGING_TYPE)
 #     3) append: add arbitrary fields to an existing node. (e.g. ER_REPOSITORY)
 #
+# Relationships:
+#     When creating relationships, we are using the parent/child taxonomy
+#     even though the relationship between nodes is not necessarily that
+#     of a parent with a child decendent. The *parent* node is simply the
+#     node that is expected to exist before a *child* node can be linked to
+#     it via a relationship.
+#
 class GraphDbLoader
   # only map strings and boolean values
   ACCEPTED_ATTRIBUTES = [Integer, TrueClass, FalseClass, String].freeze
@@ -74,11 +81,11 @@ class GraphDbLoader
                                                             o.relationship
 
     %(
-      MATCH (c:#{o.child_node} { name: '#{o.child_name}' })
-      MERGE (p:#{o.parent_node} { name: '#{o.parent_name}' })
-      ON CREATE SET #{_merge_base_attrs(o, 'p')}
-      ON MATCH SET #{_merge_base_attrs(o, 'p')}
-      MERGE (c)-[:#{_relationship_attrs(o)}]->(p)
+      MATCH (p:#{o.parent_node} { name: '#{o.parent_name}' })
+      MERGE (c:#{o.child_node} { name: '#{o.child_name}' })
+      ON CREATE SET #{_merge_base_attrs(o, 'c')}
+      ON MATCH SET #{_merge_base_attrs(o, 'c')}
+      MERGE (p)-[:#{_relationship_attrs(o)}]->(c)
     ).strip
   end
 
@@ -109,6 +116,7 @@ class GraphDbLoader
     # opts.data indicates we are adding a custom node (nested in a top-level resource)
     struct = opts.data || @data
 
+    # last_updated must be an integer
     %(
       \t#{key}.account = '#{@account}',
       \t#{key}.region = '#{@region}',
@@ -129,6 +137,7 @@ class GraphDbLoader
         \t#{key}.headless = 'true'
       ).strip
     else
+      # last_updated must be an integer
       %(
         \t#{key}.account = '#{@account}',
         \t#{key}.region = '#{@region}',
@@ -152,7 +161,7 @@ class GraphDbLoader
 
       "#{opts.relationship} {#{attrs}, last_updated: #{@last_updated}}"
     else
-      opts.relationship
+      "#{opts.relationship} {last_updated: #{@last_updated}}"
     end
   end
 

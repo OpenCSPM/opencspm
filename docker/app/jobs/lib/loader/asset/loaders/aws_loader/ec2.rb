@@ -34,10 +34,10 @@ class AWSLoader::EC2 < GraphDbLoader
     # vpc node and relationship
     if @data.vpc_id
       opts = {
-        parent_node: 'AWS_VPC',
-        parent_name: @data.vpc_id,
-        child_node: node,
-        child_name: @name,
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_VPC',
+        child_name: @data.vpc_id,
         relationship: 'MEMBER_OF_VPC'
       }
 
@@ -47,10 +47,10 @@ class AWSLoader::EC2 < GraphDbLoader
     # network_interfaces and relationship
     @data.network_interfaces.each do |ni|
       opts = {
-        parent_node: 'AWS_NETWORK_INTERFACE',
-        parent_name: ni.network_interface_id,
-        child_node: node,
-        child_name: @name,
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_NETWORK_INTERFACE',
+        child_name: ni.network_interface_id,
         relationship: 'ATTACHED_TO_INSTANCE'
       }
 
@@ -60,10 +60,10 @@ class AWSLoader::EC2 < GraphDbLoader
     # security_groups and relationship
     @data.security_groups.each do |sg|
       opts = {
-        parent_node: 'AWS_SECURITY_GROUP',
-        parent_name: sg.group_id,
-        child_node: node,
-        child_name: @name,
+        child_node: 'AWS_SECURITY_GROUP',
+        child_name: sg.group_id,
+        parent_node: node,
+        parent_name: @name,
         relationship: 'IN_SECURITY_GROUP'
       }
 
@@ -73,11 +73,11 @@ class AWSLoader::EC2 < GraphDbLoader
     # subnet and relationship
     if @data.subnet_id
       opts = {
-        parent_node: 'AWS_SUBNET',
-        # parent_name: "arn:aws:ec2:#{@region}:#{@account}:subnet/#{@data.subnet_id}",
-        parent_name: @data.subnet_id,
-        child_node: node,
-        child_name: @name,
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_SUBNET',
+        # child_name: "arn:aws:ec2:#{@region}:#{@account}:subnet/#{@data.subnet_id}",
+        child_name: @data.subnet_id,
         relationship: 'IN_SUBNET'
       }
 
@@ -113,10 +113,10 @@ class AWSLoader::EC2 < GraphDbLoader
     # vpc node and relationship
     if @data.vpc_id
       opts = {
-        parent_node: 'AWS_VPC',
-        parent_name: @data.vpc_id,
-        child_node: node,
-        child_name: @name,
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_VPC',
+        child_name: @data.vpc_id,
         relationship: 'MEMBER_OF_VPC'
       }
 
@@ -127,10 +127,10 @@ class AWSLoader::EC2 < GraphDbLoader
     @data.ip_permissions.each do |ingress|
       ingress.ip_ranges.each_with_index do |ip_range, i|
         opts = {
-          parent_node: 'SG_INGRESS_RULE',
-          parent_name: "#{@name}-#{ingress.ip_protocol}-#{ingress.to_port}-#{i}",
-          child_node: node,
-          child_name: @name,
+          parent_node: node,
+          parent_name: @name,
+          child_node: 'AWS_SECURITY_GROUP_INGRESS_RULE',
+          child_name: "#{@name}-#{ingress.ip_protocol}-#{ingress.to_port}-#{i}",
           relationship: 'HAS_INGRESS_RULE',
           relationship_attributes: {
             cidr_ip: ip_range.cidr_ip,
@@ -149,10 +149,10 @@ class AWSLoader::EC2 < GraphDbLoader
     @data.ip_permissions_egress.each do |egress|
       egress.ip_ranges.each_with_index do |ip_range, i|
         opts = {
-          parent_node: 'SG_EGRESS_RULE',
-          parent_name: "#{@name}-#{egress.ip_protocol}-#{egress.to_port}-#{i}",
-          child_node: node,
-          child_name: @name,
+          parent_node: node,
+          parent_name: @name,
+          child_node: 'AWS_SECURITY_GROUP_EGRESS_RULE',
+          child_name: "#{@name}-#{egress.ip_protocol}-#{egress.to_port}-#{i}",
           relationship: 'HAS_EGRESS_RULE',
           relationship_attributes: {
             cidr_ip: ip_range.cidr_ip,
@@ -186,10 +186,10 @@ class AWSLoader::EC2 < GraphDbLoader
     # vpc node and relationship
     if @data.vpc_id
       opts = {
-        parent_node: 'AWS_VPC',
-        parent_name: @data.vpc_id,
-        child_node: node,
-        child_name: @name,
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_VPC',
+        child_name: @data.vpc_id,
         relationship: 'MEMBER_OF_VPC'
       }
 
@@ -199,10 +199,10 @@ class AWSLoader::EC2 < GraphDbLoader
     # security_groups and relationship
     @data.groups.each do |sg|
       opts = {
-        parent_node: 'AWS_SECURITY_GROUP',
-        parent_name: sg.group_id,
-        child_node: node,
-        child_name: @name,
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_SECURITY_GROUP',
+        child_name: sg.group_id,
         relationship: 'IN_SECURITY_GROUP'
       }
 
@@ -222,11 +222,11 @@ class AWSLoader::EC2 < GraphDbLoader
     # vpc node and relationship
     if @data.vpc_id
       opts = {
-        parent_node: 'AWS_VPC',
-        parent_name: @data.vpc_id,
-        child_node: node,
-        # child_name: @name,
-        child_name: @data.subnet_id,
+        parent_node: node,
+        # parent_name: @name,
+        parent_name: @data.subnet_id,
+        child_node: 'AWS_VPC',
+        child_name: @data.vpc_id,
         relationship: 'MEMBER_OF_VPC'
       }
 
@@ -288,10 +288,10 @@ class AWSLoader::EC2 < GraphDbLoader
                            end
 
       opts = {
-        parent_node: resource_node_type,
-        parent_name: @data.resource_id,
-        child_node: node,
-        child_name: @name,
+        parent_node: node,
+        parent_name: @name,
+        child_node: resource_node_type,
+        child_name: @data.resource_id,
         relationship: 'HAS_FLOW_LOG',
         relationship_attributes: { status: @data.flow_log_status }
       }
