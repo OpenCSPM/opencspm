@@ -41,7 +41,7 @@ class GCPIAMRolesLoader < GCPLoader
   end
 
   def create_iam_role(asset_name, asset, import_id)
-    """MERGE (a:GCP_IAM_IAMROLE { name: \"#{asset_name}\" })
+    """MERGE (a:GCP_IAM_ROLE { name: \"#{asset_name}\" })
     ON CREATE set a.name = \"#{asset_name}\",
                   a.stage = \"#{asset['stage']}\", a.title = \"#{asset['title']}\",
                   a.description = \"#{asset['description']}\", a.last_updated = #{import_id},
@@ -58,7 +58,7 @@ class GCPIAMRolesLoader < GCPLoader
     perm_score = calc_perm_score(perm_name)
 
     """
-      MATCH (i:GCP_IAM_IAMROLE { name: \"#{asset_name}\" })
+      MATCH (i:GCP_IAM_ROLE { name: \"#{asset_name}\" })
       MERGE (a:GCP_IAM_PERMISSION { name: \"#{perm_name}\" })
       ON CREATE set a.name = \"#{perm_name}\", a.score = #{perm_score},
                     a.last_updated = #{import_id}, a.loader_type = 'gcp'
