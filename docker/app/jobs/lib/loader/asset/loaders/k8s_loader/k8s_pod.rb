@@ -98,7 +98,7 @@ class K8S_POD < K8sLoader
       pod_tolerations.each do |tol|
         toleration_name = tol['key'] || 'Unnamed'
         tol.delete('key')
-        supporting_relationship_with_attrs("K8S_POD", @asset_name, "K8S_PODTOLERATION", toleration_name, "k8s.io/PodToleration", {}, "k8s", "HAS_K8SPODTOLERATION", tol, "right")
+        supporting_relationship_with_attrs("K8S_POD", @asset_name, "K8S_PODTOLERATION", toleration_name, "k8s.io/PodToleration", {}, "k8s", "HAS_K8SPODTOLERATION", tol, "left")
       end
     end
 
@@ -107,7 +107,7 @@ class K8S_POD < K8sLoader
       pod_conditions.each do |pc|
         pc_name = pc['type'] || 'Unnamed'
         pc.delete('type')
-        supporting_relationship_with_attrs("K8S_POD", @asset_name, "K8S_PODCONDITION", pc_name, "k8s.io/PodCondition", {}, "k8s", "HAS_K8SPODCONDITION", pc, "right")
+        supporting_relationship_with_attrs("K8S_POD", @asset_name, "K8S_PODCONDITION", pc_name, "k8s.io/PodCondition", {}, "k8s", "HAS_K8SPODCONDITION", pc, "left")
       end
     end
   end
