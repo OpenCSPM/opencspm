@@ -20,25 +20,53 @@ class PackJob < ApplicationJob
       control_pack&.controls&.each do |control|
         puts "Control: #{control_pack.id} - #{control.id}"
         res = Control.find_or_create_by(control_pack: control_pack.id, control_id: control.id)
-        res.tags.destroy_all
 
+        existing_tags = res.tags.map(&:name).uniq
+        new_tags = []
+
+        # create new tags for primary and secondary tags
+        # if they don't exist already
         control&.tags&.map do |tag|
           if tag.class == OpenStruct
+            # top level of a nested tag set
             tag.to_h.keys.each do |k|
-              # top level of a nested tag set
-              Tagging.create(control: res, tag: Tag.find_or_create_by(name: k.downcase), primary: true)
+              _tag = k.to_s.downcase
+
+              new_tags << _tag
+
+              unless existing_tags.include?(_tag)
+                Tagging.create(control: res, tag: Tag.find_or_create_by(name: _tag), primary: true)
+              end
 
               # secondary tags
               tag.send(k).to_a.each do |t|
-                res.tags << Tag.find_or_create_by(name: t.downcase)
+                _tag = t.to_s.downcase
+
+                new_tags << _tag
+
+                res.tags << Tag.find_or_create_by(name: _tag) unless existing_tags.include?(_tag)
               end
             end
           end
 
           # standalone tag
           if tag.class == String
-            Tagging.create(control: res, tag: Tag.find_or_create_by(name: tag.downcase), primary: true)
+            _tag = tag.to_s.downcase
+
+            new_tags << _tag
+
+            unless existing_tags.include?(_tag)
+              Tagging.create(control: res, tag: Tag.find_or_create_by(name: _tag), primary: true)
+            end
           end
+        end
+
+        # delete stale tags
+        stale_tags = existing_tags - new_tags.uniq
+
+        unless stale_tags.empty?
+          taggings = res.tags.where(name: stale_tags).pluck(:tag_id)
+          res.taggings.where(tag_id: taggings).destroy_all
         end
 
         res.update(

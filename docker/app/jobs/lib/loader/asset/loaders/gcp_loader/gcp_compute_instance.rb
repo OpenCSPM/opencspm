@@ -19,7 +19,11 @@ class GCP_COMPUTE_INSTANCE < GCPLoader
     if asset.dig('resource','data','tags')
       network_tags = asset.dig('resource','data').delete('tags')
     end
-
+    metadata_items = []
+    if asset.dig('resource','data','metadata')
+      metadata_items = asset.dig('resource','data').delete('metadata')
+      binding.pry
+    end
     # cleanup
     if asset.dig('resource','data','disks')
       asset.dig('resource','data').delete('disks')
@@ -178,19 +182,34 @@ class GCP_COMPUTE_INSTANCE < GCPLoader
     if network_tags.dig('items')
       network_tags = network_tags['items']
     end
-    return unless network_tags.is_a?(Array)
+    if network_tags.is_a?(Array)
+      network_tags.each do |network_tag|
+        query = """
+          MATCH (i:#{@asset_label} { name: \"#{@asset_name}\" })
+          MERGE (t:GCP_COMPUTE_NETWORKTAG { name: \"#{network_tag}\" })
+          ON CREATE SET t.asset_type = \"compute.googleapis.com/NetworkTag\",
+                        t.last_updated = #{@import_id},
+                        t.loader_type = \"gcp\"
+          ON MATCH SET  t.asset_type = \"compute.googleapis.com/NetworkTag\",
+                        t.last_updated = #{@import_id},
+                        t.loader_type = \"gcp\"
+          MERGE (i)-[:HAS_NETWORKTAG]->(t)
+        """
+        graphquery(query)
+      end
+    end
 
-    network_tags.each do |network_tag|
+    metadata_items.each do |item|
       query = """
         MATCH (i:#{@asset_label} { name: \"#{@asset_name}\" })
-        MERGE (t:GCP_COMPUTE_NETWORKTAG { name: \"#{network_tag}\" })
-        ON CREATE SET t.asset_type = \"compute.googleapis.com/NetworkTag\",
+        MERGE (t:GCP_COMPUTE_METADATAITEM { name: \"#{item['key']}\" })
+        ON CREATE SET t.asset_type = \"compute.googleapis.com/MetadataItem\",
                       t.last_updated = #{@import_id},
                       t.loader_type = \"gcp\"
-        ON MATCH SET  t.asset_type = \"compute.googleapis.com/NetworkTag\",
+        ON MATCH SET  t.asset_type = \"compute.googleapis.com/MetadataItem\",
                       t.last_updated = #{@import_id},
                       t.loader_type = \"gcp\"
-        MERGE (i)-[:HAS_NETWORKTAG]->(t)
+        MERGE (i)-[:HAS_METADATAITEM { value: \"#{item['value']}\" }]->(t)
       """
       graphquery(query)
     end
@@ -209,19 +228,6 @@ class GCP_COMPUTE_INSTANCE < GCPLoader
     """
     graphquery(query)
 
-    # Relationship to Instance Group is in post_loader
-
-    query = """
-      MATCH (i:#{@asset_label} { name: \"#{@asset_name}\" })
-      MERGE (z:GCP_ZONE { name: \"#{zone}\" })
-      ON CREATE SET z.asset_type = \"compute.googleapis.com/Zone\",
-                    z.last_updated = #{@import_id},
-                    z.loader_type = \"gcp\"
-      ON MATCH SET  z.asset_type = \"compute.googleapis.com/Zone\",
-                    z.last_updated = #{@import_id},
-                    z.loader_type = \"gcp\"
-      MERGE (i)-[:IN_ZONE]->(z)
-    """
-    graphquery(query)
+    # Relationship to Instance Group is done in post_loader
   end
 end

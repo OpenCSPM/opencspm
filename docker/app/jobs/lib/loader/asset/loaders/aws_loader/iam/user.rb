@@ -126,7 +126,7 @@ class AWSLoader::IAM < GraphDbLoader
     end
 
     # TODO: map ssh_keys
-    # TODO: map attached_managed_policies
+
     q
   end
 end
