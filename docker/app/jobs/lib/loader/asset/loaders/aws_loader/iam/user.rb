@@ -33,7 +33,8 @@ class AWSLoader::IAM < GraphDbLoader
 
     # inline policies
     @data&.user_policy_list&.each do |policy|
-      policy_name = policy.policy_name
+      # scope the policy name to the user ARN to enforce uniqueness
+      policy_name = "#{@name}/inline_policy/#{policy.policy_name}"
 
       # inline policy node
       q.push(_upsert({
@@ -56,14 +57,7 @@ class AWSLoader::IAM < GraphDbLoader
 
       # policy statements
       policy&.policy_document&.Statement&.each_with_index do |statement, i|
-        statement_name = "#{policy_name.downcase}-#{i}"
-
-        # inline policy statement node
-        q.push(_upsert({
-                         node: 'AWS_IAM_POLICY_STATEMENT',
-                         id: statement_name,
-                         data: statement
-                       }))
+        statement_name = "#{policy_name}-#{i}"
 
         # statement -> policy
         opts = {
@@ -72,20 +66,30 @@ class AWSLoader::IAM < GraphDbLoader
           child_node: 'AWS_IAM_POLICY_STATEMENT',
           child_name: statement_name,
           relationship: 'HAS_STATEMENT',
-          relationship_attributes: { effect: statement.Effect, resource: statement.Resource }
+          relationship_attributes: { effect: statement.Effect }
         }
 
         q.push(_upsert_and_link(opts))
 
-        # statement actions
-        statement&.Action&.each do |action|
-          action_name = action
+        # statement Resources
+        resources = [*statement.Resource]
+        resources.each do |resource|
+          # resource -> statement
+          opts = {
+            parent_node: 'AWS_IAM_POLICY_STATEMENT',
+            parent_name: statement_name,
+            child_node: 'AWS_IAM_POLICY_RESOURCE',
+            child_name: resource,
+            relationship: 'HAS_RESOURCE'
+          }
 
-          # inline policy statement node
-          q.push(_upsert({
-                           node: 'AWS_IAM_POLICY_ACTION',
-                           id: action_name
-                         }))
+          q.push(_upsert_and_link(opts))
+        end
+
+        # statement actions
+        actions = [*statement.Action]
+        actions.each do |action|
+          action_name = action
 
           # action -> statement
           opts = {
@@ -99,6 +103,24 @@ class AWSLoader::IAM < GraphDbLoader
           q.push(_upsert_and_link(opts))
         end
       end
+    end
+
+    # managed policies
+    @data&.attached_managed_policies&.each do |policy|
+      policy_name = policy.policy_name
+      policy_arn = policy.policy_arn
+
+      # policy -> user
+      opts = {
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_IAM_POLICY',
+        child_name: policy_arn,
+        relationship: 'HAS_MANAGED_POLICY',
+        relationship_attributes: { inline: false, managed: true }
+      }
+
+      q.push(_upsert_and_link(opts))
     end
 
     # TODO: map ssh_keys

@@ -37,7 +37,11 @@ class AWSLoader::ResourceLoader
       # if the individual methods try to call a non-existent field
       # returned from the AWS API. We don't want to swallow that
       # exception, so re-raise it here.
-      raise e if e.receiver.nil?
+
+      # raise e if e.receiver.nil?
+
+      # raise all
+      raise e
 
       puts "No loader defined for service: #{json.service}"
     end

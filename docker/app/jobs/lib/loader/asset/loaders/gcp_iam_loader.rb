@@ -65,7 +65,7 @@ class GCPIAMLoader < GCPLoader
 
         # Create Role if it doesn't exist
         query = """
-          MERGE (r:GCP_IAM_IAMROLE { name: \"#{role}\" })
+          MERGE (r:GCP_IAM_ROLE { name: \"#{role}\" })
           ON CREATE set r.type = 'gcp', r.last_updated = #{import_id}, r.loader_type = \"gcp\"
           ON MATCH set r.type = 'gcp', r.last_updated = #{import_id}, r.loader_type = \"gcp\"
         """
@@ -74,7 +74,7 @@ class GCPIAMLoader < GCPLoader
         # Create relationship from Identity to Role
         query = """
           MATCH (i:GCP_IDENTITY { name: \"#{member}\" })
-          MERGE (r:GCP_IAM_IAMROLE { name: \"#{role}\" })
+          MERGE (r:GCP_IAM_ROLE { name: \"#{role}\" })
           MERGE (i)-[:HAS_ACCESSVIA {resource: \"#{asset_name}\", 
             last_updated: #{import_id}, loader_type: \"gcp\" }]->(r)
         """
@@ -82,7 +82,7 @@ class GCPIAMLoader < GCPLoader
 
         # Create relationship from Role to Resource
         query = """
-          MATCH (i:GCP_IAM_IAMROLE { name: \"#{role}\" })
+          MATCH (i:GCP_IAM_ROLE { name: \"#{role}\" })
           MERGE (r:#{asset_label} { name: \"#{asset_name}\" })
           MERGE (i)-[:IS_GRANTEDTO { identity: \"#{member}\",
                                      identity_name: \"#{member_name}\",
