@@ -32,7 +32,7 @@ class K8S_CLUSTERROLEBINDING < K8sLoader
         if subject.dig('namespace') && subject.dig('kind') == 'ServiceAccount'
           # SA 
           if matches = @asset_name.match(%r{(?<base>.*\/v1\/).*})
-            sa_name = "#{matches[:base]}namespaces/#{subject.dig('namespace')}/serviceaccounts/#{subject.dig('name')}"
+            sa_name = "#{matches[:base]}#{subject.dig('namespace')}/serviceaccounts/#{subject.dig('name')}"
             supporting_relationship_with_attrs("K8S_CLUSTERROLEBINDING", @asset_name, "K8S_SERVICEACCOUNT", sa_name, "k8s.io/ServiceAccount", {}, "k8s", "HAS_RBAC_SUBJECT", {}, "left")
           end
         else
