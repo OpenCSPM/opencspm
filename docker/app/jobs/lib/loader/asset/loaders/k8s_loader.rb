@@ -19,6 +19,10 @@ class K8sLoader < AssetLoader
     return if @asset_label == "K8S_TOPNODES"
     return if @asset_label == "K8S_TOPPODS"
 
+    # These are typically dupes
+    return if @asset_name =~ /apis\/extensions\/v1beta/
+    return if @asset_name =~ /apis\/extensions\/v1alpha/
+
     if Object.const_defined?(@asset_label)
       Object.const_get(@asset_label).new(@asset, @db, @import_id)
     else
