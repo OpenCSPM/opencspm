@@ -15,6 +15,9 @@ class AWSLoader::IAM < GraphDbLoader
         policy_name = @data.policy_name
         policy_arn = @data.arn
 
+        # policy statements
+        next unless policy&.document&.respond_to?(:Statement) # document is valid JSON
+
         policy&.document&.Statement&.each_with_index do |statement, i|
           statement_name = "#{policy_arn}/statement-#{i}"
 

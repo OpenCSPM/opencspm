@@ -56,7 +56,9 @@ class AWSLoader::IAM < GraphDbLoader
       q.push(_upsert_and_link(opts))
 
       # policy statements
-      policy&.policy_document&.Statement&.each_with_index do |statement, i|
+      next unless policy&.policy_document&.respond_to?(:Statement) # document is valid JSON
+
+      policy.policy_document.Statement.each_with_index do |statement, i|
         statement_name = "#{policy_name}-#{i}"
 
         # statement -> policy
