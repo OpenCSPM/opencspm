@@ -1,8 +1,6 @@
 #
 # Load IAM assets into RedisGraph
 #
-# Each method returns an array of Cypher queries
-#
 class AWSLoader::IAM < GraphDbLoader
   def account_summary
     node = 'AWS_IAM_ACCOUNT_SUMMARY'
