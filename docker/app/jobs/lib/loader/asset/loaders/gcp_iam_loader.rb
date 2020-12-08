@@ -94,5 +94,42 @@ class GCPIAMLoader < GCPLoader
         graphquery(query)
       end
     end
+
+    # Audit configs
+    return unless iam_policy['audit_configs'].is_a?(Array)
+
+    iam_policy['audit_configs'].each do |audit_config|
+      merge_name = audit_config['service'] || "UnknownService"
+      # Create 
+      if audit_config.dig('audit_log_configs')
+        audit_config['audit_log_configs'].each do |config_item|
+          log_type = config_item['log_type'] || "UnknownLogType"
+          exempted_members = nil
+          exempted_members = config_item['exempted_members'].join(",") unless config_item['exempted_members'].nil?
+          unless exempted_members.nil?
+            query = """
+              MATCH (p:#{asset_label} { name: \"#{asset_name}\" })
+              MERGE (a:GCP_CLOUDRESOURCEMANAGER_PROJECTAUDITSERVICE { name: \"#{merge_name}\",
+                    last_updated: #{import_id}, loader_type: \"gcp\"})
+              MERGE (p)-[:HAS_AUDITCONFIG { log_type: \"#{log_type}\", 
+                    exempted_members: \"#{exempted_members}\",
+                    last_updated: #{import_id}, loader_type: \"gcp\"}]->(a)
+            """
+            graphquery(query)
+          else
+            query = """
+              MATCH (p:#{asset_label} { name: \"#{asset_name}\" })
+              MERGE (a:GCP_CLOUDRESOURCEMANAGER_PROJECTAUDITSERVICE { name: \"#{merge_name}\",
+                    last_updated: #{import_id}, loader_type: \"gcp\"})
+              MERGE (p)-[:HAS_AUDITCONFIG { log_type: \"#{log_type}\", 
+                    exempted_members: null,
+                    last_updated: #{import_id}, loader_type: \"gcp\"}]->(a)
+            """
+            graphquery(query)
+          end
+        end
+      end
+
+    end
   end
 end
