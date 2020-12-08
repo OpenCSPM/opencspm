@@ -21,7 +21,7 @@ describe('Smoke Test', () => {
   it('can see current profiles and view one', () => {
     cy.contains('Profiles').click()
     cy.url().should('include', '/profiles')
-    cy.contains('K8s Visibility').click()
+    cy.contains('All Kubernetes').click()
     cy.contains('Send to campaign')
     cy.contains(/^Control \(\d*\)/)
     cy.url().should('include', '/controls')

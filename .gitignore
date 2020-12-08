@@ -19,6 +19,7 @@ docker/log
 .bashrc
 
 # UI
+docker/ui/package-lock.json
 docker/ui/dist/*
 docker/ui/cypress/videos/*
 docker/ui/cypress/screenshots/*
