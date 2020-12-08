@@ -17,12 +17,9 @@ class K8S_ENDPOINTS < K8sLoader
       subsets.each do |subset|
         addresses = subset.dig('addresses')
         ports = subset.dig('ports')
-        cluster_service = false
-        cluster_service_dig = asset.dig('resource', 'data', 'metadata', 'labels', 'kubernetes.io/cluster-service')
-        cluster_service = cluster_service_dig.downcase == 'true' unless cluster_service_dig.nil?
 
         # "upstream" cluster service mapping
-        if cluster_service && matches = @asset_name.match(%r{(?<base>.*\/)endpoints\/(?<svcname>.*)})
+        if matches = @asset_name.match(%r{(?<base>.*\/)endpoints\/(?<svcname>.*)})
           full_svc_name = "#{matches[:base]}services/#{matches[:svcname]}"
           supporting_relationship_with_attrs("K8S_ENDPOINTS", @asset_name, "K8S_SERVICE", full_svc_name, "k8s.io/Service", {}, "k8s", "HAS_K8SENDPOINT", {}, "right")
         end
@@ -33,7 +30,7 @@ class K8S_ENDPOINTS < K8sLoader
             targettype = addr.dig('targetRef', 'kind')
             pod_name = addr.dig('targetRef', 'name')
 
-            if cluster_service && targettype == 'Pod'
+            if targettype == 'Pod'
 
               # targetref -> K8S_POD
               ports.each do |port|
