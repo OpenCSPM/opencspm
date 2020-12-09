@@ -87,8 +87,10 @@
             Remediation
           </h3>
           <div class="flex justify-between mt-2 w-full text-sm leading-5 text-gray-500">
-            <div class="pr-6">
-              <p v-html="markdown(data.remediation)"></p>
+            <div class="flex min-w-full validation-details">
+              <div class="min-w-full">
+                <p v-html="markdown(data.remediation)"></p>
+              </div>
             </div>
           </div>
           <h3 class="mt-4 text-lg leading-6 font-medium text-gray-800">

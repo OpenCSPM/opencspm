@@ -1,5 +1,6 @@
-/* Font */
+/* Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro&display=swap');
 
 /* Other styling */
 
@@ -31,6 +32,7 @@
 }
 
 /* Markdown code blocks */
+.remediation-details p,
 .validation-details p {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
@@ -39,18 +41,17 @@
 .control-modal code,
 .control-modal pre {
   font-size: 0.75rem;
-  border-radius: 0.25rem;
+  border-radius: 0.2rem;
 }
 
 .control-modal code {
   padding-left: 0.25rem;
   padding-right: 0.25rem;
-  padding-top: 0.15rem;
-  padding-bottom: 0.15rem;
-  --bg-opacity: 0.9;
-  background-color: rgba(37, 47, 63, var(--bg-opacity));
-  --text-opacity: 1;
-  color: rgba(210, 214, 220, var(--text-opacity));
+  padding-top: 0.1rem;
+  padding-bottom: 0.1rem;
+  background-color: #e0e0e0;
+  color: rgba(52, 58, 64, 1);
+  font-family: 'Source Code Pro';
 }
 
 .control-modal pre,
@@ -64,6 +65,11 @@
 
 .control-modal pre code {
   margin-left: -0.25rem;
+}
+
+.control-modal p code {
+  padding-top: 0.05rem;
+  padding-bottom: 0.05rem;
 }
 
 .control-modal ul {
