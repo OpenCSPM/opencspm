@@ -8,10 +8,6 @@ namespace :findings do
   RESULTS_FILE = '/tmp/results'.freeze
   OUTPUT_FILE = './tmp/rawfindings.json'.freeze
 
-  def run_analysis
-    AnalysisJob.new.perform(guid: guid)
-  end
-
   def generate_findings
     # we're running in the correct environment
     unless Socket.gethostname == 'worker'
@@ -77,6 +73,7 @@ namespace :findings do
 
       raw_results.push({
                          version: '4',
+                         control: cid,
                          finding: idx + 1,
                          platform: ctrl.platform,
                          category: ctrl.category,
