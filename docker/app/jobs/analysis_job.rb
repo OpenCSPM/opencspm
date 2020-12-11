@@ -33,7 +33,7 @@ class AnalysisJob < ApplicationJob
     custom_formatter = CspmFormatter.new(StringIO.new)
     custom_reporter  = RSpec::Core::Reporter.new(custom_formatter)
     options = []
-    options << Dir['controls/**/controls_spec.rb']
+    options << Dir['controls/**/controls_spec.rb'].reject { |f| f.starts_with?('controls/_') }
     options << '-fCspmFormatter'
     RSpec::Core::Runner.run(options)
 
