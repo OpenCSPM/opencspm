@@ -38,7 +38,11 @@ namespace :findings do
     end
 
     controls = []
-    raw_results = []
+    raw_results = {
+      summary: {},
+      version: '4.0.0',
+      results: []
+    }
 
     # load control packs
     Dir[PACK_BASE_DIR].each do |file|
@@ -71,38 +75,38 @@ namespace :findings do
 
       puts "Finding #{idx + 1} - #{cid}"
 
-      raw_results.push({
-                         version: '4',
-                         control: cid,
-                         finding: idx + 1,
-                         platform: ctrl.platform,
-                         category: ctrl.category,
-                         resource: ctrl.resource,
-                         title: ctrl.title,
-                         description: ctrl.description,
-                         validation: ctrl.validation,
-                         remediation: ctrl.remediation,
-                         severity: ctrl.impact ? ctrl.impact / 10.0 : 0.999,
-                         effort: ctrl.effort ? ctrl.effort / 10.0 : 0.999,
-                         resources: result['resources'].map do |r|
-                                      {
-                                        resource: r['name'],
-                                        status: r['status']
-                                      }
-                                    end,
-                         references: ctrl.refs.map do |r|
-                                       {
-                                         text: r.text,
-                                         url: r.url,
-                                         ref: 'link'
-                                       }
-                                     end,
-                         result: {
-                           status: result['resources'].filter { |r| r['status'] == 'failed' }.length > 0 ? 'failed' : 'passed',
-                           passed: result['resources'].filter { |r| r['status'] == 'passed' }.count,
-                           total: result['resources'].count
-                         }
-                       })
+      raw_results[:results].push({
+                                   version: '4',
+                                   control: cid,
+                                   finding: idx + 1,
+                                   platform: ctrl.platform,
+                                   category: ctrl.category,
+                                   resource: ctrl.resource,
+                                   title: ctrl.title,
+                                   description: ctrl.description,
+                                   validation: ctrl.validation,
+                                   remediation: ctrl.remediation,
+                                   severity: ctrl.impact ? ctrl.impact / 10.0 : 0.999,
+                                   effort: ctrl.effort ? ctrl.effort / 10.0 : 0.999,
+                                   resources: result['resources'].map do |r|
+                                                {
+                                                  resource: r['name'],
+                                                  status: r['status']
+                                                }
+                                              end,
+                                   references: ctrl.refs.map do |r|
+                                                 {
+                                                   text: r.text,
+                                                   url: r.url,
+                                                   ref: 'link'
+                                                 }
+                                               end,
+                                   result: {
+                                     status: result['resources'].filter { |r| r['status'] == 'failed' }.length > 0 ? 'failed' : 'passed',
+                                     passed: result['resources'].filter { |r| r['status'] == 'passed' }.count,
+                                     total: result['resources'].count
+                                   }
+                                 })
     end
 
     # write raw findings
