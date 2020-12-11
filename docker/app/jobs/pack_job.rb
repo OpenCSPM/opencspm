@@ -11,7 +11,7 @@ class PackJob < ApplicationJob
   def perform
     logger.info('Control pack import job started')
 
-    Dir['controls/**/config.yaml'].each do |file|
+    Dir[PACK_BASE_DIR].each do |file|
       # skip directories prefixed with an underscore (e.g. test/dev controls)
       next if file.starts_with?('controls/_')
 
