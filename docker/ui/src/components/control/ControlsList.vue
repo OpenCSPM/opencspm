@@ -39,13 +39,14 @@
                          @click="openModal(control.id)">
                       {{ control.title }}
                     </div>
-                    <div class="mt-2 flex items-center space-x-4">
-                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium leading-4 bg-gray-100 text-gray-600"
+                    <div class="flex items-center space-x-4">
+                      <span class="mt-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium leading-4 bg-gray-100 text-gray-600"
                             @click="openModal(control.id)">
                         {{ control.control_id }}
                       </span>
-                      <div class="invisible group-hover:visible">
-                        <Tag v-for="(tag, idx) in control.tag_map.filter(t => t.primary).sort((a,b) => a.tag.length - b.tag.length).slice(0,10)"
+                      <div class="flex flex-wrap space-y-2 invisible group-hover:visible">
+                        <div></div>
+                        <Tag v-for="(tag, idx) in control.tag_map.filter(t => t.primary).sort((a,b) => a.tag.length - b.tag.length).slice(0,5)"
                              :key="idx"
                              :tag="tag.tag"
                              action="add"
