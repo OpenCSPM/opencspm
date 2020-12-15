@@ -33,16 +33,20 @@ class GCP_COMPUTE_FORWARDINGRULE < GCPLoader
     """
     graphquery(query)
 
-    # Relationships to target
-    compute_target_name = compute_url_to_compute_name(target)
-    query = """
-      MATCH (f:#{@asset_label} { name: \"#{@asset_name}\" })
-      MERGE (t:GCP_COMPUTE_TARGETPOOL { name: \"#{compute_target_name}\" })
-      ON CREATE SET t.asset_type = \"compute.googleapis.com/TargetPool\", t.last_updated = #{@import_id}, t.loader_type = \"gcp\"
-      ON MATCH SET t.asset_type = \"compute.googleapis.com/TargetPool\", t.last_updated = #{@import_id}, t.loader_type = \"gcp\"
-      MERGE (f)-[:HAS_TARGET]->(t)
-    """
-    graphquery(query)
+    unless target.empty?
+      # Relationships to target
+      compute_target_name = compute_url_to_compute_name(target)
+      query = """
+        MATCH (f:#{@asset_label} { name: \"#{@asset_name}\" })
+        MERGE (t:GCP_COMPUTE_TARGETPOOL { name: \"#{compute_target_name}\" })
+        ON CREATE SET t.asset_type = \"compute.googleapis.com/TargetPool\", t.last_updated = #{@import_id}, t.loader_type = \"gcp\"
+        ON MATCH SET t.asset_type = \"compute.googleapis.com/TargetPool\", t.last_updated = #{@import_id}, t.loader_type = \"gcp\"
+        MERGE (f)-[:HAS_TARGET]->(t)
+      """
+      graphquery(query)
+    else
+      # TODO: Backend Service
+    end
 
     # Relationships to region
     query = """
