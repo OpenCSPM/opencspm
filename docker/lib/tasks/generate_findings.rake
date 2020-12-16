@@ -1,26 +1,26 @@
+# frozen_string_literal: true
+
 namespace :findings do
   desc 'Generate Darkbit findings.json - run from [worker]'
   task generate: :environment do
+    check_environment
+    prepare_jobs
     generate_findings
   end
 
-  PACK_BASE_DIR = 'controls/**/config.yaml'.freeze
-  RESULTS_FILE = '/tmp/results'.freeze
-  OUTPUT_FILE = './tmp/rawfindings.json'.freeze
+  PACK_BASE_DIR = 'controls/**/config.yaml'
+  RESULTS_FILE = '/tmp/results'
+  OUTPUT_FILE = './tmp/rawfindings.json'
+  @results = []
 
-  def generate_findings
-    # we're running in the correct environment
+  # check that we're running in the correct environment
+  def check_environment
+    puts 'Checking environment...'
+
     unless Socket.gethostname == 'worker'
       puts "\n[ERROR] - I need to run on the \x1b[32m[worker]\x1b[0m container.\n"
       exit 1
     end
-
-    # force an analysis job (kill any running jobs, or ours won't run)
-    Job.running.map { |j| j.complete! }
-    guid = "manual-#{Digest::UUID.uuid_v5(Digest::UUID::OID_NAMESPACE, Time.now.utc.to_s)}"
-    puts 'Starting analysis job...'
-    AnalysisJob.new.perform(guid: guid)
-    Job.running.map { |j| j.complete! }
 
     # result file is present
     unless File.exist?(RESULTS_FILE)
@@ -29,13 +29,29 @@ namespace :findings do
       exit 1
     end
 
+    @results = JSON.parse(File.read(RESULTS_FILE))
+
     # results file parsed with non-zero count
-    results = JSON.parse(File.read(RESULTS_FILE))
-    unless results.count > 0
-      puts "\n[ERROR] - zero results found\n"
-      puts "Did you run \x1b[35mbundle exec rails batch:import\x1b[0m first?"
-      exit 1
-    end
+    return if @results.count.positive?
+
+    puts "\n[ERROR] - zero results found\n"
+    puts "Did you run \x1b[35mbundle exec rails batch:import\x1b[0m first?"
+    exit 1
+  end
+
+  # force an analysis job (kill any running jobs, or ours won't run)
+  def prepare_jobs
+    puts 'Preparing jobs...'
+
+    Job.running.map(&:complete!)
+    guid = "manual-#{Digest::UUID.uuid_v5(Digest::UUID::OID_NAMESPACE, Time.now.utc.to_s)}"
+    puts 'Starting analysis job...'
+    AnalysisJob.new.perform(guid: guid)
+    Job.running.map(&:complete!)
+  end
+
+  def generate_findings
+    puts 'Generating findings...'
 
     controls = []
     raw_results = {
@@ -48,21 +64,21 @@ namespace :findings do
     Dir[PACK_BASE_DIR].each do |file|
       next if file.starts_with?('controls/_')
 
-      controls.push(JSON.parse(YAML.load(File.read(file)).to_json, object_class: OpenStruct).controls)
+      controls.push(JSON.parse(YAML.safe_load(File.read(file)).to_json, object_class: OpenStruct).controls)
     end
 
     # flatten
     controls = controls.flatten
 
     # controls parsed with non-zero count
-    unless controls.count > 0
+    unless controls.count.positive?
       puts "\n[ERROR] - zero controls found\n"
       puts "Did you enable any \x1b[35mcontrol packs\x1b[0m?"
       exit 1
     end
 
     # iterate over results, push onto raw_results
-    results.each_with_index do |result, idx|
+    @results.each_with_index do |result, idx|
       cid = result['control_id']
       ctrl = controls.find { |c| c.id == cid }
 
@@ -102,7 +118,7 @@ namespace :findings do
                                                  }
                                                end,
                                    result: {
-                                     status: result['resources'].filter { |r| r['status'] == 'failed' }.length > 0 ? 'failed' : 'passed',
+                                     status: result['resources'].filter { |r| r['status'] == 'failed' }.length.positive? ? 'failed' : 'passed',
                                      passed: result['resources'].filter { |r| r['status'] == 'passed' }.count,
                                      total: result['resources'].count
                                    }
