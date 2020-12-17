@@ -45,6 +45,3 @@ jobs:
             971395506693.dkr.ecr.us-east-1.amazonaws.com/opencspm/engine:latest
             gcr.io/opencspm/engine:${{ env.VERSION_TAG  }}
             gcr.io/opencspm/engine:latest
-      - name: Cleanup (gcr)
-        run: |
-          for DIGEST in $(gcloud container images list-tags gcr.io/opencspm/engine --filter='-tags:*' --format='get(digest)' --limit=unlimited); do gcloud container images delete --quiet gcr.io/opencspm/engine@${DIGEST}; done
