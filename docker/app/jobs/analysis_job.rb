@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'pry'
 require 'rspec'
 require 'rspec/core'
@@ -14,7 +16,7 @@ class AnalysisJob < ApplicationJob
   TYPE = :analyze
 
   def perform(args)
-    unless args.has_key?(:guid)
+    unless args.key?(:guid)
       logger.info 'Analysis job not running without a GUID.'
       return nil
     end
@@ -31,7 +33,8 @@ class AnalysisJob < ApplicationJob
     RSpec.clear_examples
 
     custom_formatter = CspmFormatter.new(StringIO.new)
-    custom_reporter  = RSpec::Core::Reporter.new(custom_formatter)
+    RSpec::Core::Reporter.new(custom_formatter)
+
     options = []
     options << Dir['controls/**/controls_spec.rb'].reject { |f| f.starts_with?('controls/_') }
     options << '-fCspmFormatter'

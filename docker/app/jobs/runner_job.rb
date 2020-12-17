@@ -1,9 +1,14 @@
+# frozen_string_literal: true
+
+#
+# Wrapper for LoaderJob and AnalysisJob
+#
 class RunnerJob < ApplicationJob
   queue_as :default
   # not supported by sidekiq-cron
   # sidekiq_options retry: 5
 
-  RESULTS_FILE = '/tmp/results'.freeze
+  RESULTS_FILE = '/tmp/results'
   TYPE = :run
 
   def perform
@@ -51,18 +56,16 @@ class RunnerJob < ApplicationJob
 
     results = JSON.parse(File.read(RESULTS_FILE), object_class: OpenStruct)
 
-    # controls = Control.all
-
     results.each do |result|
       control = Control.find_by(control_pack: result.control_pack, control_id: result.control_id)
 
       next unless control
 
-      resources_failed = result&.resources&.filter { |r| r.status == 'failed' }.length
+      resources_failed = result&.resources&.filter { |r| r.status == 'failed' }&.length.to_i
       resources_total = result&.resources&.length
 
       result_hash = {
-        status: resources_failed > 0 ? -1 : 1,
+        status: resources_failed.positive? ? -1 : 1,
         resources_failed: resources_failed,
         resources_total: resources_total
       }
@@ -79,7 +82,7 @@ class RunnerJob < ApplicationJob
       #
       # Find or create nested resources for the control
       #
-      result&.resources.each do |r|
+      result&.resources&.each do |r|
         resource = Resource.find_or_create_by({ name: r.name })
         new_result.issues.create(resource: resource, status: r.status)
       end
