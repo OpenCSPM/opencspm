@@ -12,3 +12,17 @@ Layout/LineLength:
   Max: 100
 Style/FrozenStringLiteralComment:
   EnforcedStyle: always_true
+  Safe: true
+  SafeAutoCorrect: true
+Style/ClassAndModuleChildren:
+  Enabled: false
+Metrics/BlockLength:
+  Enabled: false
+Metrics/MethodLength:
+  Enabled: false
+Metrics/PerceivedComplexity:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Enabled: false
+Metrics/AbcSize:
+  Enabled: false
