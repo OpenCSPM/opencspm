@@ -9,6 +9,9 @@ require_relative 'spec/support/db_helper'
 require_relative 'spec/support/redisgraph_helper'
 require 'json'
 
+#
+# Runs all RSpec controls against current graph database
+#
 class AnalysisJob < ApplicationJob
   queue_as :default
   attr_accessor :output_hash
