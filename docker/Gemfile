@@ -35,7 +35,7 @@ group :development do
   gem 'spring-watcher-listen', '~> 2.0.0'
 
   # app gems
-  gem 'solargraph', '~> 0.39.15'
+  gem 'solargraph', '~> 0.40.0'
   gem 'rubocop', '~> 0.90.0'
   gem 'better_errors', '~> 2.7'
   gem 'binding_of_caller', '~> 0.8.0'
