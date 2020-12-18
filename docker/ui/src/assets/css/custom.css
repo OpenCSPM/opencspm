@@ -38,6 +38,12 @@
   margin-bottom: 0.5rem;
 }
 
+.remediation-details p a,
+.validation-details p a {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
 .control-modal code,
 .control-modal pre {
   font-size: 0.75rem;
