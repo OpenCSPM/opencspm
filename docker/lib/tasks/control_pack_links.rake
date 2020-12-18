@@ -19,7 +19,11 @@ namespace :packs do
 
       puts file
 
-      controls.push(JSON.parse(YAML.safe_load(File.read(file)).to_json, object_class: OpenStruct).controls)
+      controls.push(
+        JSON.parse(
+          YAML.safe_load(File.read(file)).to_json, object_class: OpenStruct
+        ).controls
+      )
     end
 
     # flatten
