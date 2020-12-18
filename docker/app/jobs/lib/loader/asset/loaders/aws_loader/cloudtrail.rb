@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Load CloudTrail assets into RedisGraph
 #
