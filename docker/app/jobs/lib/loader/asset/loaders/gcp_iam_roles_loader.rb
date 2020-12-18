@@ -35,6 +35,7 @@ class GCPIAMRolesLoader < GCPLoader
     when /list$/ then perm_score = 5
     when /create$/ then perm_score = 50
     when /delete$/ then perm_score = 100
+    when /setIamPolicy$/ then perm_score = 500
     when /actAs$/ then perm_score = 500
     end
     perm_score
