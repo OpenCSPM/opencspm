@@ -48,7 +48,7 @@ class GCP_CONTAINER_CLUSTER < GCPLoader
     graphquery(query)
 
     # Subnetwork
-    compute_subnetwork_name = compute_url_to_compute_name(subnetwork)
+    compute_subnetwork_name = "compute.googleapis.com/#{subnetwork}"
     query = """
       MATCH (c:#{@asset_label} { name: \"#{@asset_name}\" })
       MERGE (a:GCP_COMPUTE_SUBNETWORK { name: \"#{compute_subnetwork_name}\" })
