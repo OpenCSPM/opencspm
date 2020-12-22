@@ -3,6 +3,7 @@
 require 'config/config_loader'
 require 'fetcher/file_fetcher'
 require 'loader/file_loader'
+require 'redis'
 
 # Handles the batch import process by loading the config,
 # fetching the files, and dispatching them to the loader
@@ -17,17 +18,20 @@ class BatchImporter
   # Fetch the remote bucket and local_dir files to a local
   # temp directory, and send the db connection info and an
   # array of files to the asset loader
+  # Save redis contents to disk when done
   def import
     puts "Fetching files from remote buckets and local directories"
     files_to_load = FileFetcher.new(@load_config).fetch
-    FileLoader.new(get_db_config(@load_config), files_to_load)
+    db_options = get_db_options(@load_config)
+    FileLoader.new(db_options, files_to_load)
+    Redis.new(db_options.to_h).call("save")
   end
 
   private
 
   # Return a default db conn config or what is configured
   # in the load_config under "db"
-  def get_db_config(load_config)
+  def get_db_options(load_config)
     unless load_config.respond_to?(:db)
       db_hash = { 'url' => 'redis://localhost:6379' }
       return OpenStruct.new(db_hash)
