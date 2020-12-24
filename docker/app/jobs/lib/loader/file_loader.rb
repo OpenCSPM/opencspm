@@ -1,16 +1,16 @@
 # frozen-string-literal: true
 
-require 'validator/cai'
 require 'loader/asset/asset_router'
 require 'redisgraph'
 require 'db/redisgraph'
 require 'loader/misc/post_loader'
+require 'fast_jsonparser'
+require 'parallel'
 
 # Given an array of files, for each file, for each
 # line, validates the line as jsonlines, determines
 # asset type, and dispatches to the proper loader
 class FileLoader
-  include Validator::CAI
   include GraphDB::DB
 
   attr_accessor :db_config, :files_to_load
@@ -40,20 +40,23 @@ class FileLoader
   # format.  Send to asset router
   def loop_over_asset_lines(file_name)
     puts "Loading #{file_name}"
-    IO.foreach(file_name) do |line|
-      asset_json = parse_json_line(line)
-
-      # TEMP DEBUG - AWS only
-      # if (%w[account service region resource] - asset_json.keys).empty?
-      #   AssetRouter.new(asset_json, @import_id, @db)
-      # end
-
-      # skip validation for AWS Recon JSON
-      if (%w[account service region resource] - asset_json.keys).empty? || validate_schema(asset_json)
-        AssetRouter.new(asset_json, @import_id, @db)
+    batch_size = 50000
+    File.open(file_name) do |file|
+      file.each_slice(batch_size) do |lines|
+        Parallel.each(lines, in_processes: 8) do |line|
+          asset_json = FastJsonparser.parse(line, symbolize_keys: false)
+          if (%w[account service region resource] - asset_json.keys).empty? || validate_schema(asset_json)
+            AssetRouter.new(asset_json, @import_id, @db)
+          end
+        end
       end
     end
     puts ''
     puts "Done loading #{file_name}"
+  end
+
+  def validate_schema(asset_json)
+    return true if asset_json.dig('name') && asset_json.dig('asset_type')
+    return false
   end
 end

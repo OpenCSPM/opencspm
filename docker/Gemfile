@@ -28,6 +28,7 @@ gem 'lograge', '~> 0.11.2'
 gem 'rspec', '~> 3.9'
 gem 'addressable', '~> 2.7'
 gem 'json_schemer', '~> 0.2.15'
+gem 'fast_jsonparser', '~> 0.5'
 gem 'pry', '~> 0.13.1'
 
 group :development do
