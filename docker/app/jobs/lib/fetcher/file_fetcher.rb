@@ -48,6 +48,6 @@ class FileFetcher
 
   # Return list of files from local dir
   def load_dir_json_files
-    Dir["#{@load_dir}/*.json"]
+    Dir["#{@load_dir}/combined_for_load.json"]
   end
 end
