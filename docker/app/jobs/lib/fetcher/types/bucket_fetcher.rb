@@ -36,20 +36,13 @@ class BucketFetcher
     latest_files.each do |cai_file|
        cai_file = cai_file.chomp
        file = bucket.file cai_file
-       dest_file_name = randomize_file_name(File.basename(cai_file))
-       puts "Downloading #{bucket.name}/#{cai_file} to #{@load_dir}/#{dest_file_name}"
-       file.download "#{@load_dir}/#{dest_file_name}"
+       dest_file_path = "#{@load_dir}/combined_for_load.json"
+       puts "Appending #{bucket.name}/#{cai_file} to #{dest_file_path}"
+       downloaded = file.download
+       downloaded.rewind
+       file_data = downloaded.read
+       File.write(dest_file_path, file_data, mode: "a")
     end
-  end
-
-  def randomize_file_name(file_name)
-    # tmp-asdf23fwhj-myfilename.json
-    "tmp-#{generate_code(8)}-#{file_name.chomp}"
-  end
-
-  def generate_code(number)
-    charset = Array('A'..'Z') + Array('a'..'z')
-    Array.new(number) { charset.sample }.join
   end
 
   def fetch_bucket(bucket_name)

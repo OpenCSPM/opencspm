@@ -20,7 +20,7 @@ class AssetLoader
   end
 
   def graphquery(query, _params = {})
-    print '.'
+    #print '.'
     begin 
       @db.query(query)
     rescue RedisGraph::QueryError => e
@@ -50,7 +50,7 @@ class AssetLoader
 
   def prepare_properties(asset)
     # rubocop:disable Layout/LineLength
-    asset.flatten_with_path.tap { |hs| hs.delete('name') }.tap { |hs| hs.delete('asset_type') }.first(300).map { |h| "a.#{h[0]} = \"#{h[1].to_s.slice(0..500).gsub(/\"/, '\\"').gsub(/\n/,'\n')}\"" }.join ",\n"
+    asset.flatten_with_path.tap { |hs| hs.delete('name') }.tap { |hs| hs.delete('asset_type') }.first(300).map { |h| "a.#{h[0]} = \"#{h[1].to_s.slice(0..500).gsub(/\"/, '\\"').gsub(/\\\\"/, '\\"').gsub(/\n/,'\n')}\"" }.join ",\n"
     # rubocop:enable Layout/LineLength
   end
 

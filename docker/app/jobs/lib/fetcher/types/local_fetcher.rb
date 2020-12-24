@@ -16,26 +16,15 @@ class LocalFetcher
         begin
           File.readlines(manifest_file).each do |cai_file|
             source_file_path = "#{manifest_base_dir}/#{cai_file}".chomp
-            dest_file_path = "#{@load_dir}/#{randomize_file_name(cai_file)}"
-            puts "Copying from #{source_file_path} to #{dest_file_path}" 
-            FileUtils.cp(source_file_path, dest_file_path)
+            file_data = File.read(source_file_path)
+            dest_file_path = "#{@load_dir}/combined_for_load.json"
+            puts "Appending #{source_file_path} to #{dest_file_path}" 
+            File.write(dest_file_path, file_data, mode: "a")
           end
         rescue => e
           puts e.inspect
         end
       end
     end
-  end
-
-  private
-
-  def randomize_file_name(file_name)
-    # tmp-asdf23fwhj-myfilename.json
-    "tmp-#{generate_code(8)}-#{file_name.chomp}"
-  end
-
-  def generate_code(number)
-    charset = Array('A'..'Z') + Array('a'..'z')
-    Array.new(number) { charset.sample }.join
   end
 end
