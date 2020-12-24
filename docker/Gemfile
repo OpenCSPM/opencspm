@@ -15,6 +15,7 @@ gem 'redis', '~> 4.2'
 gem 'redisgraph', '~> 2.0'
 gem 'sidekiq', '~> 6.1'
 gem 'sidekiq-cron', '~> 1.2'
+gem 'parallel', '~> 1.20'
 gem 'fast_jsonapi', '~> 1.5'
 gem 'recursive-open-struct', '~> 1.1'
 gem 'pundit', '~> 2.1'
@@ -36,19 +37,19 @@ group :development do
   gem 'spring-watcher-listen', '~> 2.0.0'
 
   # app gems
-  gem 'solargraph', '~> 0.40.0'
-  gem 'rubocop', '~> 0.90.0'
-  gem 'better_errors', '~> 2.7'
-  gem 'binding_of_caller', '~> 0.8.0'
   gem 'awesome_print', '~> 1.8'
+  gem 'solargraph', '~> 0.40.0'
+  gem 'better_errors', '~> 2.7'
+  gem 'rubocop', '~> 0.90.0'
+  gem 'binding_of_caller', '~> 0.8.0'
 end
 
 group :development, :test do
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
 
   # app gems
-  gem 'rspec-rails', '~> 4.0'
-  gem 'factory_bot_rails', '~> 6.1'
-  gem 'ruby-debug-ide', '~> 0.7.2'
   gem 'debase', '~> 0.2.4'
+  gem 'factory_bot_rails', '~> 6.1'
+  gem 'rspec-rails', '~> 4.0'
+  gem 'ruby-debug-ide', '~> 0.7.2'
 end
