@@ -377,6 +377,7 @@ DEPENDENCIES
   omniauth (~> 1.9)
   omniauth-github (~> 1.4)
   omniauth-google-oauth2 (~> 0.8.0)
+  parallel (~> 1.20)
   pg (>= 0.18, < 2.0)
   pry (~> 0.13.1)
   puma (~> 4.1)
