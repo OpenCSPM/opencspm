@@ -147,12 +147,12 @@ class GCP_COMPUTE_FIREWALL < GCPLoader
           MATCH (f:#{@asset_label} { name: \"#{@asset_name}\" })
           MERGE (a:GCP_IDENTITY { name: \"serviceAccount:#{sa_name}\" })
           ON CREATE SET a.asset_type = \"iam.googleapis.com/ServiceAccount\",
-                        a.member_name = #{sa_name},
+                        a.member_name = \"#{sa_name}\",
                         a.member_type = \"serviceAccount\",
                         a.last_updated = #{@import_id},
                         a.loader_type = \"gcp\"
           ON MATCH SET  a.asset_type = \"iam.googleapis.com/ServiceAccount\",
-                        a.member_name = #{sa_name},
+                        a.member_name = \"#{sa_name}\",
                         a.member_type = \"serviceAccount\",
                         a.last_updated = #{@import_id},
                         a.loader_type = \"gcp\"
@@ -168,12 +168,12 @@ class GCP_COMPUTE_FIREWALL < GCPLoader
           MATCH (f:#{@asset_label} { name: \"#{@asset_name}\" })
           MERGE (a:GCP_IDENTITY { name: \"serviceAccount:#{sa_name}\" })
           ON CREATE SET a.asset_type = \"iam.googleapis.com/ServiceAccount\",
-                        a.member_name = #{sa_name},
+                        a.member_name = \"#{sa_name}\",
                         a.member_type = \"serviceAccount\",
                         a.last_updated = #{@import_id},
                         a.loader_type = \"gcp\"
           ON MATCH SET  a.asset_type = \"iam.googleapis.com/ServiceAccount\",
-                        a.member_name = #{sa_name},
+                        a.member_name = \"#{sa_name}\",
                         a.member_type = \"serviceAccount\",
                         a.last_updated = #{@import_id},
                         a.loader_type = \"gcp\"
