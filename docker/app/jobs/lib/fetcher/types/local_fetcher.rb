@@ -8,9 +8,10 @@ class LocalFetcher
 
   def fetch
     puts @local_dirs
-    # Enumerate **/*manifest.txt
+    # Enumerate **/*manifest.txt and /*manifest.txt
     @local_dirs.each do |local_dir|
-      Dir["#{local_dir}/*/*manifest.txt"].each do |manifest_file|
+       dirs = Dir["#{local_dir}/*/*manifest.txt"] + Dir["#{local_dir}/*manifest.txt"]
+       dirs.each do |manifest_file|
         manifest_base_dir = File.dirname(manifest_file)
         cai_files = []
         begin
