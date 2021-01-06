@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Load EC2 assets into RedisGraph
 #
@@ -12,10 +14,11 @@
 class AWSLoader::EC2 < GraphDbLoader
   def account
     node = 'AWS_EC2_ACCOUNT'
+    name = "account-#{@account}" # AWS account doesn't have an ARN
     q = []
 
     # account node
-    q.push(_upsert({ node: node, id: @name }))
+    q.push(_upsert({ node: node, id: name }))
   end
 
   #
