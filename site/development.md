@@ -35,7 +35,8 @@ Launch IDE from within `docker` directory:
 
 ### Launch Full Environment
 
-To just run the full environment locally, run `docker-compose up` from within the `docker` directory. The initial run will take several minutes - at roughly 1 minute to build the Docker image, roughly 2 more minutes to install all Ruby gems (`core` container) and JavaScript packages (`ui` container).
+To just run the full environment locally, run `docker-compose -f docker-compose-development.yml up` from within the `docker` directory. The initial run will take several minutes - at roughly 1 minute to build the Docker image, roughly 2 more minutes to install all Ruby gems (`core` container) and JavaScript packages (`ui` container).
+ 
 
 Most of the console output won't be visible while the initial build is happening, though you can view status in the Docker Desktop dashboard or with `docker-compose logs`. 
 
@@ -68,6 +69,13 @@ worker_1    | 2020-10-08T19:10:01.284Z pid=1 tid=gnzrya5pl INFO: See LICENSE and
 worker_1    | 2020-10-08T19:10:01.284Z pid=1 tid=gnzrya5pl INFO: Upgrade to Sidekiq Pro for more features and support: https://sidekiq.org
 worker_1    | 2020-10-08T19:10:01.284Z pid=1 tid=gnzrya5pl INFO: Starting processing, hit Ctrl-C to stop
 ```
+As such if there are errors in the `worker` container such as:
+```
+worker_1    | bundler: command not found: sidekiq
+worker_1    | Install missing gem executables with `bundle install`
+opencspm_worker_1 exited with code 127
+```
+Just wait for the `core` container to finish initializing.
 
 ### Application URLs & Endpoints
 
@@ -77,6 +85,12 @@ worker_1    | 2020-10-08T19:10:01.284Z pid=1 tid=gnzrya5pl INFO: Starting proces
 * Redis Insight UI: http://localhost:8001
 
 ### Development Environment Details
+
+To re-deploy and re-build the Docker images 
+```console
+$ cd docker
+$ docker-compose -f docker-compose-development.yml up --build
+```
 
 To build or re-build the Docker image, use `docker-compose build`.
 
