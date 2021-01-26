@@ -21,7 +21,8 @@ class AWSLoader::S3 < GraphDbLoader
         data: {
           owner_display_name: @data&.acl&.owner&.display_name,
           owner_id: @data&.acl&.owner&.id,
-          is_public: @data&.public&.is_public || false
+          is_public: @data&.public&.is_public || false,
+          is_encrypted_at_rest: @data&.encryption&.rules&.count&.positive? || false
         }
       }
 
