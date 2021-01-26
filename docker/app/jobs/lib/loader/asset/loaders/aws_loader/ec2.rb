@@ -306,7 +306,7 @@ class AWSLoader::EC2 < GraphDbLoader
   end
 
   def volume
-    node = 'AWS_VOLUME'
+    node = 'AWS_EBS_VOLUME'
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
