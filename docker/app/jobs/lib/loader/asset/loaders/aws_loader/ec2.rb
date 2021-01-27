@@ -326,4 +326,12 @@ class AWSLoader::EC2 < GraphDbLoader
 
     q.push(_upsert({ node: node, id: @name }))
   end
+
+  def ebs_encryption_settings
+    node = 'AWS_EBS_ENCRYPTION_SETTINGS'
+    name = "#{@region}-#{@account}"
+    q = []
+
+    q.push(_upsert({ node: node, id: name }))
+  end
 end
