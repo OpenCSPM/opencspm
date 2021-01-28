@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Load ConfigService assets into RedisGraph
 #
@@ -29,7 +31,11 @@ class AWSLoader::ConfigService < GraphDbLoader
     q = []
 
     # configuration_recorder node
-    q.push(_upsert({ node: node, id: @name }))
+    q.push(_upsert({
+                     node: node,
+                     id: @name,
+                     data: {}.merge(@data.recording_group.to_h).merge(@data.status.to_h)
+                   }))
 
     q
   end
