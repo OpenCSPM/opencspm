@@ -25,6 +25,41 @@ class AWSLoader::CloudTrail < GraphDbLoader
       q.push(_append(opts))
     end
 
+    @data&.event_selectors&.event_selectors&.each_with_index do |es, i|
+      # trail -> event_selector
+      opts = {
+        parent_node: 'AWS_CLOUDTRAIL_TRAIL',
+        parent_name: @name,
+        child_node: 'AWS_CLOUDTRAIL_EVENT_SELECTOR',
+        child_name: "#{@name}/event_selector_#{i}",
+        relationship: 'HAS_EVENT_SELECTOR',
+        relationship_attributes: {
+          read_write_type: es.read_write_type,
+          include_management_events: es.include_management_events
+        },
+        headless: true
+      }
+
+      q.push(_upsert_and_link(opts))
+
+      es&.data_resources&.each do |dr|
+        [*dr.values].each do |v|
+          # event_selector -> data_resource
+          opts = {
+            parent_node: 'AWS_CLOUDTRAIL_EVENT_SELECTOR',
+            parent_name: "#{@name}/event_selector_#{i}",
+            child_node: 'AWS_CLOUDTRAIL_DATA_RESOURCE',
+            child_name: v,
+            relationship: 'HAS_DATA_RESOURCE',
+            relationship_attributes: { type: dr.type },
+            headless: true
+          }
+
+          q.push(_upsert_and_link(opts))
+        end
+      end
+    end
+
     q
   end
 end
