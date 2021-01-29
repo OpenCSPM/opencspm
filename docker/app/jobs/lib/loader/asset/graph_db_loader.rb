@@ -77,7 +77,7 @@ class GraphDbLoader
     %(
       MATCH (from:#{o.from_node}),(to:#{o.to_node})
       WHERE from.name = '#{o.from_name}' AND to.name = '#{o.to_name}'
-      CREATE (from)-[r:#{o.relationship} { last_updated: #{@last_updated} }]->(to)
+      MERGE (from)-[:#{_relationship_attrs(o)}]->(to)
     )
   end
 
