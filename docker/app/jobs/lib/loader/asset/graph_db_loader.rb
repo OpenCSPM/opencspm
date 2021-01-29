@@ -78,7 +78,7 @@ class GraphDbLoader
       MATCH (from:#{o.from_node}),(to:#{o.to_node})
       WHERE from.name = '#{o.from_name}' AND to.name = '#{o.to_name}'
       MERGE (from)-[:#{_relationship_attrs(o)}]->(to)
-    )
+    ).strip
   end
 
   #
@@ -97,7 +97,7 @@ class GraphDbLoader
       MERGE (n:#{o.node} { name: '#{o.id}' })
       ON CREATE SET #{_base_attrs(o, 'n')}
       ON MATCH SET #{_base_attrs(o, 'n')}
-    )
+    ).strip
   end
 
   #

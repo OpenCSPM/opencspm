@@ -202,14 +202,23 @@ class AWSLoader::EC2 < GraphDbLoader
     # security_groups and relationship
     @data.groups.each do |sg|
       opts = {
-        parent_node: node,
-        parent_name: @name,
-        child_node: 'AWS_SECURITY_GROUP',
-        child_name: sg.group_id,
-        relationship: 'IN_SECURITY_GROUP'
+        node: 'AWS_SECURITY_GROUP',
+        id: sg.group_id,
+        headless: true
       }
 
-      q.push(_upsert_and_link(opts))
+      q.push(_merge(opts))
+
+      # network_interface -> security_group
+      opts = {
+        from_node: 'AWS_NETWORK_INTERFACE',
+        from_name: @name,
+        to_node: 'AWS_SECURITY_GROUP',
+        to_name: sg.group_id,
+        relationship: 'IN_SECURITY_GROUP',
+        headless: true
+      }
+      q.push(_link(opts))
     end
 
     q
