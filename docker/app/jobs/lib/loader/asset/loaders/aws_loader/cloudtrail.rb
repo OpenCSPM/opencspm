@@ -25,6 +25,32 @@ class AWSLoader::CloudTrail < GraphDbLoader
       q.push(_append(opts))
     end
 
+    # s3 logging bucket
+    #
+    # note: multi-region trails will create multiple relationships,
+    # one per region; this is expected
+    if @data.s3_bucket_name
+      bucket = "arn:aws:s3:::#{@data.s3_bucket_name}"
+
+      opts = {
+        node: 'AWS_S3_BUCKET',
+        id: bucket
+      }
+
+      q.push(_merge(opts))
+
+      # trail -> s3_bucket
+      opts = {
+        from_node: 'AWS_CLOUDTRAIL_TRAIL',
+        from_name: @name,
+        to_node: 'AWS_S3_BUCKET',
+        to_name: bucket,
+        relationship: 'LOGS_TO_BUCKET'
+      }
+
+      q.push(_link(opts))
+    end
+
     @data&.event_selectors&.event_selectors&.each_with_index do |es, i|
       # trail -> event_selector
       opts = {
