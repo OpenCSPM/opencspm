@@ -77,25 +77,25 @@ class AWSLoader::S3 < GraphDbLoader
           }
 
           q.push(_upsert_and_link(opts))
-        end
 
-        # statement Actions
-        actions = [*statement.Action]
-        actions.each do |action|
-          action_name = action
+          # statement Actions
+          actions = [*statement.Action]
+          actions.each do |action|
+            action_name = action
 
-          # action -> statement
-          opts = {
-            parent_node: 'AWS_S3_BUCKET_POLICY_STATEMENT',
-            parent_name: statement_name,
-            child_node: 'AWS_S3_BUCKET_POLICY_ACTION',
-            child_name: action_name,
-            relationship: 'HAS_ACTION',
-            relationship_attributes: { effect: statement.Effect },
-            headless: true
-          }
+            # action -> statement
+            opts = {
+              from_node: 'AWS_S3_BUCKET_POLICY_STATEMENT',
+              from_name: statement_name,
+              to_node: 'AWS_S3_BUCKET_POLICY_RESOURCE',
+              to_name: resource,
+              relationship: 'HAS_ACTION',
+              relationship_attributes: { action: action_name, effect: statement.Effect },
+              headless: true
+            }
 
-          q.push(_upsert_and_link(opts))
+            q.push(_link(opts))
+          end
         end
 
         # statement Principals

@@ -1,8 +1,12 @@
+# frozen_string_literal: true
+
+#
+# AWS asset graph db loader
+#
 class AWSLoader::ResourceLoader
   def initialize(asset, db, import_id)
     @asset = asset
     @db = db
-    # TODO: use import_id in GraphDbLoader
     @import_id = import_id
 
     load
@@ -43,7 +47,7 @@ class AWSLoader::ResourceLoader
       # raise all
       raise e
 
-      puts "No loader defined for service: #{json.service}"
+      # puts "No loader defined for service: #{json.service}"
     end
   end
 end

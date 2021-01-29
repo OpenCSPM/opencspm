@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Load AWS_IAM_POLICY nodes
 #
@@ -28,7 +30,8 @@ class AWSLoader::IAM < GraphDbLoader
             child_node: 'AWS_IAM_POLICY_STATEMENT',
             child_name: statement_name,
             relationship: 'HAS_STATEMENT',
-            relationship_attributes: { effect: statement.Effect }
+            relationship_attributes: { sid: statement.Sid, effect: statement.Effect },
+            headless: true
           }
 
           q.push(_upsert_and_link(opts))
@@ -38,31 +41,31 @@ class AWSLoader::IAM < GraphDbLoader
           resources.each do |resource|
             # resource -> statement
             opts = {
-              parent_node: 'AWS_IAM_POLICY_STATEMENT',
-              parent_name: statement_name,
-              child_node: 'AWS_IAM_POLICY_RESOURCE',
-              child_name: resource,
-              relationship: 'HAS_RESOURCE'
+              node: 'AWS_IAM_POLICY_RESOURCE',
+              id: resource,
+              headless: true
             }
 
-            q.push(_upsert_and_link(opts))
-          end
+            q.push(_merge(opts))
 
-          # statement Actions
-          actions = [*statement.Action]
-          actions.each do |action|
-            action_name = action
+            # statement Actions
+            actions = [*statement.Action]
+            actions.each do |action|
+              action_name = action
 
-            # action -> statement
-            opts = {
-              parent_node: 'AWS_IAM_POLICY_STATEMENT',
-              parent_name: statement_name,
-              child_node: 'AWS_IAM_POLICY_ACTION',
-              child_name: action_name,
-              relationship: 'HAS_ACTION'
-            }
+              # action -> statement
+              opts = {
+                from_node: 'AWS_IAM_POLICY_STATEMENT',
+                from_name: statement_name,
+                to_node: 'AWS_IAM_POLICY_RESOURCE',
+                to_name: resource,
+                relationship: 'HAS_ACTION',
+                relationship_attributes: { action: action_name, effect: statement.Effect },
+                headless: true
+              }
 
-            q.push(_upsert_and_link(opts))
+              q.push(_link(opts))
+            end
           end
         end
       end
