@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Generic wrapper for loading AWS assets into RedisGragh
 #
@@ -44,6 +46,42 @@ class GraphDbLoader
   private
 
   #
+  # Cypher query to create/match a node
+  #
+  # e.g.  node = 'AWS_INSTANCE'
+  #       id = i-abc123def456 (or full ARN)
+  #
+  def _merge(opts)
+    o = OpenStruct.new(opts)
+
+    raise ApplicationError::GraphLoaderParamsMissing unless o.node && o.id
+
+    %(
+      MERGE (n:#{o.node} { name: '#{o.id}', last_updated: #{@last_updated} })
+    )
+  end
+
+  #
+  # Cypher query to create a relationship between two nodes
+  #
+  #
+  def _link(opts)
+    o = OpenStruct.new(opts)
+
+    raise ApplicationError::GraphLoaderParamsMissing unless o.from_node &&
+                                                            o.from_name &&
+                                                            o.to_node &&
+                                                            o.to_name &&
+                                                            o.relationship
+
+    %(
+      MATCH (from:#{o.from_node}),(to:#{o.to_node})
+      WHERE from.name = '#{o.from_name}' AND to.name = '#{o.to_name}'
+      CREATE (from)-[r:#{o.relationship} { last_updated: #{@last_updated} }]->(to)
+    )
+  end
+
+  #
   # Cypher query to create/upsert a node
   #
   # e.g.  node = 'AWS_INSTANCE'
@@ -63,7 +101,7 @@ class GraphDbLoader
   end
 
   #
-  # Cypher query to find an existing node, create/upsert a parent node,
+  # Cypher query to find an existing node, create/upsert a child node,
   # and attach a relationship
   #
   # e.g.  parent_node == 'AWS_VPC',
