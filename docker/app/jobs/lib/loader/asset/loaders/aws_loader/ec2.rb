@@ -87,6 +87,28 @@ class AWSLoader::EC2 < GraphDbLoader
       q.push(_upsert_and_link(opts))
     end
 
+    if @data.metadata_options
+      metadata_options = "#{@name}-metadata-options"
+
+      opts = {
+        node: 'AWS_EC2_INSTANCE_METADATA_OPTIONS',
+        id: metadata_options
+      }
+
+      q.push(_merge(opts))
+
+      opts = {
+        from_node: node,
+        from_name: @name,
+        to_node: 'AWS_EC2_INSTANCE_METADATA_OPTIONS',
+        to_name: metadata_options,
+        relationship: 'HAS_METADATA_OPTIONS',
+        relationship_attributes: @data.metadata_options.to_h
+      }
+
+      q.push(_link(opts))
+    end
+
     q
   end
 
