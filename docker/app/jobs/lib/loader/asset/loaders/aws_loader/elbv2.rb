@@ -26,7 +26,7 @@ class AWSLoader::ElasticLoadBalancingV2 < GraphDbLoader
                        drop_invalid_header_fields: drop_invalid_header_fields,
                        fail_open_waf: fail_open_waf,
                        desync_mitigation: desync_mitigation
-                     } }))
+                     }}))
 
     q
   end
