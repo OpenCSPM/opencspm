@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Load RDS assets into RedisGraph
 #
@@ -27,6 +29,29 @@ class AWSLoader::RDS < GraphDbLoader
     q
   end
 
+  def db_cluster_snapshot
+    node = 'AWS_RDS_CLUSTER_SNAPSHOT'
+    q = []
+
+    # cluster snapshot node
+    q.push(_upsert({ node: node, id: @data.arn }))
+
+    # cluster relationship
+    if @data.db_cluster_identifier
+      opts = {
+        parent_node: 'AWS_RDS_CLUSTER',
+        parent_name: "arn:aws:rds:#{@region}:#{@account}:cluster:#{@data.db_cluster_identifier}",
+        child_node: node,
+        child_name: @name,
+        relationship: 'HAS_SNAPSHOT'
+      }
+
+      q.push(_upsert_and_link(opts))
+    end
+
+    q
+  end
+
   def db_instance
     node = 'AWS_RDS_INSTANCE'
     q = []
@@ -37,11 +62,10 @@ class AWSLoader::RDS < GraphDbLoader
     # cluster relationship
     if @data.db_cluster_identifier
       opts = {
-        parent_node: node,
-        parent_name: @name,
-        child_node: 'AWS_RDS_CLUSTER',
-        child_name: "arn:aws:rds:#{@region}:#{@account}:cluster:#{@data.db_cluster_identifier}",
-        # child_name: @data.db_cluster_identifier,
+        parent_node: 'AWS_RDS_CLUSTER',
+        parent_name: "arn:aws:rds:#{@region}:#{@account}:cluster:#{@data.db_cluster_identifier}",
+        child_node: node,
+        child_name: @name,
         relationship: 'MEMBER_OF_RDS_CLUSTER'
       }
 
@@ -61,12 +85,11 @@ class AWSLoader::RDS < GraphDbLoader
     # instance relationship
     if @data.db_instance_identifier
       opts = {
-        parent_node: node,
-        parent_name: @name,
-        child_node: 'AWS_RDS_INSTANCE',
-        child_name: "arn:aws:rds:#{@region}:#{@account}:db:#{@data.db_instance_identifier}",
-        # child_name: @data.db_instance_identifier,
-        relationship: 'SNAPSHOT_OF_RDS_INSTANCE'
+        parent_node: 'AWS_RDS_INSTANCE',
+        parent_name: "arn:aws:rds:#{@region}:#{@account}:db:#{@data.db_instance_identifier}",
+        child_node: node,
+        child_name: @name,
+        relationship: 'HAS_SNAPSHOT'
       }
 
       q.push(_upsert_and_link(opts))
