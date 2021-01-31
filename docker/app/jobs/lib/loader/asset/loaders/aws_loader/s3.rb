@@ -23,7 +23,8 @@ class AWSLoader::S3 < GraphDbLoader
           owner_id: @data&.acl&.owner&.id,
           is_public: @data&.public&.is_public || false,
           is_encrypted_at_rest: @data&.encryption&.rules&.count&.positive? || false,
-          versioning_enabled: @data&.versioning&.status == 'Enabled' || false
+          versioning_enabled: @data&.versioning&.status == 'Enabled' || false,
+          mfa_deletion: @data&.versioning&.mfa_delete == 'Enabled' || false
         }
       }
 
