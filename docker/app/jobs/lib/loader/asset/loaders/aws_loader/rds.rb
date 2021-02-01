@@ -13,6 +13,12 @@ class AWSLoader::RDS < GraphDbLoader
     # rds cluster node
     q.push(_upsert({ node: node, id: @data.arn }))
 
+    cloudwatch_logs_exports = @data&.enabled_cloudwatch_logs_exports&.join(',') || false
+
+    q.push(_append({ node: node, id: @data.arn, data: {
+                     enabled_cloudwatch_logs_exports: cloudwatch_logs_exports
+                   }}))
+
     # security_groups and relationship
     @data.vpc_security_groups.each do |sg|
       opts = {
@@ -58,6 +64,12 @@ class AWSLoader::RDS < GraphDbLoader
 
     # rds instance node
     q.push(_upsert({ node: node, id: @name }))
+
+    cloudwatch_logs_exports = @data&.enabled_cloudwatch_logs_exports&.join(',') || false
+
+    q.push(_append({ node: node, id: @name, data: {
+                     enabled_cloudwatch_logs_exports: cloudwatch_logs_exports
+                   }}))
 
     # cluster relationship
     if @data.db_cluster_identifier
