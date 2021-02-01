@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Load Lambda assets into RedisGraph
 #
@@ -10,6 +12,11 @@ class AWSLoader::Lambda < GraphDbLoader
 
     # function node
     q.push(_upsert({ node: node, id: @name }))
+
+    # vpc
+    q.push(_append({ node: node, id: @name, data: {
+                     vpc_id: @data&.vpc_config&.vpc_id || 'none'
+                   } }))
 
     # TODO: map to IAM_ROLE (assumes role)
     # TODO: map to AWS_VPC
