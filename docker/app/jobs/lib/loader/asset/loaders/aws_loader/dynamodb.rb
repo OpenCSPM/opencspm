@@ -13,6 +13,12 @@ class AWSLoader::DynamoDB < GraphDbLoader
     # table node
     q.push(_upsert({ node: node, id: @name }))
 
+    # encryption attributes
+    q.push(_append({ node: node, id: @name, data: {
+                     sse_status: @data&.sse_description&.status || 'none',
+                     sse_type: @data&.sse_description&.sse_type || 'none'
+                   } }))
+
     q
   end
 end
