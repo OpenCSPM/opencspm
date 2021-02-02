@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Load SSM assets into RedisGraph
 #
@@ -10,6 +12,22 @@ class AWSLoader::SSM < GraphDbLoader
 
     # instance node
     q.push(_upsert({ node: node, id: @name }))
+
+    # instance -> ssm_instance
+    opts = {
+      from_node: 'AWS_E2_INSTANCE',
+      from_name: @data.instance_id,
+      to_node: node,
+      to_name: @name,
+      relationship: 'HAS_SSM_AGENT',
+      relationship_attributes: {
+        association_status: @data.association_status,
+        ping_status: @data.ping_status
+      },
+      headless: true
+    }
+
+    q.push(_link(opts))
 
     q
   end

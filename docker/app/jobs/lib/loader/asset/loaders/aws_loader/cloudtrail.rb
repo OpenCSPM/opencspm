@@ -16,11 +16,7 @@ class AWSLoader::CloudTrail < GraphDbLoader
 
     # trail status
     if @data.status
-      opts = {
-        node: node,
-        id: @name,
-        data: @data.status
-      }
+      opts = { node: node, id: @name, data: @data.status }
 
       q.push(_append(opts))
     end
