@@ -40,7 +40,7 @@ class FileLoader
   # format.  Send to asset router
   def loop_over_asset_lines(file_name)
     puts "Loading #{file_name}"
-    batch_size = 50000
+    batch_size = 50_000
     File.open(file_name) do |file|
       file.each_slice(batch_size) do |lines|
         Parallel.each(lines, in_processes: 8) do |line|
@@ -57,6 +57,7 @@ class FileLoader
 
   def validate_schema(asset_json)
     return true if asset_json.dig('name') && asset_json.dig('asset_type')
-    return false
+
+    false
   end
 end
