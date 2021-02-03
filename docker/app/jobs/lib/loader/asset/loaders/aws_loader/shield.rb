@@ -53,4 +53,12 @@ class AWSLoader::Shield < GraphDbLoader
 
     q
   end
+
+  def protection
+    node = 'AWS_SHIELD_PROTECTION'
+    q = []
+
+    # protection node
+    q.push(_upsert({ node: node, id: @name }))
+  end
 end

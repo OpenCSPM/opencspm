@@ -21,4 +21,12 @@ class AWSLoader::DynamoDB < GraphDbLoader
 
     q
   end
+
+  def limits
+    node = 'AWS_DYNAMODB_LIMITS'
+    q = []
+
+    # limits node
+    q.push(_upsert({ node: node, id: @name }))
+  end
 end

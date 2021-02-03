@@ -370,4 +370,20 @@ class AWSLoader::EC2 < GraphDbLoader
 
     q.push(_upsert({ node: node, id: name }))
   end
+
+  def internet_gateway
+    node = 'AWS_INTERNET_GATEWAY'
+    name = "arn:aws:ec2:#{@region}:#{@account}:internet_gateway/#{@name}"
+    q = []
+
+    q.push(_upsert({ node: node, id: name }))
+  end
+
+  def network_acl
+    node = 'AWS_NETWORK_ACL'
+    name = "arn:aws:ec2:#{@region}:#{@account}:network_acl/#{@name}"
+    q = []
+
+    q.push(_upsert({ node: node, id: name }))
+  end
 end
