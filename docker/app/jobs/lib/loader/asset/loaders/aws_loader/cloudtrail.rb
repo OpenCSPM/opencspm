@@ -57,7 +57,9 @@ class AWSLoader::CloudTrail < GraphDbLoader
         relationship: 'HAS_EVENT_SELECTOR',
         relationship_attributes: {
           read_write_type: es.read_write_type,
-          include_management_events: es.include_management_events
+          include_management_events: es.include_management_events,
+          exclude_management_event_sources: es.exclude_management_event_sources.any?,
+          include_s3_data_resources: es&.data_resources&.map { |x| x.type == 'AWS::S3::Object' && x.values.join(',') == 'arn:aws:s3' }.any?
         },
         headless: true
       }
