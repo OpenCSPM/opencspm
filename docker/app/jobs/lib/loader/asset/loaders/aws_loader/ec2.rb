@@ -303,6 +303,11 @@ class AWSLoader::EC2 < GraphDbLoader
     q = []
 
     q.push(_upsert({ node: node, id: @name }))
+
+    q.push(_append({ node: node, id: @name, data: {
+                     create_volume_permissions: @data&.create_volume_permissions&.map(&:group)&.join(','),
+                     state: @data.state # re-write another field so append isn't empty
+                   } }))
   end
 
   def flow_log
