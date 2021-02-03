@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Load IAM assets into RedisGraph
 #
@@ -24,6 +26,8 @@ class AWSLoader::IAM < GraphDbLoader
 
     @data&.content&.each do |user|
       id = user.delete_field('arn')
+
+      q.push(_merge({ node: node, id: id }))
 
       opts = {
         node: node,
