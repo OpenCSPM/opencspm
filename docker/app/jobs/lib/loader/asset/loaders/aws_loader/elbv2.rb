@@ -28,6 +28,34 @@ class AWSLoader::ElasticLoadBalancingV2 < GraphDbLoader
                        desync_mitigation: desync_mitigation
                      }}))
 
+    @data.listeners.each do |listener|
+      opts = {
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_ELASTIC_LOAD_BALANCER_LISTENER',
+        child_name: listener.listener_arn,
+        relationship: 'HAS_LISTENER',
+        relationship_attributes: { port: listener.port, protocol: listener.protocol.downcase },
+        headless: true
+      }
+
+      q.push(_upsert_and_link(opts))
+
+      listener.default_actions.each do |action|
+        opts = {
+          parent_node: 'AWS_ELASTIC_LOAD_BALANCER_LISTENER',
+          parent_name: listener.listener_arn,
+          child_node: 'AWS_ELASTIC_LOAD_BALANCER_LISTENER_ACTION',
+          child_name: "#{listener.listener_arn}-#{action.order}",
+          relationship: 'HAS_ACTION',
+          relationship_attributes: { type: action.type, order: action.order },
+          headless: true
+        }
+
+        q.push(_upsert_and_link(opts))
+      end
+    end
+
     q
   end
 end
