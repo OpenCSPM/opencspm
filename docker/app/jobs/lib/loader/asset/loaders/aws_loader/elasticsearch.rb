@@ -14,6 +14,7 @@ class AWSLoader::ElasticsearchService < GraphDbLoader
     q.push(_upsert({ node: node, id: @name }))
 
     # additional attributes
+    vpc_id = @data&.vpc_options&.vpc_id
     enforce_https = @data&.domain_endpoint_options&.enforce_https || false
     encryption_at_rest = @data&.encryption_at_rest_options&.enabled || false
     node_to_node = @data&.node_to_node_encryption_options&.enabled || false
@@ -24,6 +25,7 @@ class AWSLoader::ElasticsearchService < GraphDbLoader
 
     q.push(_append({ node: node, id: @name,
                      data: {
+                       vpc_id: vpc_id,
                        enforce_https_enabled: enforce_https,
                        encryption_at_rest_enabled: encryption_at_rest,
                        node_to_node_encryption_options: node_to_node,
