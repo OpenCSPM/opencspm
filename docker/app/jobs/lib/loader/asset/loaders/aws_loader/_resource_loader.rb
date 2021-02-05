@@ -34,7 +34,7 @@ class AWSLoader::ResourceLoader
       # call loader method for the asset type
       loader.send(json.asset_type)&.each do |q|
         @db.query(q)
-        printf "\x1b[32m.\x1b[0m"
+        printf "\x1b[32m.\x1b[0m" if ENV['SHOW_DOTS']
       end
     rescue NameError => e
       # Instances of ::GraphDbLoader will raise a NameError exception
