@@ -31,7 +31,7 @@ class LoaderJob < ApplicationJob
       puts "Loader job finished - #{guid}"
     rescue StandardError => e
       job.failed!
-      puts "Loader job failed - #{e.class} #{e.message} (#{e.backtrace[0].split(':').last})"
+      puts "Loader job failed - #{e.class} #{e.message} (#{e.backtrace[0]})"
 
       # re-raise for RunnerJob
       raise e

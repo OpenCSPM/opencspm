@@ -54,7 +54,7 @@ class AnalysisJob < ApplicationJob
       puts "Analysis job finished - #{guid}"
     rescue StandardError => e
       job.failed!
-      puts "#Analysis job failed - #{e.class} #{e.message} (#{e.backtrace[0].split(':').last})"
+      puts "#Analysis job failed - #{e.class} #{e.message} (#{e.backtrace[0]})"
 
       # re-raise for RunnerJob
       raise e
