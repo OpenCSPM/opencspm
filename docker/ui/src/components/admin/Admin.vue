@@ -86,8 +86,7 @@
                       <td
                           class="max-w-0 w-full px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-900">
                         <div class="flex">
-                          <a href="#"
-                             class="group inline-flex space-x-2 truncate text-sm leading-5">
+                          <span class="group inline-flex space-x-2 truncate text-sm leading-5">
 
                             <svg class="flex-shrink-0 h-5 w-5 text-cool-gray-400 group-hover:text-cool-gray-500 transition ease-in-out duration-150"
                                  viewBox="0 0 20 20"
@@ -102,15 +101,15 @@
                               {{ event.kind }} job
                               <span
                                     class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium leading-4 bg-gray-100 text-gray-400">
-                                {{ event.guid }}
+                                {{ event.guid.split('-')[0] }}
                               </span>
                             </p>
-                          </a>
+                          </span>
                         </div>
                       </td>
                       <td
                           class="hidden px-6 py-4 whitespace-no-wrap text-sm leading-5 text-cool-gray-500 md:block">
-                        <span :class="{'bg-green-100 text-green-800': event.status === 'complete', 'bg-blue-100 text-blue-800': event.status === 'running'}"
+                        <span :class="{'bg-green-100 text-green-800': event.status === 'complete', 'bg-blue-100 text-blue-800': event.status === 'running', 'bg-red-100 text-red-800': event.status === 'failed'}"
                               class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-medium leading-4 capitalize">
                           {{ event.status }}
                         </span>

@@ -28,6 +28,9 @@ class AssetRouter
     # Load an AWS resource
     return aws_load if (%w[account service region resource] - @asset.keys).empty?
 
+    # check for valid non-AWS resource
+    return unless (%w[name asset_type] - @asset.keys).empty?
+
     # Skip instance templates with an asset name that includes zones
     if @asset['asset_type'] == 'compute.googleapis.com/InstanceTemplate' && @asset['name'] =~ %r{/zones/}
       return

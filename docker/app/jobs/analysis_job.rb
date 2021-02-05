@@ -31,25 +31,33 @@ class AnalysisJob < ApplicationJob
     # Track the job
     job = Job.create(status: :running, kind: TYPE, guid: guid)
 
-    RSpec.world.reset
-    RSpec.reset
-    RSpec.clear_examples
+    begin
+      RSpec.world.reset
+      RSpec.reset
+      RSpec.clear_examples
 
-    custom_formatter = CspmFormatter.new(StringIO.new)
-    RSpec::Core::Reporter.new(custom_formatter)
+      custom_formatter = CspmFormatter.new(StringIO.new)
+      RSpec::Core::Reporter.new(custom_formatter)
 
-    options = []
-    options << Dir['controls/**/controls_spec.rb'].reject { |f| f.starts_with?('controls/_') }
-    options << '-fCspmFormatter'
-    RSpec::Core::Runner.run(options)
+      options = []
+      options << Dir['controls/**/controls_spec.rb'].reject { |f| f.starts_with?('controls/_') }
+      options << '-fCspmFormatter'
+      RSpec::Core::Runner.run(options)
 
-    # results = JSON.parse(File.read(RunnerJob::RESULTS_FILE))
+      # results = JSON.parse(File.read(RunnerJob::RESULTS_FILE))
 
-    RSpec.clear_examples
-    RSpec.world.reset
-    RSpec.reset
+      RSpec.clear_examples
+      RSpec.world.reset
+      RSpec.reset
 
-    job.complete!
-    logger.info "#{guid} Analysis job finished"
+      job.complete!
+      puts "Analysis job finished - #{guid}"
+    rescue StandardError => e
+      job.failed!
+      puts "#Analysis job failed - #{e.class} #{e.message} (#{e.backtrace[0].split(':').last})"
+
+      # re-raise for RunnerJob
+      raise e
+    end
   end
 end

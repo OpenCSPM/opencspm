@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Add lib to the load path
 $:.unshift(File.expand_path('lib', __dir__))
 require 'batch_importer'
@@ -9,7 +11,7 @@ class LoaderJob < ApplicationJob
   TYPE = :load
 
   def perform(args)
-    unless args.has_key?(:guid)
+    unless args.key?(:guid)
       logger.info 'Loader job not running without a GUID.'
       return nil
     end
@@ -22,9 +24,17 @@ class LoaderJob < ApplicationJob
     job = Job.create(status: :running, kind: TYPE, guid: guid)
 
     logger.info 'Loading data'
-    BatchImporter.new("load_config/config.yaml").import
 
-    job.complete!
-    logger.info "#{guid} Loader job finished"
+    begin
+      BatchImporter.new('load_config/config.yaml').import
+      job.complete!
+      puts "Loader job finished - #{guid}"
+    rescue StandardError => e
+      job.failed!
+      puts "Loader job failed - #{e.class} #{e.message} (#{e.backtrace[0].split(':').last})"
+
+      # re-raise for RunnerJob
+      raise e
+    end
   end
 end

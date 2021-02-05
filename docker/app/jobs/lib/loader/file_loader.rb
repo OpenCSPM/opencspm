@@ -36,28 +36,22 @@ class FileLoader
     end
   end
 
-  # Validate each line in the file as valid CAI
-  # format.  Send to asset router
+  # Batch load file, send each line to asset router
   def loop_over_asset_lines(file_name)
+    line_count = 0
     puts "Loading #{file_name}"
     batch_size = 50_000
     File.open(file_name) do |file|
       file.each_slice(batch_size) do |lines|
+        line_count += lines.length
         Parallel.each(lines, in_processes: 8) do |line|
           asset_json = FastJsonparser.parse(line, symbolize_keys: false)
-          if (%w[account service region resource] - asset_json.keys).empty? || validate_schema(asset_json)
-            AssetRouter.new(asset_json, @import_id, @db)
-          end
+          AssetRouter.new(asset_json, @import_id, @db)
+          line_count += 1
         end
       end
     end
-    puts ''
-    puts "Done loading #{file_name}"
-  end
 
-  def validate_schema(asset_json)
-    return true if asset_json.dig('name') && asset_json.dig('asset_type')
-
-    false
+    puts "\n\nDone loading #{file_name}. (#{line_count} lines)"
   end
 end
