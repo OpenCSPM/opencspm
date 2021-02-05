@@ -21,7 +21,7 @@ class RunnerJob < ApplicationJob
     # Shared GUID
     guid = Digest::UUID.uuid_v5(Digest::UUID::OID_NAMESPACE, Time.now.utc.to_s)
 
-    logger.info("#{guid} Runner job started")
+    puts "Runner job started - #{guid}"
 
     # Track the job
     job = Job.create(status: :running, kind: TYPE, guid: guid)
@@ -41,6 +41,8 @@ class RunnerJob < ApplicationJob
       # Parse results
       #
       File.file?(RESULTS_FILE)
+
+      puts "Processing results started - #{guid}"
 
       results = JSON.parse(File.read(RESULTS_FILE), object_class: OpenStruct)
 
@@ -76,11 +78,13 @@ class RunnerJob < ApplicationJob
         end
       end
 
+      puts "Processing results finished - #{guid}"
+
       job.complete!
       puts "Runner job finished - #{guid}"
     rescue StandardError => e
       job.failed!
-      puts "Runner job failed - #{e.class} #{e.message} (#{e.backtrace[0].split(':').last})"
+      puts "Runner job failed - #{e.class} #{e.message} (#{e.backtrace[0]})"
     end
   end
 end
