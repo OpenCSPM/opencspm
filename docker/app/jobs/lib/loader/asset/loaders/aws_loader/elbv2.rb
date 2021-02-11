@@ -14,10 +14,10 @@ class AWSLoader::ElasticLoadBalancingV2 < GraphDbLoader
     q.push(_upsert({ node: node, id: @name }))
 
     # additional attributes
-    logging_enabled = @data&.attributes&.find { |a| a.key == 'access_logs.s3.enabled'}&.value || false
-    drop_invalid_header_fields = @data&.attributes&.find { |a| a.key == 'routing.http.drop_invalid_header_fields.enabled'}&.value || false
-    fail_open_waf = @data&.attributes&.find { |a| a.key == 'waf.fail_open.enabled'}&.value || false
-    desync_mitigation = @data&.attributes&.find { |a| a.key == 'routing.http.desync_mitigation_mode'}&.value || 'none'
+    logging_enabled = @data&.attributes&.find { |a| a.key == 'access_logs.s3.enabled' }&.value || false
+    drop_invalid_header_fields = @data&.attributes&.find { |a| a.key == 'routing.http.drop_invalid_header_fields.enabled' }&.value || false
+    fail_open_waf = @data&.attributes&.find { |a| a.key == 'waf.fail_open.enabled' }&.value || false
+    desync_mitigation = @data&.attributes&.find { |a| a.key == 'routing.http.desync_mitigation_mode' }&.value || 'none'
 
     # append additional attributes
     q.push(_append({ node: node, id: @name,
@@ -28,7 +28,7 @@ class AWSLoader::ElasticLoadBalancingV2 < GraphDbLoader
                        desync_mitigation: desync_mitigation
                      }}))
 
-    @data.listeners.each do |listener|
+    @data&.listeners&.each do |listener|
       opts = {
         parent_node: node,
         parent_name: @name,
