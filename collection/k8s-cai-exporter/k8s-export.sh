@@ -15,16 +15,20 @@ if [[ "${GCS_BUCKET_FOLDER}" == "" ]]; then
   exit 1
 fi
 
-if [[ "${DEBUG_EXPORT}" != "" ]]; then
-  sleep "${DEBUG_TIME}" || sleep 300
+if [[ "${DEBUG_EXPORT_TIME}" != "" ]]; then
+  echo "Sleeping ${DEBUG_EXPORT_TIME} or 300 seconds"
+  sleep "${DEBUG_EXPORT_TIME}" || sleep 300
 fi
+
+export HOME=/tmp
+cd
 
 # Gather context
 echo "Gathering context"
 GCPPROJECT="$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/project/project-id)"
 GCPLOCATION="$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/attributes/cluster-location)"
 CLUSTERNAME="$(curl -s -H "Metadata-Flavor: Google" http://metadata.google.internal/computeMetadata/v1/instance/attributes/cluster-name)"
-CONTEXT="container.googleapis.com/projects/${GCPPROJECT}/locations/${GCPLOCAION}/clusters/${CLUSTERNAME}"
+CONTEXT="container.googleapis.com/projects/${GCPPROJECT}/locations/${GCPLOCATION}/clusters/${CLUSTERNAME}"
 UTC_TIME="$(date +%s --utc)"
 GCS_FILE_NAME="${UTC_TIME}_${GCPPROJECT}_${GCPLOCATION}_${CLUSTERNAME}_k8s-export.json"
 GCS_MANIFEST="${GCPPROJECT}_${GCPLOCATION}_${CLUSTERNAME}_manifest.txt"
@@ -60,11 +64,23 @@ echo "Export complete."
 
 echo "Sending export to GCS"
 if [[ -f "${OUTPUTFILE}" ]]; then
-  gsutil cp "${OUTPUTFILE}" "gs://${GCS_BUCKET_NAME}/${GCS_BUCKET_FOLDER}/${GCS_FILE_NAME}"
+  # Send export
+  if gsutil cp "${OUTPUTFILE}" "gs://${GCS_BUCKET_NAME}/${GCS_BUCKET_FOLDER}/${GCS_FILE_NAME}"; then
+    echo "Export JSON sent to GCS"
+  else
+    echo "ERROR: Unable to send export to GCS!"
+    exit 1
+  fi
+
+  # Create and send manifest
   echo "${GCS_FILE_NAME}" > "/tmp/${GCS_MANIFEST}"
-  gsutil cp "/tmp/${GCS_MANIFEST}" "gs://${GCS_BUCKET_NAME}/${GCS_BUCKET_FOLDER}/${GCS_MANIFEST}"
-  echo "Exports sent to GCS"
-  exit 0
+  if gsutil cp "/tmp/${GCS_MANIFEST}" "gs://${GCS_BUCKET_NAME}/${GCS_BUCKET_FOLDER}/${GCS_MANIFEST}"; then
+    echo "Export manifest sent to GCS"
+    exit 0
+  else
+    echo "ERROR: Unable to send manifest to GCS!"
+    exit 1
+  fi
 else
   echo "ERROR: Output file not found"
   exit 1
