@@ -164,9 +164,11 @@ class K8sLoader < AssetLoader
     # "container.googleapis.com/projects/demo1-bad/locations/us-central1-c/clusters/cluster-1"
     if asset_name.match(/^container.googleapis.com/)
       asset_name.match(/(.*\/clusters\/[a-zA-Z0-9\-_]*)/)[1]
-    else
+    elsif asset_name.match(/([a-zA-Z0-9\-_]*)\//)
       # up to the first "/"
       asset_name.match(/([a-zA-Z0-9\-_]*)\//)[1]
+    else
+      asset_name
     end
   end
 
