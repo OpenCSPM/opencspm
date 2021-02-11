@@ -53,7 +53,6 @@ $ find . -type d -maxdepth 2 -name "*"
 ./opencspm-controls
 ./opencspm-controls/opencspm-darkbit-community-controls
 ./opencspm
-./opencspm/terraform
 ./opencspm/collection
 ./opencspm/docker
 ./opencspm/load_dir
@@ -125,7 +124,7 @@ $ docker volume prune
 
 ### Dedicated Mode
 
-Refer to the `/terraform` directory for instructions on deploying OpenCSPM in your environment.
+Refer to [https://github.com/OpenCSPM/opencspm-terraform-gcp](https://github.com/OpenCSPM/opencspm-terraform-gcp) for instructions and a [Terraform](https://terraform.io) module to deploy an OpenCSPM instance inside your GCP organization. AWS based deployments are planned for the future.
 
 ## Development
 
