@@ -35,7 +35,7 @@ class AWSLoader::S3 < GraphDbLoader
     if @data.policy
       policy_arn = @data.arn.to_s
 
-      # statement -> policy
+      # policy -> bucket
       opts = {
         parent_node: 'AWS_S3_BUCKET',
         parent_name: @name,

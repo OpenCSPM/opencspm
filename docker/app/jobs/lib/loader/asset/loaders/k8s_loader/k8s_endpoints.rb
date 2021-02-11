@@ -15,8 +15,8 @@ class K8S_ENDPOINTS < K8sLoader
 
     unless subsets.nil?
       subsets.each do |subset|
-        addresses = subset.dig('addresses')
-        ports = subset.dig('ports')
+        addresses = subset.dig('addresses') || []
+        ports = subset.dig('ports') || []
 
         # "upstream" cluster service mapping
         if matches = @asset_name.match(%r{(?<base>.*\/)endpoints\/(?<svcname>.*)})

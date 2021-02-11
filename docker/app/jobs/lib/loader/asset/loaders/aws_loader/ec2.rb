@@ -87,6 +87,25 @@ class AWSLoader::EC2 < GraphDbLoader
       q.push(_upsert_and_link(opts))
     end
 
+    if @data.iam_instance_profile
+      opts = {
+        node: 'AWS_EC2_IAM_PROFILE',
+        id: @data.iam_instance_profile.arn
+      }
+
+      q.push(_merge(opts))
+
+      opts = {
+        from_node: node,
+        from_name: @name,
+        to_node: 'AWS_EC2_IAM_PROFILE',
+        to_name: @data.iam_instance_profile.arn,
+        relationship: 'HAS_IAM_PROFILE'
+      }
+
+      q.push(_link(opts))
+    end
+
     if @data.metadata_options
       metadata_options = "#{@name}-metadata-options"
 
