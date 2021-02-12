@@ -21,7 +21,6 @@ x-backend: &backend
     - ../../opencspm-controls:/app/controls/:ro
     - .dockerdev/.psqlrc:/app/.psqlrc:ro
     - .dockerdev/.bashrc:/app/.bashrc:ro
-    - ~/.config/gcloud/opencspm-loader.json:/tmp/keys/credentials.json:ro
   environment:
     <<: *env
     REDIS_URL: redis://redis:6379/
@@ -32,7 +31,6 @@ x-backend: &backend
     PSQL_HISTFILE: /app/log/.psql_history
     EDITOR: vi
     MALLOC_ARENA_MAX: 2
-    GOOGLE_APPLICATION_CREDENTIALS: /tmp/keys/credentials.json
   depends_on:
     - db
     - redis
