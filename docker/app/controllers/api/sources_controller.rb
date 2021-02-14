@@ -1,8 +1,13 @@
+# frozen_string_literal: true
+
 class Api::SourcesController < ApplicationController
   before_action :set_source, only: %i[show update destroy]
 
   # GET /sources
   def index
+    # re-read config.yml sources
+    Source.new.refresh
+
     @sources = Source.all.order(id: :asc)
 
     render json: @sources

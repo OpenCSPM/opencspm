@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class User < ApplicationRecord
   has_secure_password
   rolify
@@ -72,22 +74,22 @@ class User < ApplicationRecord
       {
         path: '/campaigns',
         name: 'Campaigns',
-        num: Campaign.all.count
+        num: Campaign.all.count.to_s
       },
       {
         path: '/profiles',
         name: 'Profiles',
-        num: Profile.all.count
+        num: Profile.all.count.to_s
       },
       {
         path: '/controls',
         name: 'Controls',
-        num: Control.all.count
+        num: Control.all.count.to_s
       },
       {
         path: '/sources',
         name: 'Sources',
-        num: Source.all.count
+        num: Source.all.count.to_s
       }
     ]
 
