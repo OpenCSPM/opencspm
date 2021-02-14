@@ -9,7 +9,7 @@
     "smoke": "cypress run --browser chrome --spec cypress/integration/smoke_spec.js --headless"
   },
   "dependencies": {
-    "@tailwindcss/ui": "^0.5.0",
+    "@tailwindcss/ui": "^0.7.2",
     "axios": "^0.21.1",
     "chart.js": "^2.9.3",
     "core-js": "^3.6.5",
