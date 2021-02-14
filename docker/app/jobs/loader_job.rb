@@ -7,6 +7,7 @@ require 'pry'
 
 class LoaderJob < ApplicationJob
   queue_as :default
+  CONFIG_FILE = 'load_config/config.yaml'
 
   TYPE = :load
 
@@ -26,7 +27,7 @@ class LoaderJob < ApplicationJob
     logger.info 'Loading data'
 
     begin
-      BatchImporter.new('load_config/config.yaml').import
+      BatchImporter.new(CONFIG_FILE).import
       job.complete!
       puts "Loader job finished - #{guid}"
     rescue StandardError => e

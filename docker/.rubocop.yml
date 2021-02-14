@@ -9,7 +9,7 @@
 #
 # See https://docs.rubocop.org/rubocop/configuration
 Layout/LineLength:
-  Max: 100
+  Max: 120
 Style/FrozenStringLiteralComment:
   EnforcedStyle: always_true
   Safe: true
