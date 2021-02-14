@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Import Controls from Control Packs
 #
@@ -6,7 +8,7 @@ class PackJob < ApplicationJob
   # not supported by sidekiq-cron
   # sidekiq_options retry: 5
 
-  PACK_BASE_DIR = 'controls/**/config.yaml'.freeze
+  PACK_BASE_DIR = 'controls/**/config.yaml'
 
   def perform
     logger.info('Control pack import job started')
@@ -18,7 +20,7 @@ class PackJob < ApplicationJob
       control_pack = JSON.parse(YAML.load(File.read(file)).to_json, object_class: OpenStruct)
 
       control_pack&.controls&.each do |control|
-        puts "Control: #{control_pack.id} - #{control.id}"
+        puts "loaded control: #{control_pack.id} - #{control.id}"
         res = Control.find_or_create_by(control_pack: control_pack.id, control_id: control.id)
 
         existing_tags = res.tags.map(&:name).uniq
