@@ -1,0 +1,13 @@
+name: release-notification
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  release-notification:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Send Slack Message
+        run: |
+          curl -X POST -H 'Content-type: application/json' --data '{"text":"New OpenCSPM release: ${{ github.event.release.tag_name }} - https://github.com/opencspm/opencspm/releases/tag/${{ github.event.release.tag_name }}"}' ${{ secrets.SLACK_WEBHOOK_URL }}
