@@ -1,0 +1,6 @@
+development:
+  webhooks:
+    runner_job: <%= ENV['JOB_WEBHOOK_URL'] %>
+production:
+  webhooks:
+    runner_job: <%= ENV['JOB_WEBHOOK_URL'] %>

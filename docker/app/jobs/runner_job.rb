@@ -81,6 +81,7 @@ class RunnerJob < ApplicationJob
       puts "Processing results finished - #{guid}"
 
       job.complete!
+      job.send_webhook
       puts "Runner job finished - #{guid}"
     rescue StandardError => e
       job.failed!
