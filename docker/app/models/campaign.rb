@@ -1,6 +1,13 @@
+# frozen_string_literal: true
+
+#
+# Campaign
+#
 class Campaign < ApplicationRecord
   belongs_to :user
   before_save :update_control_count
+
+  validates :name, presence: true, length: { maximum: 120 }
 
   #
   # Return the Controls that match this Campaign's filters
@@ -24,9 +31,7 @@ class Campaign < ApplicationRecord
     # filters MAY have a Tags filter
     controls = controls.where(tags: { name: tags_filter }) if tags_filter && !tags_filter.empty?
     # filters MAY have "all" tags flag set
-    if must_have_all_tags
-      controls = controls.having('json_agg(tags.name)::jsonb @> ?::jsonb', tags_filter.to_s)
-    end
+    controls = controls.having('json_agg(tags.name)::jsonb @> ?::jsonb', tags_filter.to_s) if must_have_all_tags
 
     controls
   end

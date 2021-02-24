@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 #
 # Load Support assets into RedisGraph
 #
