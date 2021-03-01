@@ -31,7 +31,7 @@ class Job < ApplicationRecord
       next if webhook.nil?
 
       url = URI(webhook)
-      headers = {'content-type' => 'application/json'}
+      headers = { 'content-type' => 'application/json' }
       payload = {
         'job_id' => id,
         'job_type' => kind,
