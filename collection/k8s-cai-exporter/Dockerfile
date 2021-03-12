@@ -1,4 +1,4 @@
-FROM gcr.io/google.com/cloudsdktool/cloud-sdk:327.0.0-alpine
+FROM gcr.io/google.com/cloudsdktool/cloud-sdk:331.0.0-alpine
 RUN apk update && \
     apk add jq curl vim && \
     curl -sLO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl && \
