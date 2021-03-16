@@ -41,7 +41,7 @@ class BucketFetcher
        downloaded = file.download
        downloaded.rewind
        file_data = downloaded.read
-       File.write(dest_file_path, file_data, mode: "a")
+       File.write(dest_file_path, file_data, mode: "ab")
     end
   end
 
