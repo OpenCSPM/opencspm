@@ -20,7 +20,7 @@ class LocalFetcher
             file_data = File.read(source_file_path)
             dest_file_path = "#{@load_dir}/combined_for_load.json"
             puts "Appending #{source_file_path} to #{dest_file_path}" 
-            File.write(dest_file_path, file_data, mode: "a")
+            File.write(dest_file_path, file_data, mode: "ab")
           end
         rescue => e
           puts e.inspect
