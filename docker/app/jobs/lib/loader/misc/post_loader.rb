@@ -136,13 +136,13 @@ class PostLoader
     puts 'Cleaning up stale resources and relationships'
     print '.'
     query = %(
-      MATCH ()-[r]-() where r.last_updated <> #{@import_id} delete r
+      MATCH ()-[r]-() where r.last_updated < #{@import_id} delete r
     )
     @db.query(query)
 
     print '.'
     query = %(
-      MATCH (n) where n.last_updated <> #{@import_id} detach delete n
+      MATCH (n) where n.last_updated < #{@import_id} detach delete n
     )
     @db.query(query)
     puts ''
