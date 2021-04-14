@@ -40,7 +40,7 @@ class FileLoader
   def loop_over_asset_lines(file_name)
     line_count = 0
     puts "Loading #{file_name}"
-    batch_size = 50_000
+    batch_size = 25000
     File.open(file_name) do |file|
       file.each_slice(batch_size) do |lines|
         line_count += lines.length
