@@ -31,6 +31,7 @@ gem 'addressable', '~> 2.7'
 gem 'json_schemer', '~> 0.2.15'
 gem 'fast_jsonparser', '~> 0.5'
 gem 'pry', '~> 0.13.1'
+gem 'kramdown', '~> 2.3.1' # update for CVE-2021-28834
 
 group :development do
   gem 'spring'
