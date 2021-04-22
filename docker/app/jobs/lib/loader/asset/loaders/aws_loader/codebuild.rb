@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 #
-# Load CodePipeline assets into RedisGraph
+# Load CodeBuild assets into RedisGraph
 #
 # Each method returns an array of Cypher queries
 #
-class AWSLoader::CodePipeline < RedisGraph
+class AWSLoader::CodeBuild < RedisGraph
 end
