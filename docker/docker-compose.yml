@@ -6,7 +6,7 @@ x-app: &app
     RAILS_ENV: ${RAILS_ENV:-production}
     RAILS_SERVE_STATIC_FILES: 1
     RAILS_LOG_TO_STDOUT: 1
-  image: gcr.io/opencspm/engine:0.1.20
+  image: gcr.io/opencspm/engine:0.1.21
   tmpfs:
     - /tmp
 
@@ -63,7 +63,7 @@ services:
       - redis
 
   db:
-    image: gcr.io/opencspm/postgres:13.1
+    image: gcr.io/opencspm/postgres:13.2
     hostname: db
     volumes:
       - .dockerdev/.psqlrc:/root/.psqlrc:ro
