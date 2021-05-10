@@ -5,11 +5,11 @@ x-app: &app
     context: .dockerdev
     dockerfile: Dockerfile.development
     args:
-      RUBY_VERSION: '2.6.6'
+      RUBY_VERSION: '2.7.3'
       PG_MAJOR: '13'
       NODE_MAJOR: '12'
       YARN_VERSION: '1.22.5'
-      BUNDLER_VERSION: '2.0.2'
+      BUNDLER_VERSION: '2.1.4'
   environment: &env
     NODE_ENV: ${NODE_ENV:-development}
     RAILS_ENV: ${RAILS_ENV:-development}
@@ -87,7 +87,7 @@ services:
       - redis
 
   db:
-    image: gcr.io/opencspm/postgres:13.1
+    image: gcr.io/opencspm/postgres:13.2
     hostname: db
     volumes:
       - .dockerdev/.psqlrc:/root/.psqlrc:ro
