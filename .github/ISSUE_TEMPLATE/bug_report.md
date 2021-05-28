@@ -10,6 +10,9 @@ assignees: ''
 **Describe the bug**
 A clear and concise description of what the bug is.
 
+**OpenCSPM version**
+What version of the OpenCSPM Docker image are you using? (e.g. 0.1.22)
+
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
