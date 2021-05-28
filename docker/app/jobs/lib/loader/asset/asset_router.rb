@@ -17,6 +17,8 @@ Dir[File.join(__dir__, 'loaders', 'k8s_loader', '*.rb')].each { |file| require f
 
 # Comment
 class AssetRouter
+  INVALID_JSON = 'Expected NDJSON import file, found JSON import file.'
+
   def initialize(asset, import_id, db)
     @asset = asset
     @import_id = import_id
@@ -25,6 +27,12 @@ class AssetRouter
   end
 
   def route
+    # raise exception if not NDJSON
+    if @asset.is_a?(Array)
+      puts "[asset_router] Error: #{INVALID_JSON}"
+      raise INVALID_JSON
+    end
+
     # Load an AWS resource
     return aws_load if (%w[account service region resource] - @asset.keys).empty?
 
