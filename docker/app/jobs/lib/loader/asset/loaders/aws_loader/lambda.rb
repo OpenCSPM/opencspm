@@ -13,18 +13,35 @@ class AWSLoader::Lambda < GraphDbLoader
     # function node
     q.push(_upsert({ node: node, id: @name }))
 
-    # vpc
-    q.push(_append({
-                     node: node,
-                     id: @name,
-                     data: {
-                       vpc_id: @data&.vpc_config&.vpc_id || 'none'
-                     }
-                   }))
+    # vpc node and relationship
+    if @data.vpc_id
+      opts = {
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_VPC',
+        child_name: @data.vpc_id,
+        relationship: 'MEMBER_OF_VPC'
+      }
+
+      q.push(_upsert_and_link(opts))
+    end
+
+    # subnet and relationship
+    if @data.subnet_id
+      opts = {
+        parent_node: node,
+        parent_name: @name,
+        child_node: 'AWS_SUBNET',
+        child_name: @data.subnet_id,
+        relationship: 'IN_SUBNET'
+      }
+
+      q.push(_upsert_and_link(opts))
+    end
 
     # TODO: map to IAM_ROLE (assumes role)
-    # TODO: map to AWS_VPC
-    # TODO: map to AWS_SUBNET
+    # TODO: map to AWS_VPC (review lines 17 - 27, 176 - 181)
+    # TODO: map to AWS_SUBNET (review lines 29 - 40, 183 - 204)
     # TODO: map to AWS_SECURITY_GROUP
 
     # function policy
@@ -151,6 +168,36 @@ class AWSLoader::Lambda < GraphDbLoader
           end
         end
       end
+    end
+
+    q
+  end
+
+  def vpc
+    q = []
+
+    # vpc node
+    q.push(_upsert({ node: 'AWS_VPC', id: @name }))
+  end
+
+  def subnet
+    node = 'AWS_SUBNET'
+    q = []
+
+    # use subnet_id instead of ARN
+    q.push(_upsert({ node: node, id: @data.subnet_id }))
+
+    # vpc node and relationship
+    if @data.vpc_id
+      opts = {
+        parent_node: node,
+        parent_name: @data.subnet_id,
+        child_node: 'AWS_VPC',
+        child_name: @data.vpc_id,
+        relationship: 'MEMBER_OF_VPC'
+      }
+
+      q.push(_upsert_and_link(opts))
     end
 
     q
