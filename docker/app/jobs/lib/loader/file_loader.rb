@@ -45,9 +45,14 @@ class FileLoader
       file.each_slice(batch_size) do |lines|
         line_count += lines.length
         Parallel.each(lines, in_processes: 8) do |line|
-          asset_json = FastJsonparser.parse(line, symbolize_keys: false)
-          AssetRouter.new(asset_json, @import_id, @db)
-          line_count += 1
+          begin
+            asset_json = FastJsonparser.parse(line, symbolize_keys: false)
+            AssetRouter.new(asset_json, @import_id, @db)
+            line_count += 1
+          rescue FastJsonparser::ParseError => e
+            puts "[file_loader] Error: JSON can't be parsed. Ensure you are loading NDJSON files."
+            raise e
+          end
         end
       end
     end
