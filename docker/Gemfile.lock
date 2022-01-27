@@ -323,7 +323,7 @@ GEM
       rake (>= 0.8.1)
     ruby-progressbar (1.11.0)
     ruby2_keywords (0.0.4)
-    sidekiq (6.2.1)
+    sidekiq (6.4.0)
       connection_pool (>= 2.2.2)
       rack (~> 2.0)
       redis (>= 4.2.0)
@@ -415,7 +415,7 @@ DEPENDENCIES
   rspec-rails (~> 4.0, >= 4.0.1)
   rubocop (~> 0.90.0)
   ruby-debug-ide (~> 0.7.2)
-  sidekiq (~> 6.1)
+  sidekiq (~> 6.4)
   sidekiq-cron (~> 1.2)
   solargraph (~> 0.40.0)
   spring
